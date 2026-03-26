@@ -1,0 +1,204 @@
+<template>
+  <footer class="main-footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <img src="../assets/logo.png" alt="Origin Electric" class="footer-logo" />
+        <p class="brand-tagline">Powering Homes & Businesses with Smart Energy Solutions.</p>
+        <div class="social-icons">
+          <a href="#" class="soc-btn" aria-label="Facebook">
+            <FacebookIcon class="icon-sm" />
+          </a> 
+          <a href="#" class="soc-btn" aria-label="Twitter">
+            <TwitterIcon class="icon-sm" />
+          </a> 
+          <a href="#" class="soc-btn" aria-label="Instagram">
+            <InstagramIcon class="icon-sm" />
+          </a> 
+          <a href="#" class="soc-btn" aria-label="Linkedin">
+            <LinkedinIcon class="icon-sm" />
+          </a>
+        </div>
+      </div>
+      
+      <div class="footer-links">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><router-link to="/">Home</router-link></li>
+          <li><router-link to="/marketplace">Marketplace</router-link></li>
+          <li><router-link to="/load-audit">Load Audit</router-link></li>
+          <li><router-link to="/contact">Contact</router-link></li>
+        </ul>
+      </div>
+
+      <div class="footer-contact">
+        <h4>Contact Experts</h4>
+        <div class="contact-item">
+          <MailIcon class="icon-xs" />
+          <a href="mailto:info@originelectric.com">info@originelectric.com</a>
+        </div>
+        <div class="contact-item">
+          <PhoneIcon class="icon-xs" />
+          <span>+1 (234) 567-890</span>
+        </div>
+        <div class="contact-item">
+          <MapPinIcon class="icon-xs" />
+          <span>123 Energy Plaza, Lagos, Nigeria</span>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container">
+        <div class="footer-bottom-flex">
+          <p>&copy; 2024 Origin Electric. All Rights Reserved.</p>
+          <div class="footer-legal">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+</template>
+
+<script setup>
+import { 
+  Facebook as FacebookIcon, 
+  Twitter as TwitterIcon, 
+  Instagram as InstagramIcon, 
+  Linkedin as LinkedinIcon,
+  Mail as MailIcon,
+  Phone as PhoneIcon,
+  MapPin as MapPinIcon
+} from 'lucide-vue-next';
+</script>
+
+<style scoped>
+.main-footer {
+  background-color: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  padding: var(--space-xl) 0 var(--space-md) 0;
+  margin-top: var(--space-xl);
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--space-xl);
+  margin-bottom: var(--space-xl);
+}
+
+.footer-logo {
+  height: 60px;
+  width: auto;
+  margin-bottom: var(--space-sm);
+}
+
+.brand-tagline {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  max-width: 300px;
+  margin-bottom: var(--space-md);
+}
+
+.footer-links h4,
+.footer-contact h4 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: var(--space-sm);
+  color: var(--color-blue-primary);
+}
+
+.footer-links ul li {
+  margin-bottom: var(--space-xs);
+}
+
+.footer-links a {
+  color: var(--text-secondary);
+  font-weight: 500;
+  transition: all var(--transition-speed);
+}
+
+.footer-links a:hover {
+  color: var(--color-blue-primary);
+  padding-left: 4px;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: var(--space-xs);
+  color: var(--text-secondary);
+}
+
+.contact-item a {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.icon-xs {
+  width: 16px;
+  height: 16px;
+  color: var(--color-blue-primary);
+}
+
+.social-icons {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.soc-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  color: var(--text-secondary);
+  transition: all var(--transition-bounce);
+}
+
+.soc-btn:hover {
+  background: var(--color-blue-primary);
+  color: white;
+  transform: translateY(-4px);
+  border-color: var(--color-blue-primary);
+}
+
+.icon-sm {
+  width: 18px;
+  height: 18px;
+}
+
+.footer-bottom {
+  border-top: 1px solid var(--border-color);
+  padding-top: var(--space-md);
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.footer-bottom-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.footer-legal {
+  display: flex;
+  gap: var(--space-md);
+}
+
+.footer-legal a:hover {
+  color: var(--color-blue-primary);
+}
+
+@media (max-width: 768px) {
+  .footer-grid {
+    gap: var(--space-lg);
+  }
+}
+</style>
