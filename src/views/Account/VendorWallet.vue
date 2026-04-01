@@ -46,41 +46,71 @@
             <ReceiptIcon class="empty-icon" />
             <p>No transactions yet</p>
           </div>
-          <div v-else class="transactions-table-wrapper">
-            <table class="transactions-table">
-              <thead>
-                <tr>
-                  <th>Type</th>
-                  <th>Reference</th>
-                  <th>Date</th>
-                  <th>Amount</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="tx in transactions" :key="tx.id">
-                  <td>
-                    <div class="type-cell">
-                      <div :class="['type-icon', tx.type]">
-                        <ArrowDownRight v-if="tx.type === 'credit'" class="icon-xs" />
-                        <ArrowUpRight v-else class="icon-xs" />
+          <div v-else class="transactions-container">
+            <!-- Desktop Table View -->
+            <div class="transactions-table-wrapper hide-mobile">
+              <table class="transactions-table">
+                <thead>
+                  <tr>
+                    <th>Type</th>
+                    <th>Reference</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="tx in transactions" :key="tx.id">
+                    <td>
+                      <div class="type-cell">
+                        <div :class="['type-icon', tx.type]">
+                          <ArrowDownRight v-if="tx.type === 'credit'" class="icon-xs" />
+                          <ArrowUpRight v-else class="icon-xs" />
+                        </div>
+                        <span class="capitalize">{{ tx.type === 'credit' ? 'Sale' : 'Withdrawal' }}</span>
                       </div>
-                      <span class="capitalize">{{ tx.type === 'sale' ? 'Sale' : 'Withdrawal' }}</span>
+                    </td>
+                    <td><span class="ref-text">{{ tx.reference }}</span></td>
+                    <td>{{ formatDate(tx.created_at) }}</td>
+                    <td>
+                      <span :class="['amount-text', tx.type === 'credit' ? 'positive' : 'negative']">
+                        {{ tx.type === 'credit' ? '+' : '-' }}₦{{ formatCurrency(Math.abs(tx.amount)) }}
+                      </span>
+                    </td>
+                    <td>
+                      <span :class="['status-pill', tx.status]">{{ tx.status }}</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Mobile Card View -->
+            <div class="transactions-mobile-list">
+              <div v-for="tx in transactions" :key="tx.id" class="tx-mobile-card">
+                <div class="tx-card-header">
+                  <div class="type-cell">
+                    <div :class="['type-icon', tx.type]">
+                      <ArrowDownRight v-if="tx.type === 'credit'" class="icon-xs" />
+                      <ArrowUpRight v-else class="icon-xs" />
                     </div>
-                  </td>
-                  <td><span class="ref-text">{{ tx.reference }}</span></td>
-                  <td>{{ formatDate(tx.created_at) }}</td>
-                  <td>
+                    <span class="capitalize-text">{{ tx.type === 'credit' ? 'Sale' : 'Withdrawal' }}</span>
+                  </div>
+                  <span :class="['status-pill', tx.status]">{{ tx.status }}</span>
+                </div>
+                <div class="tx-card-body mt-3">
+                  <div class="tx-info">
+                    <span class="ref-text">{{ tx.reference }}</span>
+                    <span class="date-text mt-1">{{ formatDate(tx.created_at) }}</span>
+                  </div>
+                  <div class="tx-amount">
                     <span :class="['amount-text', tx.type === 'credit' ? 'positive' : 'negative']">
                       {{ tx.type === 'credit' ? '+' : '-' }}₦{{ formatCurrency(Math.abs(tx.amount)) }}
                     </span>
-                  </td>
-                  <td>
-                    <span :class="['status-pill', tx.status]">{{ tx.status }}</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -428,8 +458,67 @@ onMounted(fetchData);
 .icon-xs { width: 14px; height: 14px; }
 .icon-sm { width: 18px; height: 18px; }
 
+.show-mobile { display: none !important; }
+
+.transactions-mobile-list {
+  display: none;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
 @media (max-width: 992px) {
   .wallet-stats { grid-template-columns: 1fr; }
+  
+  .hide-mobile { display: none !important; }
+  .transactions-mobile-list { display: flex; }
+  
+  .history-section {
+    padding: 1.5rem;
+  }
+}
+
+.tx-mobile-card {
+  padding: 1.25rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  transition: transform 0.2s;
+}
+
+.tx-mobile-card:active {
+  transform: scale(0.98);
+}
+
+.tx-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tx-card-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.tx-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.date-text {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.capitalize-text {
+  text-transform: capitalize;
+}
+
+.tx-amount .amount-text {
+  font-size: 1.1rem;
 }
 
 /* Minimalist Modal Styles */

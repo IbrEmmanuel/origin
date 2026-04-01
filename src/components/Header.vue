@@ -4,7 +4,7 @@
     <div class="top-bar">
       <div class="container top-bar-content">
         <div class="contact-info">
-          <a href="tel:+2348000000000" class="top-link"><PhoneIcon class="icon-xs" /> +234 (800) 000-0000</a>
+          <a href="tel:+2347041880339" class="top-link"><PhoneIcon class="icon-xs" /> +234 704 188 0339</a>
           <a href="mailto:hello@originelectric.com" class="top-link hidden-mobile"><MailIcon class="icon-xs" /> hello@originelectric.com</a>
         </div>
         <router-link to="/cart" class="top-cart">

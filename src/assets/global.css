@@ -112,8 +112,14 @@ img {
 
 @media (max-width: 992px) {
   .main-content {
-    padding-top: 60px;
+    padding-top: 110px;
   }
+}
+
+/* Override for Account pages and standalone pages to handle their own header offset */
+.main-content.is-account,
+.main-content.is-standalone {
+  padding-top: 0 !important;
 }
 
 /* Buttons */

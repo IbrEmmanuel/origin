@@ -5,18 +5,15 @@
         <img src="../assets/logo.png" alt="Origin Electric" class="footer-logo" />
         <p class="brand-tagline">Powering Homes & Businesses with Smart Energy Solutions.</p>
         <div class="social-icons">
-          <a href="#" class="soc-btn" aria-label="Facebook">
+          <a href="https://www.facebook.com/OriginElectric" class="soc-btn" aria-label="Facebook" target="_blank">
             <FacebookIcon class="icon-sm" />
           </a> 
-          <a href="#" class="soc-btn" aria-label="Twitter">
-            <TwitterIcon class="icon-sm" />
-          </a> 
-          <a href="#" class="soc-btn" aria-label="Instagram">
+          <a href="https://www.instagram.com/origin_electricltd" class="soc-btn" aria-label="Instagram" target="_blank">
             <InstagramIcon class="icon-sm" />
           </a> 
-          <a href="#" class="soc-btn" aria-label="Linkedin">
-            <LinkedinIcon class="icon-sm" />
-          </a>
+          <a href="https://www.tiktok.com/@originelectricltd" class="soc-btn" aria-label="Tiktok" target="_blank">
+            <MusicIcon class="icon-sm" />
+          </a> 
         </div>
       </div>
       
@@ -38,11 +35,11 @@
         </div>
         <div class="contact-item">
           <PhoneIcon class="icon-xs" />
-          <span>+1 (234) 567-890</span>
+          <span>+234 704 188 0339</span>
         </div>
         <div class="contact-item">
           <MapPinIcon class="icon-xs" />
-          <span>123 Energy Plaza, Lagos, Nigeria</span>
+          <span>Near FHV3+JQ7 Oau Muslim Graduates Association Resource Centre, Ile, Stadium Road, Ife 220101, Osun state, Nigeria</span>
         </div>
       </div>
     </div>
@@ -63,9 +60,8 @@
 <script setup>
 import { 
   Facebook as FacebookIcon, 
-  Twitter as TwitterIcon, 
   Instagram as InstagramIcon, 
-  Linkedin as LinkedinIcon,
+  Music as MusicIcon,
   Mail as MailIcon,
   Phone as PhoneIcon,
   MapPin as MapPinIcon
@@ -125,7 +121,7 @@ import {
 
 .contact-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
   margin-bottom: var(--space-xs);
   color: var(--text-secondary);
@@ -140,6 +136,7 @@ import {
   width: 16px;
   height: 16px;
   color: var(--color-blue-primary);
+  flex-shrink: 0;
 }
 
 .social-icons {

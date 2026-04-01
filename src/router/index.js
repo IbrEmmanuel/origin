@@ -110,6 +110,12 @@ const routes = [
         path: '/verify-email',
         name: 'VerifyEmail',
         component: () => import('../views/VerifyEmailView.vue')
+    },
+    {
+        path: '/energy-ai',
+        name: 'EnergyAI',
+        component: () => import('@/views/EnergyAIView.vue'),
+        meta: { requiresAuth: true }
     }
 ]
 

@@ -1,10 +1,10 @@
 <template>
   <div class="app-container">
-    <Header v-if="!isAccountPage" />
-    <main class="main-content">
+    <Header v-if="!hideGlobalLayout" />
+    <main class="main-content" :class="{ 'is-standalone': hideGlobalLayout }">
       <router-view />
     </main>
-    <Footer v-if="!isAccountPage" />
+    <Footer v-if="!hideGlobalLayout" />
   </div>
 </template>
 
@@ -15,7 +15,9 @@ import Header from './components/Header.vue';
 import Footer from './components/Footer.vue';
 
 const route = useRoute();
-const isAccountPage = computed(() => route.path.startsWith('/account'));
+const hideGlobalLayout = computed(() => {
+  return route.path.startsWith('/account') || route.path === '/energy-ai';
+});
 </script>
 
 <style>

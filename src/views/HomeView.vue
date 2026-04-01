@@ -13,15 +13,15 @@
               <CalculatorIcon class="icon-btn" />
               Calculate My Power Need
             </router-link>
-            <button class="btn btn-secondary btn-lg">
+            <router-link to="/account/consultations" class="btn btn-secondary btn-lg">
               <CalendarIcon class="icon-btn" />
               Book Consultation
-            </button>
+            </router-link>
           </div>
           <div class="hero-ai-trigger">
-            <button class="btn btn-ai-glow">
+            <router-link to="/energy-ai" class="btn btn-ai-glow">
               <SparklesIcon class="ai-icon" /> Talk to Energy AI
-            </button>
+            </router-link>
           </div>
         </div>
 
@@ -490,7 +490,7 @@ onUnmounted(() => {
 
 @media (max-width: 992px) {
   .hero-premium {
-    padding: var(--space-lg) 0;
+    padding: var(--space-xl) 0 var(--space-lg);
     min-height: auto;
   }
 }

@@ -1,192 +1,164 @@
 <template>
-  <div class="content-section">
-    <!-- Tab Navigation -->
-    <div class="profile-tabs glass-card">
-      <button 
-        v-for="tab in tabs" 
-        :key="tab.id"
-        class="tab-btn"
-        :class="{ active: activeTab === tab.id }"
-        @click="activeTab = tab.id"
-      >
-        <component :is="tab.icon" class="icon-xs-tab" />
-        {{ tab.label }}
-      </button>
+  <div class="profile-container">
+    <!-- 1. Profile Identity Header -->
+    <div class="profile-header-card glass-card">
+      <div class="user-avatar-hero">
+        {{ (user.first_name?.[0] || '') + (user.last_name?.[0] || '') || 'U' }}
+      </div>
+      <div class="user-info-hero">
+        <h2>{{ user.first_name || 'User' }} {{ user.last_name || '' }}</h2>
+        <p class="user-email-hero">{{ user.email }}</p>
+        <div class="user-badges">
+          <span class="badge badge-verified">Verified Account</span>
+          <span class="badge badge-date">Member since 2024</span>
+        </div>
+      </div>
     </div>
 
-    <div class="tab-content mt-6">
-      <!-- General Tab -->
-      <div v-if="activeTab === 'general'" class="tab-pane">
-        <div class="profile-card glass-card">
-          <div class="profile-header">
-            <div class="user-avatar-lg">{{ (user.first_name?.[0] || '') + (user.last_name?.[0] || '') || 'U' }}</div>
-            <div class="profile-meta">
-              <h3>{{ user.first_name || 'User' }} {{ user.last_name || '' }}</h3>
-              <p>{{ user.email }}</p>
+    <div class="profile-content-grid">
+      <!-- 2. Primary Column (Settings & Addresses) -->
+      <div class="profile-column main-col">
+        <section class="section-card glass-card">
+          <div class="section-header">
+            <UserIcon class="icon-inline" />
+            <h3>Personal Information</h3>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>First Name</label>
+              <input type="text" v-model="user.first_name" placeholder="Enter first name" />
+            </div>
+            <div class="form-group">
+              <label>Last Name</label>
+              <input type="text" v-model="user.last_name" placeholder="Enter last name" />
+            </div>
+            <div class="form-group full-width">
+              <label>Phone Number</label>
+              <input type="tel" v-model="user.phone" placeholder="+234 ..." />
             </div>
           </div>
-          <div class="profile-form mt-6">
-            <div class="form-grid">
-              <div class="form-group">
-                <label>First Name</label>
-                <input type="text" v-model="user.first_name" placeholder="First Name" />
-              </div>
-              <div class="form-group">
-                <label>Last Name</label>
-                <input type="text" v-model="user.last_name" placeholder="Last Name" />
-              </div>
-              <div class="form-group">
-                <label>Phone</label>
-                <input type="tel" v-model="user.phone" placeholder="Phone Number" />
-              </div>
-            </div>
-            <button class="btn btn-primary mt-4" @click="saveProfile">Save Changes</button>
-          </div>
-        </div>
+          <button class="btn btn-primary mt-6" @click="saveProfile">Update Profile</button>
+        </section>
 
-        <div class="profile-card glass-card mt-6">
-          <div class="card-header">
+        <section class="section-card glass-card">
+          <div class="section-header">
+            <PackageIcon class="icon-inline" />
             <h3>Saved Addresses</h3>
             <button class="btn-text">+ Add New</button>
           </div>
-          <div class="address-list">
-            <div v-for="address in addresses" :key="address.id" class="address-item">
-              <div class="address-type">
+          <div class="address-grid">
+            <div v-for="address in addresses" :key="address.id" class="address-card">
+              <div class="address-type-row">
                 <span class="type-tag">{{ address.type }}</span>
                 <span v-if="address.isDefault" class="default-tag">Default</span>
               </div>
-              <p class="address-text">{{ address.fullAddress }}</p>
-              <div class="address-actions">
+              <p class="address-body">{{ address.fullAddress }}</p>
+              <div class="address-footer">
                 <button class="btn-link">Edit</button>
                 <button class="btn-link delete">Delete</button>
               </div>
             </div>
+            <div v-if="addresses.length === 0" class="empty-state">
+               <p>No addresses saved yet.</p>
+            </div>
           </div>
-        </div>
+        </section>
       </div>
 
-      <!-- Referrals Tab -->
-      <div v-if="activeTab === 'referrals'" class="tab-pane">
-        <div class="profile-card glass-card">
-          <div class="card-header">
+      <!-- 3. Side Column (Referrals & Preferences) -->
+      <div class="profile-column side-col">
+        <section class="section-card glass-card highlight-card">
+          <div class="section-header">
+            <ReferralsIcon class="icon-inline" />
             <h3>Referrals & Rewards</h3>
           </div>
-          <div class="referral-content">
-            <div class="referral-stats">
-              <div class="ref-stat">
-                <span class="ref-value">{{ referralData.count }}</span>
-                <span class="ref-label">Friends Joined</span>
+          <div class="referral-widget">
+            <div class="reward-stats-hero">
+              <div class="stat-box">
+                <span class="stat-num">{{ referralData.count }}</span>
+                <span class="stat-lbl">Joined</span>
               </div>
-              <div class="ref-stat">
-                <span class="ref-value">{{ referralData.earnings }}</span>
-                <span class="ref-label">Earned (Units)</span>
+              <div class="stat-box">
+                <span class="stat-num">{{ referralData.earnings }}</span>
+                <span class="stat-lbl">Units</span>
               </div>
             </div>
-            <div class="referral-code-box">
-              <p class="label-xs">Your Unique Referral Code</p>
-              <div class="code-wrapper">
-                <code>{{ referralData.code }}</code>
-                <button class="btn-copy">
+            <div class="referral-code-wrapper">
+              <label>Your Referral Code</label>
+              <div class="copy-box">
+                <code>{{ referralData.code || 'NOCODE' }}</code>
+                <button class="btn-copy-icon" @click="copyReferralCode" title="Copy Code">
                   <CopyIcon class="icon-xs" />
                 </button>
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </section>
 
-      <!-- Favorites Tab -->
-      <div v-if="activeTab === 'favorites'" class="tab-pane">
-        <div class="profile-card glass-card">
-          <div class="card-header">
-            <h3>Favourite Items</h3>
-            <router-link to="/marketplace" class="text-link">Shop More</router-link>
+        <section class="section-card glass-card">
+          <div class="section-header">
+            <SettingsIcon class="icon-inline" />
+            <h3>Notifications</h3>
           </div>
-          <div class="favorites-grid">
-            <div v-for="item in favorites" :key="item.id" class="favorite-item">
-              <div class="item-image-box">
-                <PackageIcon class="icon-md" />
+          <div class="settings-stack">
+            <div class="setting-row">
+              <div class="setting-meta">
+                <span class="setting-title">Email Alerts</span>
+                <span class="setting-sub">Orders & Promotions</span>
               </div>
-              <div class="favorite-info">
-                <p class="favorite-name">{{ item.name }}</p>
-                <p class="favorite-price">{{ item.price }}</p>
-              </div>
-              <div class="favorite-actions">
-                <button class="btn btn-primary btn-xs">Add to Cart</button>
-                <button class="btn-icon-delete" title="Remove">
-                  <TrashIcon class="icon-xs" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Activity Tab -->
-      <div v-if="activeTab === 'activity'" class="tab-pane">
-        <div class="profile-card glass-card">
-          <div class="card-header">
-            <h3>Search History</h3>
-            <button class="btn-text-sm" @click="clearSearchHistory">Clear All</button>
-          </div>
-          <div class="history-list">
-            <div v-for="search in searchHistory" :key="search.id" class="history-item">
-              <div class="history-info">
-                <ClockIcon class="icon-xs-dim" />
-                <span>{{ search.query }}</span>
-              </div>
-              <button class="btn-remove">×</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Settings Tab -->
-      <div v-if="activeTab === 'settings'" class="tab-pane max-w-2xl">
-        <div class="profile-card glass-card">
-          <div class="card-header">
-            <h3>Account Settings</h3>
-          </div>
-          <div class="settings-list">
-            <div class="setting-item">
-              <div class="setting-info">
-                <p class="setting-label">Email Notifications</p>
-                <p class="setting-desc">Orders and promotional updates</p>
-              </div>
-              <label class="switch">
+              <label class="switch-md">
                 <input type="checkbox" v-model="settings.email" />
-                <span class="slider"></span>
+                <span class="slider-md"></span>
               </label>
             </div>
-            <div class="setting-item">
-              <div class="setting-info">
-                <p class="setting-label">SMS Notifications</p>
-                <p class="setting-desc">Delivery status alerts</p>
+            <div class="setting-row">
+              <div class="setting-meta">
+                <span class="setting-title">SMS Status</span>
+                <span class="setting-sub">Delivery Updates</span>
               </div>
-              <label class="switch">
+              <label class="switch-md">
                 <input type="checkbox" v-model="settings.sms" />
-                <span class="slider"></span>
+                <span class="slider-md"></span>
               </label>
             </div>
-            <div class="setting-item">
-              <div class="setting-info">
-                <p class="setting-label">Marketing communications</p>
-                <p class="setting-desc">Personalized offers and news</p>
-              </div>
-              <label class="switch">
-                <input type="checkbox" v-model="settings.marketing" />
-                <span class="slider"></span>
-              </label>
+            <button class="btn btn-outline-full mt-4" @click="saveProfile">Save Preferences</button>
+          </div>
+        </section>
+
+        <section class="section-card glass-card danger-zone">
+          <h3>Security</h3>
+          <p class="text-xs-dim">Managed your account security and data</p>
+          <div class="danger-actions mt-3">
+            <button class="btn-text-danger">Deactivate Account</button>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- 4. Footer Sections (Favorites & Activity) -->
+    <div class="profile-footer-area">
+      <section class="section-card glass-card">
+          <div class="section-header">
+            <HeartIcon class="icon-inline" />
+            <h3>Favourite Items</h3>
+            <router-link to="/marketplace" class="btn-text-action">Explore More</router-link>
+          </div>
+        <div class="favorites-scroller">
+          <div v-for="item in favorites" :key="item.id" class="fav-mini-card">
+            <div class="fav-img">
+              <PackageIcon class="icon-sm" />
             </div>
-            <div class="setting-item pt-6 border-t mt-4">
-              <div class="security-actions">
-                <button class="btn btn-outline btn-full mb-3" @click="saveProfile">Save Preferences</button>
-                <button class="btn btn-outline-danger btn-full">Deactivate Account</button>
-              </div>
+            <div class="fav-data">
+              <p class="fav-name">{{ item.name }}</p>
+              <p class="fav-price">{{ item.price }}</p>
             </div>
+            <button class="fav-del-btn"><TrashIcon class="icon-xs" /></button>
+          </div>
+          <div v-if="favorites.length === 0" class="empty-state-inline">
+            <p>You haven't favorited any items yet.</p>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   </div>
 </template>
@@ -197,30 +169,24 @@ import {
   User as UserIcon,
   Users as ReferralsIcon,
   Heart as HeartIcon,
-  Clock as ClockIcon,
   Settings as SettingsIcon,
   Package as PackageIcon, 
   Trash2 as TrashIcon,
   Copy as CopyIcon
 } from 'lucide-vue-next';
 
-const activeTab = ref('general');
 const isLoading = ref(true);
-
-const tabs = [
-  { id: 'general', label: 'General', icon: UserIcon },
-  { id: 'referrals', label: 'Referrals', icon: ReferralsIcon },
-  { id: 'favorites', label: 'Favorites', icon: HeartIcon },
-  { id: 'activity', label: 'Activity', icon: ClockIcon },
-  { id: 'settings', label: 'Settings', icon: SettingsIcon },
-];
-
 const user = ref({ first_name: '', last_name: '', email: '', phone: '' });
 const addresses = ref([]);
 const favorites = ref([]);
 const referralData = ref({ code: '', count: 0, earnings: 0 });
-const searchHistory = ref([]);
 const settings = ref({ email: true, sms: false, marketing: true });
+
+const copyReferralCode = () => {
+    if (!referralData.value.code) return;
+    navigator.clipboard.writeText(referralData.value.code);
+    alert('Referral code copied to clipboard!');
+};
 
 const fetchProfile = async () => {
   try {
@@ -238,8 +204,6 @@ const fetchProfile = async () => {
       addresses.value = data.addresses;
       favorites.value = data.favorites;
       referralData.value = data.referralData;
-      searchHistory.value = data.searchHistory;
-      settings.value = data.settings;
     }
   } catch (err) {
     console.error('Failed to load profile', err);
@@ -279,515 +243,514 @@ const saveProfile = async () => {
     console.error('Failed to save profile', err);
   }
 };
-
-const clearSearchHistory = async () => {
-    try {
-        const token = localStorage.getItem('token');
-        const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
-        await fetch(`${baseUrl}/api/user/search-history`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        searchHistory.value = [];
-    } catch (e) {
-        console.error(e);
-    }
-};
 </script>
 
 <style scoped>
-.profile-tabs {
+.profile-container {
   display: flex;
-  gap: 8px;
-  padding: 8px;
-  overflow-x: auto;
-  scrollbar-width: none;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding-bottom: var(--space-lg);
 }
 
-.profile-tabs::-webkit-scrollbar { display: none; }
-
-.tab-btn {
-  flex: 1;
-  min-width: fit-content;
+/* 1. Header Hero Card */
+.profile-header-card {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px 20px;
-  border: none;
-  background: transparent;
-  color: var(--text-secondary);
-  font-weight: 700;
-  font-size: 0.9rem;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.2s;
+  gap: 32px;
+  padding: 32px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
 }
 
-.tab-btn:hover {
-  background: var(--bg-secondary);
-  color: var(--text-primary);
-}
-
-.tab-btn.active {
-  background: var(--color-blue-primary);
-  color: white;
-}
-
-.profile-card {
-  padding: var(--space-lg);
-}
-
-.user-avatar-lg {
-  width: 64px;
-  height: 64px;
-  background: var(--color-blue-primary);
+.user-avatar-hero {
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(135deg, var(--color-blue-primary), var(--color-blue-dark));
   color: white;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 2.5rem;
   font-weight: 800;
+  box-shadow: 0 10px 20px rgba(0, 102, 204, 0.2);
 }
 
-.profile-header {
+.user-info-hero h2 {
+  font-size: 1.75rem;
+  margin-bottom: 4px;
+}
+
+.user-email-hero {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  margin-bottom: 12px;
+}
+
+.user-badges {
+  display: flex;
+  gap: 12px;
+}
+
+.badge {
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.badge-verified {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.badge-date {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
+
+/* 2. Content Grid */
+.profile-content-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: var(--space-md);
+}
+
+.profile-column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.section-card {
+  padding: var(--space-md);
+}
+
+.section-header {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 12px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 12px;
 }
 
+.section-header h3 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  flex: 1;
+}
+
+.icon-inline {
+  width: 20px;
+  height: 20px;
+  color: var(--color-blue-primary);
+}
+
+/* Forms */
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-md);
+  gap: 20px;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
 }
 
 .form-group label {
   display: block;
-  font-weight: 600;
-  margin-bottom: 6px;
   font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text-secondary);
 }
 
 .form-group input {
   width: 100%;
   padding: 12px 16px;
-  border: 1.5px solid var(--border-color);
   background: var(--bg-secondary);
+  border: 1.5px solid var(--border-color);
   border-radius: var(--radius-md);
   color: var(--text-primary);
   font-size: 0.95rem;
+  transition: all 0.2s;
 }
 
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-md);
+.form-group input:focus {
+  border-color: var(--color-blue-primary);
+  outline: none;
+  background: var(--bg-primary);
 }
 
-.card-header h3 {
-  font-size: 1.1rem;
-  font-weight: 800;
-}
-
-.btn-text {
-  background: transparent;
-  border: none;
-  color: var(--color-blue-primary);
-  font-weight: 700;
-  font-size: 0.85rem;
-  cursor: pointer;
-}
-
-.btn-text-sm {
-  background: transparent;
-  border: none;
-  color: var(--text-secondary);
-  font-weight: 600;
-  font-size: 0.75rem;
-  cursor: pointer;
-}
-
-.text-link {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--color-blue-primary);
-  text-decoration: none;
-}
-
-/* Address List */
-.address-list {
+/* Address Grid */
+.address-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-md);
+  gap: 16px;
 }
 
-.address-item {
+.address-card {
   padding: 16px;
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
+  transition: all 0.2s;
+}
+
+.address-card:hover {
+  border-color: var(--color-blue-primary);
+  transform: translateY(-2px);
+}
+
+.address-type-row {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  justify-content: space-between;
+  margin-bottom: 12px;
 }
 
 .type-tag {
   background: var(--color-blue-light);
   color: var(--color-blue-primary);
   padding: 2px 8px;
-  border-radius: var(--radius-sm);
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  margin-right: 8px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  border-radius: 4px;
 }
 
 .default-tag {
+  font-size: 0.65rem;
   color: var(--text-secondary);
-  font-size: 0.7rem;
   font-weight: 600;
 }
 
-.address-text {
+.address-body {
   font-size: 0.9rem;
-  line-height: 1.4;
+  line-height: 1.5;
+  margin-bottom: 16px;
+  min-height: 40px;
 }
 
-.address-actions {
+.address-footer {
   display: flex;
   gap: 12px;
-  margin-top: 4px;
 }
 
-.btn-link {
-  background: transparent;
-  border: none;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--color-blue-primary);
-  cursor: pointer;
-  padding: 0;
+/* Referrals */
+.highlight-card {
+  background: linear-gradient(135deg, var(--bg-secondary), var(--color-blue-light));
+  border: 1px solid var(--color-blue-primary);
 }
 
-.btn-link.delete { color: #ef4444; }
-
-/* Favorites Grid */
-.favorites-grid {
+.reward-stats-hero {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  gap: 20px;
+  margin-bottom: 24px;
 }
 
-.favorite-item {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 16px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-}
-
-.item-image-box {
-  width: 56px;
-  height: 56px;
-  background: var(--bg-primary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.favorite-info {
+.stat-box {
   flex: 1;
-}
-
-.favorite-name {
-  font-weight: 700;
-  font-size: 1rem;
-}
-
-.favorite-price {
-  font-weight: 800;
-  color: var(--color-blue-primary);
-  font-size: 0.95rem;
-}
-
-.favorite-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.btn-icon-delete {
-  background: transparent;
-  border: none;
-  color: var(--text-secondary);
-  cursor: pointer;
-  padding: 8px;
-  transition: color 0.2s;
-}
-
-.btn-icon-delete:hover { color: #ef4444; }
-
-/* Referral Section */
-.referral-stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-md);
-  margin-bottom: var(--space-lg);
-}
-
-.ref-stat {
-  padding: 24px;
-  background: var(--color-blue-light);
-  border-radius: var(--radius-lg);
+  padding: 16px;
+  background: var(--bg-primary);
+  border-radius: var(--radius-md);
   text-align: center;
+  box-shadow: var(--shadow-sm);
 }
 
-.ref-value {
+.stat-num {
   display: block;
-  font-size: 2rem;
+  font-size: 1.75rem;
   font-weight: 800;
   color: var(--color-blue-primary);
 }
 
-.ref-label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--color-blue-primary);
-  opacity: 0.8;
-}
-
-.referral-code-box {
-  padding: 24px;
-  background: var(--bg-secondary);
-  border: 2px dashed var(--color-blue-primary);
-  border-radius: var(--radius-lg);
-  text-align: center;
-}
-
-.label-xs {
+.stat-lbl {
   font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
+  font-weight: 600;
   color: var(--text-secondary);
-  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.code-wrapper {
+.copy-box {
   display: flex;
-  justify-content: center;
   align-items: center;
   gap: 12px;
+  padding: 12px 16px;
+  background: var(--bg-primary);
+  border: 2px dashed var(--color-blue-primary);
+  border-radius: var(--radius-md);
+  margin-top: 8px;
 }
 
-.code-wrapper code {
+.copy-box code {
+  flex: 1;
   font-family: monospace;
-  font-size: 1.25rem;
   font-weight: 700;
-  color: var(--text-primary);
+  font-size: 1.1rem;
 }
 
-.btn-copy {
+.btn-copy-icon {
   background: transparent;
   border: none;
   color: var(--color-blue-primary);
   cursor: pointer;
-  display: flex;
   padding: 4px;
 }
 
-/* History List */
-.history-list {
+/* Notification Settings */
+.settings-stack {
   display: flex;
   flex-direction: column;
+  gap: 16px;
 }
 
-.history-item {
+.setting-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 0;
-  border-bottom: 1px solid var(--border-color);
+  padding: 12px 0;
 }
 
-.history-item:last-child { border-bottom: none; }
+.setting-title {
+  display: block;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
 
-.history-info {
+.setting-sub {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+/* Favorites area */
+.profile-footer-area {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-md);
+}
+
+.favorites-scroller {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fav-mini-card {
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-size: 0.95rem;
-  color: var(--text-primary);
+  gap: 16px;
+  padding: 12px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
 }
 
-.btn-remove {
+.fav-img {
+  width: 48px;
+  height: 48px;
+  background: var(--bg-primary);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fav-data {
+  flex: 1;
+}
+
+.fav-name { font-weight: 700; font-size: 0.9rem; }
+.fav-price { font-weight: 800; color: var(--color-blue-primary); font-size: 0.85rem; }
+
+.fav-del-btn {
   background: transparent;
   border: none;
   color: var(--text-secondary);
-  font-size: 1.5rem;
-  line-height: 1;
   cursor: pointer;
 }
 
-/* Settings */
-.settings-list {
+/* Activity History */
+.activity-history-list {
   display: flex;
   flex-direction: column;
-  gap: 20px;
 }
 
-.setting-item {
+.activity-history-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-color);
 }
 
-.setting-label {
-  font-weight: 700;
-  font-size: 1rem;
+.activity-history-item:last-child { border-bottom: none; }
+
+.activity-item-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.9rem;
 }
 
-.setting-desc {
-  font-size: 0.85rem;
+.btn-activity-del {
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
   color: var(--text-secondary);
+  cursor: pointer;
 }
 
-.btn-full { width: 100%; }
-.mb-3 { margin-bottom: 0.75rem; }
-
-/* Switch Styles */
-.switch {
+/* Switches */
+.switch-md {
   position: relative;
   display: inline-block;
-  width: 44px;
+  width: 48px;
   height: 24px;
 }
-
-.switch input { opacity: 0; width: 0; height: 0; }
-
-.slider {
-  position: absolute;
-  cursor: pointer;
+.switch-md input { opacity: 0; width: 0; height: 0; }
+.slider-md {
+  position: absolute; cursor: pointer;
   top: 0; left: 0; right: 0; bottom: 0;
   background-color: var(--border-color);
-  transition: .4s;
-  border-radius: 34px;
+  transition: .3s;
+  border-radius: 24px;
 }
-
-.slider:before {
-  position: absolute;
-  content: "";
+.slider-md:before {
+  position: absolute; content: "";
   height: 18px; width: 18px;
   left: 3px; bottom: 3px;
   background-color: white;
-  transition: .4s;
+  transition: .3s;
   border-radius: 50%;
 }
+input:checked + .slider-md { background-color: var(--color-blue-primary); }
+input:checked + .slider-md:before { transform: translateX(24px); }
 
-input:checked + .slider { background-color: var(--color-blue-primary); }
-input:checked + .slider:before { transform: translateX(20px); }
+/* Buttons & Utils */
+.btn-outline-sm {
+  background: transparent;
+  border: 1.5px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
 
-/* Utilities */
-.icon-xs-tab { width: 16px; height: 16px; }
-.icon-xs { width: 14px; height: 14px; }
-.icon-xs-dim { width: 14px; height: 14px; opacity: 0.5; }
-.icon-md { width: 24px; height: 24px; }
+.btn-outline-full {
+  width: 100%;
+  background: transparent;
+  border: 1.5px solid var(--color-blue-primary);
+  color: var(--color-blue-primary);
+  padding: 12px;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-text {
+  background: var(--color-blue-light);
+  color: var(--color-blue-primary);
+  border: none;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-text:hover {
+  background: var(--color-blue-primary);
+  color: white;
+}
+
+.btn-text-sm {
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-text-sm:hover {
+  background: var(--border-color);
+  color: var(--text-primary);
+}
+
+.btn-text-action {
+  background: var(--bg-secondary);
+  color: var(--color-blue-primary);
+  border: 1px solid var(--border-color);
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  font-size: 0.72rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.btn-text-action:hover {
+  border-color: var(--color-blue-primary);
+  background: var(--color-blue-light);
+}
+
+.btn-text-danger {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: none;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-text-danger:hover {
+  background: #ef4444;
+  color: white;
+}
+
+.text-xs-dim { font-size: 0.75rem; color: var(--text-secondary); }
+.empty-state { grid-column: 1 / -1; padding: 40px; text-align: center; color: var(--text-secondary); }
+.empty-state-inline { padding: 20px; text-align: center; color: var(--text-secondary); font-size: 0.85rem; }
+
 .mt-4 { margin-top: 1rem; }
 .mt-6 { margin-top: 1.5rem; }
-.pt-6 { padding-top: 1.5rem; }
-.border-t { border-top: 1px solid var(--border-color); }
-.max-w-2xl { max-width: 600px; }
-.btn-xs { padding: 6px 12px; font-size: 0.75rem; }
+
+@media (max-width: 1024px) {
+  .profile-content-grid {
+    grid-template-columns: 1fr;
+  }
+}
 
 @media (max-width: 768px) {
-  .form-grid, .address-list, .referral-stats {
-    grid-template-columns: 1fr;
+  .profile-header-card {
+    flex-direction: column;
+    text-align: center;
+    padding: 24px;
     gap: 16px;
   }
-  .profile-tabs {
-    padding: 4px;
-    border-radius: 12px;
+  .header-actions-hero { margin: 0 auto; }
+  .form-grid, .address-grid, .profile-footer-area {
+    grid-template-columns: 1fr;
   }
-  .tab-btn {
-    padding: 10px 16px;
-    font-size: 0.85rem;
-  }
-  .profile-card {
-    padding: var(--space-md);
-    border-radius: 16px;
-  }
-  
-  .profile-header {
-    flex-direction: column;
-    text-align: center;
-    gap: 12px;
-  }
-
-  .user-avatar-lg {
-    width: 80px;
-    height: 80px;
-    font-size: 2rem;
-  }
-
-  .favorite-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .favorite-info {
-    width: 100%;
-  }
-
-  .favorite-actions {
-    width: 100%;
-    justify-content: space-between;
-  }
-  
-  .favorite-actions .btn {
-    flex: 1;
-    margin-right: 12px;
-    text-align: center;
-    padding: 10px 0;
-    font-size: 0.9rem;
-  }
-
-  .code-wrapper {
-    background: var(--bg-primary);
-    padding: 12px;
-    border-radius: 8px;
-    margin-top: 8px;
-  }
-  
-  .referral-code-box {
-    padding: 16px;
-  }
-
-  .setting-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .switch {
-    align-self: flex-start;
-  }
-
-  .security-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  
-  .security-actions .mb-3 {
-    margin-bottom: 0;
-  }
+  .section-card { padding: 20px; }
+  .user-avatar-hero { width: 80px; height: 80px; font-size: 2rem; }
 }
 </style>

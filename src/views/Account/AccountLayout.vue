@@ -83,7 +83,8 @@ import {
   Calendar as ConsultIcon, 
   User as UserIcon,
   LogOut as LogOutIcon,
-  ShoppingCart as ShoppingCartIcon
+  ShoppingCart as ShoppingCartIcon,
+  Sparkles as SparklesIcon
 } from 'lucide-vue-next';
 
 import authService from '@/services/auth.service';
@@ -107,7 +108,8 @@ const navItems = [
   { path: '/account/orders', label: 'Orders', icon: ShoppingBagIcon, description: 'Track your energy systems and installation progress.' },
   { path: '/account/vendor', label: 'Vendor', icon: VendorIcon, description: 'Manage your partner account or join as a vendor.' },
   { path: '/account/consultations', label: 'Consultations', icon: ConsultIcon, description: 'View and schedule your engineering assessments.' },
-  { path: '/account/profile', label: 'Profile', icon: UserIcon, description: 'Manage your personal details and preferences.' }
+  { path: '/account/profile', label: 'Profile', icon: UserIcon, description: 'Manage your personal details and preferences.' },
+  { path: '/energy-ai', label: 'Energy AI', icon: SparklesIcon, description: 'Smart AI diagnostic tool for your energy systems.' }
 ];
 
 const currentRouteItem = computed(() => {
@@ -207,6 +209,7 @@ onUnmounted(() => {
   flex: 1;
   background-color: var(--bg-primary);
   color: var(--text-primary);
+  padding-top: 80px; /* Fixed header offset */
 }
 
 /* Sidebar Navigation */
@@ -433,6 +436,7 @@ onUnmounted(() => {
   .dashboard-layout {
     flex-direction: column;
     padding-bottom: 80px; /* Room for bottom nav */
+    padding-top: 70px; /* Mobile header offset */
   }
 
   .dashboard-nav {
@@ -481,7 +485,7 @@ onUnmounted(() => {
 
   .dashboard-main {
     margin-left: 0;
-    padding: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
   }
 
   .content-header h1 {

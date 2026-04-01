@@ -32,7 +32,7 @@ import LoadAuditCalculator from '../components/LoadAuditCalculator.vue';
 
 @media (max-width: 768px) {
   .page-padding {
-    padding: var(--space-lg) var(--space-sm);
+    padding: var(--space-xl) var(--space-sm) var(--space-lg);
   }
 }
 

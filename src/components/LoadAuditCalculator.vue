@@ -17,7 +17,7 @@
           <label>Select Appliance</label>
           <select v-model="selectedAppliance" @change="handlePresetSelect">
             <option value="">-- Choose from list --</option>
-            <option v-for="item in applianceDataset" :key="item.name" :value="item">{{ item.name }}</option>
+            <option v-for="item in applianceLibrary" :key="item.id" :value="item">{{ item.name }}</option>
             <option value="custom">Manual Entry</option>
           </select>
         </div>
@@ -219,7 +219,7 @@
               <div>
                 <label>Solar Array</label>
                 <strong>{{ solarCapacityKW.toFixed(2) }} kW</strong>
-                <small>{{ Math.ceil(solarCapacityKW * 1000 / 450) }} x 450W Panels</small>
+                <small>{{ Math.ceil(solarCapacityKW * 1000 / config.specs.panel_wattage) }} x {{ config.specs.panel_wattage }}W Panels</small>
               </div>
             </div>
           </div>
@@ -247,7 +247,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { 
   Plus as PlusIcon, 
   Trash2 as TrashIcon, 
@@ -263,11 +263,13 @@ import {
   Zap as FastChargeIcon,
   Flame as VeryFastChargeIcon
 } from 'lucide-vue-next';
-import { applianceDataset } from '../utils/applianceData';
+import applianceService from '../services/appliance.service';
+import settingsService from '../services/settings.service';
 
 // State
 const currentStep = ref(1);
-const appliances = ref([]);
+const appliances = ref([]); // User's added appliances
+const applianceLibrary = ref([]); // Data from backend
 const selectedAppliance = ref('');
 const entryName = ref('');
 const entryWattage = ref(null);
@@ -278,6 +280,47 @@ const isCustomBackup = ref(false);
 const customHours = ref(null);
 
 const chargeSpeed = ref('normal');
+
+const config = ref({
+  pricing: {
+    inverter_cost_per_kva: 150000,
+    battery_cost_per_kwh: 180000,
+    solar_cost_per_kw: 250000
+  },
+  engineering: {
+    safety_margin: 1.2,
+    power_factor: 0.8,
+    peak_sun_hours: 4.5
+  },
+  specs: {
+    panel_wattage: 450,
+    battery_dod: 0.8,
+    battery_efficiency: 0.85,
+    battery_ah: 200
+  },
+  thresholds: {
+    voltage_12v_max: 1.5,
+    voltage_24v_max: 3.5,
+    margin_percentage: 15,
+    max_margin_cap: 500000
+  }
+});
+
+const fetchConfig = async () => {
+  try {
+    const [configData, appData] = await Promise.all([
+      settingsService.getSetting('load_audit_config'),
+      applianceService.getAppliances()
+    ]);
+    
+    if (configData) config.value = configData;
+    if (appData) applianceLibrary.value = appData;
+  } catch (err) {
+    console.error('Failed to fetch load audit data:', err);
+  }
+};
+
+onMounted(fetchConfig);
 
 // Options
 const backupOptions = [
@@ -352,7 +395,29 @@ const formatPrice = (num) => {
 };
 
 const requestInstallation = () => {
-  alert('Thank you! Our engineering team has received your blueprint and will contact you within 2 hours.');
+  const phoneNumber = '2347041880339';
+  
+  let message = `*Origin Electric - Load Audit Results*\n\n`;
+  
+  message += `*Load Details:*\n`;
+  appliances.value.forEach(app => {
+    message += `- ${app.name}: ${app.wattage}W x ${app.quantity} = ${app.wattage * app.quantity}W\n`;
+  });
+  message += `\n*Total Load:* ${totalWatts.value}W\n`;
+  
+  message += `\n*System Recommendations:*\n`;
+  message += `- Inverter: ${recommendedInverter.value}kVA\n`;
+  message += `- Battery storage: ${batteryCapacityKWh.value.toFixed(1)}kWh (${batteryConfig.value})\n`;
+  message += `- Solar array: ${solarCapacityKW.value.toFixed(2)}kW (${Math.ceil(solarCapacityKW.value * 1000 / config.value.specs.panel_wattage)} x ${config.value.specs.panel_wattage}W Panels)\n`;
+  
+  message += `\n*Estimated Cost Range:* ₦${formatPrice(minCost.value)} - ₦${formatPrice(maxCost.value)}\n\n`;
+  
+  message += `Please send me a detailed quotation including installation and warranty`;
+  
+  const encodedMessage = encodeURIComponent(message);
+  const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+  
+  window.open(whatsappUrl, '_blank');
 };
 
 // Calculations
@@ -366,8 +431,8 @@ const estimatedSurge = computed(() => {
 
 const recommendedInverter = computed(() => {
   if (totalWatts.value === 0) return 0;
-  // Rule: (Total Watts * 1.2 safety) / 0.8 Power Factor
-  const va = (totalWatts.value * 1.2) / 0.8;
+  // Rule: (Total Watts * safety margin) / Power Factor
+  const va = (totalWatts.value * config.value.engineering.safety_margin) / config.value.engineering.power_factor;
   const kva = va / 1000;
   
   // Standard sizes: 1, 1.5, 2.5, 3.5, 5, 7.5, 10, 15...
@@ -380,41 +445,54 @@ const effectiveBackupHours = computed(() => {
 });
 
 const batteryCapacityKWh = computed(() => {
-  // kWh = (Watts * Hours) / (Efficiency 0.85 * DoD 0.8)
+  // kWh = (Watts * Hours) / (Efficiency * DoD)
   if (totalWatts.value === 0) return 0;
-  return (totalWatts.value * effectiveBackupHours.value / 1000) / (0.85 * 0.8);
+  return (totalWatts.value * effectiveBackupHours.value / 1000) / (config.value.specs.battery_efficiency * config.value.specs.battery_dod);
 });
 
 const batteryConfig = computed(() => {
   if (batteryCapacityKWh.value === 0) return '-';
-  const totalAhAt48V = (batteryCapacityKWh.value * 1000) / 48;
-  const num200AhBatteries = Math.ceil(totalAhAt48V / 200) * 4; // Assuming 48V bank (4x12V)
-  const voltage = recommendedInverter.value >= 3.5 ? '48V' : (recommendedInverter.value >= 1.5 ? '24V' : '12V');
+  
+  const voltage = recommendedInverter.value >= config.value.thresholds.voltage_24v_max 
+    ? '48V' 
+    : (recommendedInverter.value >= config.value.thresholds.voltage_12v_max ? '24V' : '12V');
+    
+  const vNum = parseInt(voltage);
+  const totalAhAtVoltage = (batteryCapacityKWh.value * 1000) / vNum;
+  const ahPerBattery = config.value.specs.battery_ah;
   
   if (voltage === '48V') {
-     const chains = Math.ceil(totalAhAt48V / 200);
-     return `48V 200Ah Bank (${chains * 4} Batteries)`;
+     const chains = Math.ceil(totalAhAtVoltage / ahPerBattery);
+     return `48V ${ahPerBattery}Ah Bank (${chains * 4} Batteries)`;
   } else if (voltage === '24V') {
-     const chains = Math.ceil((batteryCapacityKWh.value * 1000 / 24) / 200);
-     return `24V 200Ah Bank (${chains * 2} Batteries)`;
+     const chains = Math.ceil(totalAhAtVoltage / ahPerBattery);
+     return `24V ${ahPerBattery}Ah Bank (${chains * 2} Batteries)`;
   } else {
-     const num = Math.ceil((batteryCapacityKWh.value * 1000 / 12) / 200);
-     return `12V 200Ah (${num} Batteries)`;
+     const num = Math.ceil(totalAhAtVoltage / ahPerBattery);
+     return `12V ${ahPerBattery}Ah (${num} Batteries)`;
   }
 });
 
 const solarCapacityKW = computed(() => {
-  // Rough estimate: Need to replenish battery in ~5 peak sun hours * speed multiplier
+  // replenish battery in peak sun hours * speed multiplier
   const mult = chargeSpeeds.find(s => s.id === chargeSpeed.value)?.mult || 1;
-  return (batteryCapacityKWh.value / 4.5) * mult;
+  return (batteryCapacityKWh.value / config.value.engineering.peak_sun_hours) * mult;
 });
 
-// Cost Estimation Logic (Placeholder multipliers based on market)
+// Cost Estimation Logic
 const minCost = computed(() => {
   if (totalWatts.value === 0) return 0;
-  return (recommendedInverter.value * 150000) + (batteryCapacityKWh.value * 180000) + (solarCapacityKW.value * 250000);
+  const { pricing } = config.value;
+  return (recommendedInverter.value * pricing.inverter_cost_per_kva) + 
+         (batteryCapacityKWh.value * pricing.battery_cost_per_kwh) + 
+         (solarCapacityKW.value * pricing.solar_cost_per_kw);
 });
-const maxCost = computed(() => minCost.value * 1.25);
+const maxCost = computed(() => {
+  if (minCost.value === 0) return 0;
+  const marginPercent = config.value.thresholds.margin_percentage / 100;
+  const margin = Math.min(minCost.value * marginPercent, config.value.thresholds.max_margin_cap);
+  return minCost.value + margin;
+});
 
 </script>
 
@@ -443,7 +521,7 @@ const maxCost = computed(() => minCost.value * 1.25);
   gap: var(--space-sm);
   margin-bottom: var(--space-md);
   padding: 0.75rem;
-  background: rgba(0,0,0,0.03);
+  background: var(--bg-secondary);
   border-radius: var(--radius-full);
 }
 
@@ -595,9 +673,26 @@ input, select {
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   background: var(--bg-primary);
+  color: var(--text-primary);
   font-family: inherit;
   font-size: 1rem;
-  transition: border-color 0.2s;
+  transition: all 0.2s;
+}
+
+input:disabled, select:disabled {
+  background: var(--bg-secondary);
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+input::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.5;
+}
+
+option {
+  background: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 input:focus, select:focus {
