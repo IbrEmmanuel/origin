@@ -298,8 +298,8 @@
             <span class="label">Years Excellence</span>
           </div>
           <div class="feature-item">
-            <span class="count">500+</span>
-            <span class="label">Certified Engineers</span>
+            <span class="count">1,500+</span>
+            <span class="label">Happy Clients</span>
           </div>
           <div class="feature-item">
             <span class="count">99.9%</span>

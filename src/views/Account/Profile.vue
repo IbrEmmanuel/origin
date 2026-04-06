@@ -10,7 +10,8 @@
         <p class="user-email-hero">{{ user.email }}</p>
         <div class="user-badges">
           <span class="badge badge-verified">Verified Account</span>
-          <span class="badge badge-date">Member since 2024</span>
+          <span class="badge badge-date">Member since {{ getJoinYear(user.memberSince) }}</span>
+
         </div>
       </div>
     </div>
@@ -78,11 +79,12 @@
                 <span class="stat-num">{{ referralData.count }}</span>
                 <span class="stat-lbl">Joined</span>
               </div>
-              <div class="stat-box">
+              <!-- <div class="stat-box">
                 <span class="stat-num">{{ referralData.earnings }}</span>
                 <span class="stat-lbl">Units</span>
-              </div>
+              </div> -->
             </div>
+
             <div class="referral-code-wrapper">
               <label>Your Referral Code</label>
               <div class="copy-box">
@@ -92,6 +94,17 @@
                 </button>
               </div>
             </div>
+
+            <div class="referral-link-wrapper mt-4">
+              <label>Your Referral Link</label>
+              <div class="copy-box link-box">
+                <span class="link-text">{{ generateReferralLink() }}</span>
+                <button class="btn-copy-icon" @click="copyReferralLink" title="Copy Link">
+                  <CopyIcon class="icon-xs" />
+                </button>
+              </div>
+            </div>
+
           </div>
         </section>
 
@@ -182,11 +195,30 @@ const favorites = ref([]);
 const referralData = ref({ code: '', count: 0, earnings: 0 });
 const settings = ref({ email: true, sms: false, marketing: true });
 
+const getJoinYear = (dateString) => {
+    if (!dateString) return new Date().getFullYear();
+    return new Date(dateString).getFullYear();
+};
+
 const copyReferralCode = () => {
+
     if (!referralData.value.code) return;
     navigator.clipboard.writeText(referralData.value.code);
     alert('Referral code copied to clipboard!');
 };
+
+const generateReferralLink = () => {
+    if (!referralData.value.code) return '';
+    return `${window.location.origin}/signup?ref=${referralData.value.code}`;
+};
+
+const copyReferralLink = () => {
+    const link = generateReferralLink();
+    if (!link) return;
+    navigator.clipboard.writeText(link);
+    alert('Referral link copied to clipboard!');
+};
+
 
 const fetchProfile = async () => {
   try {
@@ -215,6 +247,12 @@ const fetchProfile = async () => {
 onMounted(fetchProfile);
 
 const saveProfile = async () => {
+  // Frontend Validation
+  if (!user.value.first_name?.trim() || !user.value.last_name?.trim() || !user.value.phone?.trim()) {
+    alert('Please fill out all personal information fields (First Name, Last Name, Phone).');
+    return;
+  }
+
   try {
     const token = localStorage.getItem('token');
     if (!token) return;
@@ -237,12 +275,15 @@ const saveProfile = async () => {
     if (response.ok) {
       alert('Profile updated successfully');
     } else {
-      alert('Failed to update profile');
+      const errorData = await response.json();
+      alert(errorData.message || 'Failed to update profile');
     }
   } catch (err) {
     console.error('Failed to save profile', err);
+    alert('An unexpected error occurred while saving your profile.');
   }
 };
+
 </script>
 
 <style scoped>
@@ -500,7 +541,27 @@ const saveProfile = async () => {
   color: var(--color-blue-primary);
   cursor: pointer;
   padding: 4px;
+  transition: transform 0.2s;
 }
+
+.btn-copy-icon:hover {
+  transform: scale(1.1);
+}
+
+.link-box {
+  border-style: solid;
+  border-width: 1px;
+}
+
+.link-text {
+  flex: 1;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 
 /* Notification Settings */
 .settings-stack {

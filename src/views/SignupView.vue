@@ -63,6 +63,23 @@
             <label for="terms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
           </div>
 
+          <div class="form-group">
+            <label for="referral_code">Referral Code (Optional)</label>
+            <div class="input-wrapper">
+              <ReferralsIcon class="input-icon" />
+              <input 
+                type="text" 
+                id="referral_code" 
+                v-model="referralCode" 
+                placeholder="ENTER CODE" 
+                :readonly="isReferralReadonly"
+                :class="{ 'readonly-input': isReferralReadonly }"
+              />
+            </div>
+            <p v-if="isReferralReadonly" class="input-hint success-text">Referral applied!</p>
+          </div>
+
+
           <button type="submit" class="auth-btn primary-btn" :disabled="isLoading">
             <span v-if="isLoading" class="loader"></span>
             <span v-else>Create Account</span>
@@ -89,30 +106,60 @@
         </p>
       </div>
     </div>
+
+    <!-- Referral Modal for New Google Users -->
+    <ReferralModal 
+      :isOpen="isReferralModalOpen" 
+      @close="completeGoogleSignup(null)" 
+      @submit="completeGoogleSignup"
+    />
+
   </div>
 </template>
 
+
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import authService from '@/services/auth.service';
+import { auth, googleProvider } from '@/firebase/config';
+import { signInWithPopup } from 'firebase/auth';
+import ReferralModal from '@/components/ReferralModal.vue';
 import { 
   Mail as MailIcon, 
   Lock as LockIcon, 
   User as UserIcon,
+  Users as ReferralsIcon,
   Eye as EyeIcon, 
   EyeOff as EyeOffIcon 
 } from 'lucide-vue-next';
 
+
 const router = useRouter();
+const route = useRoute();
 
 const name = ref('');
 const email = ref('');
 const password = ref('');
+const referralCode = ref('');
+const isReferralReadonly = ref(false);
 const acceptTerms = ref(false);
 const showPassword = ref(false);
 const isLoading = ref(false);
 const error = ref('');
+
+// Google Auth State
+const isReferralModalOpen = ref(false);
+const googleIdToken = ref(null);
+
+
+onMounted(() => {
+  if (route.query.ref) {
+    referralCode.value = route.query.ref;
+    isReferralReadonly.value = true;
+  }
+});
+
 
 const handleSignup = async () => {
   if (!acceptTerms.value) {
@@ -124,28 +171,81 @@ const handleSignup = async () => {
   error.value = '';
   
   try {
-    const data = await authService.register(email.value, password.value);
+    const data = await authService.register(email.value, password.value, referralCode.value, name.value);
+
+
     
     // Store token and unverified user info
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify(data.user));
     
     // Redirect to verify email with email as query param
-    router.push({
-      path: '/verify-email',
-      query: { email: email.value }
-    });
+    router.push('/verify-email?email=' + email.value);
   } catch (err) {
-    error.value = err.response?.data?.message || 'Signup failed. Please try again.';
+    error.value = err.response?.data?.message || 'Registration failed.';
     alert(error.value);
   } finally {
     isLoading.value = false;
   }
 };
 
-const signupWithGoogle = () => {
-  alert('Google Signup coming soon!');
+const signupWithGoogle = async () => {
+  isLoading.value = true;
+  error.value = '';
+
+  try {
+    const result = await signInWithPopup(auth, googleProvider);
+    const idToken = await result.user.getIdToken();
+    googleIdToken.value = idToken;
+
+    // Check if we already have a referral in the URL
+    const urlRef = route.query.ref;
+    if (urlRef) {
+      await completeGoogleSignup(urlRef);
+    } else {
+      // Check if user is new
+      try {
+        const data = await authService.googleLogin(idToken);
+        if (data.isNewUser) {
+          isReferralModalOpen.value = true;
+        } else {
+          finishAuth(data);
+        }
+      } catch (err) {
+        console.error('Initial Google Login failed', err);
+        error.value = 'Google login failed. Please try again.';
+      }
+    }
+  } catch (err) {
+    console.error('Firebase Google Auth Error:', err);
+    error.value = 'Failed to connect to Google.';
+  } finally {
+    isLoading.value = false;
+  }
 };
+
+const completeGoogleSignup = async (referralCode) => {
+  isReferralModalOpen.value = false;
+  isLoading.value = true;
+
+  try {
+    const data = await authService.googleLogin(googleIdToken.value, referralCode);
+    finishAuth(data);
+  } catch (err) {
+    error.value = err.response?.data?.message || 'Google signup failed.';
+    alert(error.value);
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+
+const finishAuth = (data) => {
+  localStorage.setItem('token', data.token);
+  localStorage.setItem('user', JSON.stringify({ ...data.user, is_verified: true }));
+  router.push('/account/dashboard');
+};
+
 </script>
 
 <style scoped>
@@ -257,6 +357,18 @@ input:focus {
   color: var(--text-secondary);
   margin-top: 0.25rem;
 }
+
+.success-text {
+  color: #10b981 !important;
+  font-weight: 600;
+}
+
+.readonly-input {
+  background: var(--bg-primary) !important;
+  border-style: dashed !important;
+  cursor: not-allowed;
+}
+
 
 .password-toggle {
   position: absolute;

@@ -121,7 +121,7 @@
               </div>
               <div class="info-text">
                 <h4>Visit Office</h4>
-                <p class="address-text">Near FHV3+JQ7 Oau Muslim Graduates Association Resource Centre, Ile, Stadium Road, Ife 220101, Osun state, Nigeria</p>
+                <p class="address-text">Near FHV3+JQ7, OAU Muslim graduates centre, stadium road, Ile Ife</p>
               </div>
             </div>
           </div>

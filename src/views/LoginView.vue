@@ -72,13 +72,25 @@
         </p>
       </div>
     </div>
+
+
+    <!-- Referral Modal for New Google Users -->
+    <ReferralModal 
+      :isOpen="isReferralModalOpen" 
+      @close="completeGoogleLogin(null)" 
+      @submit="completeGoogleLogin"
+    />
   </div>
 </template>
 
+
 <script setup>
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import authService from '@/services/auth.service';
+import { auth, googleProvider } from '@/firebase/config';
+import { signInWithPopup } from 'firebase/auth';
+import ReferralModal from '@/components/ReferralModal.vue';
 import { 
   Mail as MailIcon, 
   Lock as LockIcon, 
@@ -86,13 +98,20 @@ import {
   EyeOff as EyeOffIcon 
 } from 'lucide-vue-next';
 
+
 const router = useRouter();
+const route = useRoute();
 
 const email = ref('');
 const password = ref('');
 const showPassword = ref(false);
 const isLoading = ref(false);
 const error = ref('');
+
+// Google Auth State
+const isReferralModalOpen = ref(false);
+const googleIdToken = ref(null);
+
 
 const handleLogin = async () => {
   isLoading.value = true;
@@ -122,9 +141,62 @@ const handleLogin = async () => {
   }
 };
 
-const loginWithGoogle = () => {
-  alert('Google Login coming soon!');
+const loginWithGoogle = async () => {
+  isLoading.value = true;
+  error.value = '';
+
+  try {
+    const result = await signInWithPopup(auth, googleProvider);
+    const idToken = await result.user.getIdToken();
+    googleIdToken.value = idToken;
+
+    // Check if we already have a referral in the URL
+    const urlRef = route.query.ref;
+    if (urlRef) {
+      await completeGoogleLogin(urlRef);
+    } else {
+      // Check if user is new via a try-login attempt
+      try {
+        const data = await authService.googleLogin(idToken);
+        if (data.isNewUser) {
+          isReferralModalOpen.value = true;
+        } else {
+          finishAuth(data);
+        }
+      } catch (err) {
+        console.error('Initial Google Login failed', err);
+        error.value = 'Google login failed. Please try again.';
+      }
+    }
+  } catch (err) {
+    console.error('Firebase Google Auth Error:', err);
+    error.value = 'Failed to connect to Google.';
+  } finally {
+    isLoading.value = false;
+  }
 };
+
+const completeGoogleLogin = async (referralCode) => {
+  isReferralModalOpen.value = false;
+  isLoading.value = true;
+
+  try {
+    const data = await authService.googleLogin(googleIdToken.value, referralCode);
+    finishAuth(data);
+  } catch (err) {
+    error.value = err.response?.data?.message || 'Google login failed.';
+    alert(error.value);
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const finishAuth = (data) => {
+  localStorage.setItem('token', data.token);
+  localStorage.setItem('user', JSON.stringify({ ...data.user, is_verified: true }));
+  router.push('/account/dashboard');
+};
+
 </script>
 
 <style scoped>

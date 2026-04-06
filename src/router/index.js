@@ -77,6 +77,11 @@ const routes = [
                 component: () => import('../views/Account/Vendor.vue')
             },
             {
+                path: 'market',
+                name: 'AccountMarket',
+                component: () => import('../views/Account/MarketDashboard.vue')
+            },
+            {
                 path: 'consultations',
                 name: 'AccountConsultations',
                 component: () => import('../views/Account/Consultations.vue')
@@ -115,6 +120,12 @@ const routes = [
         path: '/energy-ai',
         name: 'EnergyAI',
         component: () => import('@/views/EnergyAIView.vue'),
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/vendor-apply',
+        name: 'VendorApply',
+        component: () => import('@/views/VendorApplicationView.vue'),
         meta: { requiresAuth: true }
     }
 ]

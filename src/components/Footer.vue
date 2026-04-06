@@ -24,6 +24,7 @@
           <li><router-link to="/marketplace">Marketplace</router-link></li>
           <li><router-link to="/load-audit">Load Audit</router-link></li>
           <li><router-link to="/contact">Contact</router-link></li>
+          <li><router-link to="/vendor-apply">Become a Supplier</router-link></li>
         </ul>
       </div>
 
@@ -39,7 +40,7 @@
         </div>
         <div class="contact-item">
           <MapPinIcon class="icon-xs" />
-          <span>Near FHV3+JQ7 Oau Muslim Graduates Association Resource Centre, Ile, Stadium Road, Ife 220101, Osun state, Nigeria</span>
+          <span>Near FHV3+JQ7, OAU Muslim graduates centre, stadium road, Ile Ife</span>
         </div>
       </div>
     </div>

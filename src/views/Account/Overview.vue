@@ -9,6 +9,31 @@
         <span class="stat-label">{{ stat.label }}</span>
       </div>
     </div>
+    
+    <!-- Navigation Cards Section -->
+    <div class="nav-cards">
+      <router-link to="/energy-ai" class="nav-item-card glass-card">
+        <div class="nav-icon ai-soft-bg">
+          <SparklesIcon class="icon-sm" />
+        </div>
+        <div class="nav-info">
+          <h3>Energy AI</h3>
+          <p>Smart savings and analysis.</p>
+        </div>
+        <ArrowRightIcon class="icon-xs arrow" />
+      </router-link>
+
+      <router-link to="/account/market" class="nav-item-card glass-card">
+        <div class="nav-icon market-soft-bg">
+          <ShoppingBagIcon class="icon-sm" />
+        </div>
+        <div class="nav-info">
+          <h3>Marketplace</h3>
+          <p>Premium energy hardware.</p>
+        </div>
+        <ArrowRightIcon class="icon-xs arrow" />
+      </router-link>
+    </div>
 
     <!-- Recent Orders Section -->
     <div class="wide-card glass-card">
@@ -49,7 +74,12 @@ import { ref, onMounted } from 'vue';
 import { 
   ShoppingBag as OrderIcon, 
   Clock as PendingIcon, 
-  Wallet as BalanceIcon 
+  Wallet as BalanceIcon,
+  Sparkles as SparklesIcon,
+  ShoppingBag as ShoppingBagIcon,
+  ArrowRight as ArrowRightIcon,
+  Zap as ZapIcon,
+  Layout as LayoutIcon
 } from 'lucide-vue-next';
 
 const stats = ref([
@@ -224,4 +254,74 @@ onMounted(async () => {
 }
 
 .icon-md { width: 28px; height: 28px; }
+
+/* Navigation Cards Styling */
+.nav-cards {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+  margin-top: calc(-1 * var(--space-xs));
+}
+
+.nav-item-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  text-decoration: none;
+  transition: all 0.2s ease-out;
+  border: 1px solid var(--border-color);
+}
+
+.nav-item-card:hover {
+  border-color: var(--color-blue-primary);
+  background: var(--bg-primary);
+  transform: translateY(-2px);
+}
+
+.nav-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ai-soft-bg { background: rgba(99, 102, 241, 0.1); color: #6366f1; }
+.market-soft-bg { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+
+.nav-info h3 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.nav-info p {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.arrow {
+  margin-left: auto;
+  color: var(--text-secondary);
+  opacity: 0.5;
+  transition: all 0.2s;
+}
+
+.nav-item-card:hover .arrow {
+  opacity: 1;
+  color: var(--color-blue-primary);
+  transform: translateX(4px);
+}
+
+@media (max-width: 640px) {
+  .nav-cards {
+    grid-template-columns: 1fr;
+  }
+}
 </style>

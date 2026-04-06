@@ -1,10 +1,29 @@
 import api from './api';
 
 const authService = {
-  async register(email, password) {
-    const response = await api.post('/auth/register', { email, password });
+  async register(email, password, referral_code = null, name = '') {
+    const response = await api.post('/auth/register', { email, password, referral_code, name });
     return response.data;
   },
+
+  async googleLogin(idToken, referral_code = null) {
+    const response = await api.post('/auth/google', { idToken, referral_code });
+    return response.data;
+  },
+
+  async forgotPassword(email) {
+    const response = await api.post('/auth/forgot-password', { email });
+    return response.data;
+  },
+
+  async resetPassword(email, code, newPassword) {
+    const response = await api.post('/auth/reset-password', { email, code, newPassword });
+    return response.data;
+  },
+
+
+
+
 
   async login(email, password) {
     const response = await api.post('/auth/login', { email, password });

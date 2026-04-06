@@ -84,16 +84,18 @@ import {
   User as UserIcon,
   LogOut as LogOutIcon,
   ShoppingCart as ShoppingCartIcon,
-  Sparkles as SparklesIcon
+  ShoppingBag as MarketIcon
 } from 'lucide-vue-next';
 
 import authService from '@/services/auth.service';
+import vendorService from '@/services/vendor.service';
 import { useCart } from '@/composables/useCart';
 
 const router = useRouter();
 const route = useRoute();
 const isMobile = ref(false);
 const user = ref(authService.getUser());
+const vendorStatus = ref(null);
 
 const { cartCount } = useCart();
 
@@ -103,17 +105,28 @@ const userInitials = computed(() => {
   return user.value.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
 });
 
-const navItems = [
-  { path: '/account/dashboard', label: 'Dashboard', icon: DashboardIcon, description: 'Quick overview of your energy ecosystem.' },
-  { path: '/account/orders', label: 'Orders', icon: ShoppingBagIcon, description: 'Track your energy systems and installation progress.' },
-  { path: '/account/vendor', label: 'Vendor', icon: VendorIcon, description: 'Manage your partner account or join as a vendor.' },
-  { path: '/account/consultations', label: 'Consultations', icon: ConsultIcon, description: 'View and schedule your engineering assessments.' },
-  { path: '/account/profile', label: 'Profile', icon: UserIcon, description: 'Manage your personal details and preferences.' },
-  { path: '/energy-ai', label: 'Energy AI', icon: SparklesIcon, description: 'Smart AI diagnostic tool for your energy systems.' }
-];
+const navItems = computed(() => {
+  const items = [
+    { path: '/account/dashboard', label: 'Dashboard', icon: DashboardIcon, description: 'Quick overview of your energy ecosystem.' },
+    { path: '/account/orders', label: 'Orders', icon: ShoppingBagIcon, description: 'Track your energy systems and installation progress.' },
+  ];
+
+  if (vendorStatus.value === 'approved') {
+    items.push({ path: '/account/vendor', label: 'Vendor', icon: VendorIcon, description: 'Manage your partner account and store.' });
+  } else {
+    items.push({ path: '/account/market', label: 'Market', icon: MarketIcon, description: 'Explore premium energy products and solutions.' });
+  }
+
+  items.push(
+    { path: '/account/consultations', label: 'Consultations', icon: ConsultIcon, description: 'View and schedule your engineering assessments.' },
+    { path: '/account/profile', label: 'Profile', icon: UserIcon, description: 'Manage your personal details and preferences.' }
+  );
+
+  return items;
+});
 
 const currentRouteItem = computed(() => {
-  return navItems.find(item => route.path.startsWith(item.path)) || navItems[0];
+  return navItems.value.find(item => route.path.startsWith(item.path)) || navItems.value[0];
 });
 
 const currentRouteLabel = computed(() => currentRouteItem.value.label);
@@ -123,6 +136,15 @@ const checkMobile = () => {
   isMobile.value = window.innerWidth <= 768;
 };
 
+const fetchVendorStatus = async () => {
+  try {
+    const data = await vendorService.getStatus();
+    vendorStatus.value = data.status;
+  } catch (err) {
+    console.error('Failed to fetch vendor status', err);
+  }
+};
+
 const handleLogout = () => {
   authService.logout();
   router.push('/login');
@@ -130,6 +152,7 @@ const handleLogout = () => {
 
 onMounted(() => {
   checkMobile();
+  fetchVendorStatus();
   window.addEventListener('resize', checkMobile);
 });
 
