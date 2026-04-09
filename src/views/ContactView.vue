@@ -92,7 +92,7 @@
           <div class="info-cards">
             <!-- Email Card -->
             <div class="info-card glass-card">
-              <div class="info-icon-box grad-blue">
+              <div class="info-icon-box bg-grad-blue">
                 <MailIcon />
               </div>
               <div class="info-text">
@@ -104,24 +104,36 @@
 
             <!-- Phone Card -->
             <div class="info-card glass-card">
-              <div class="info-icon-box grad-orange">
+              <div class="info-icon-box bg-grad-orange">
                 <PhoneIcon />
               </div>
               <div class="info-text">
                 <h4>Call Us</h4>
-                <a href="tel:+2347041880339">+234 704 188 0339</a>
+                <div class="contact-links">
+                  <a href="tel:+2347041880339">+234 704 188 0339</a>
+                  <a href="tel:+2349130703970">+234 913 070 3970 <small>(Ibadan)</small></a>
+                </div>
                 <p>Mon - Sat, 8am - 6pm</p>
               </div>
             </div>
 
             <!-- Address Card -->
             <div class="info-card glass-card">
-              <div class="info-icon-box grad-blue">
+              <div class="info-icon-box bg-grad-blue">
                 <MapPinIcon />
               </div>
               <div class="info-text">
                 <h4>Visit Office</h4>
-                <p class="address-text">Near FHV3+JQ7, OAU Muslim graduates centre, stadium road, Ile Ife</p>
+                <div class="address-group">
+                  <div class="address-block">
+                    <strong>Head Office:</strong>
+                    <p class="address-text">Near OAU Muslim Graduates Association Resource Centre, Stadium Road, Ile-Ife, Osun State.</p>
+                  </div>
+                  <div class="address-block mt-3">
+                    <strong>Ibadan Office:</strong>
+                    <p class="address-text">Ibadan Contact Office – Oyo State</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -409,8 +421,17 @@ textarea {
   align-items: center;
   justify-content: center;
   border-radius: 12px;
-  color: white;
   flex-shrink: 0;
+}
+
+.bg-grad-blue {
+  background: linear-gradient(135deg, var(--color-blue-primary), var(--color-blue-dark));
+  color: white;
+}
+
+.bg-grad-orange {
+  background: linear-gradient(135deg, var(--color-orange-primary), var(--color-orange-dark));
+  color: white;
 }
 
 .info-text h4 {
@@ -433,6 +454,40 @@ textarea {
 .address-text {
   line-height: 1.5;
   margin-top: 4px;
+}
+
+.contact-links {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.contact-links a {
+  font-size: 1.15rem !important;
+}
+
+.contact-links small {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.address-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.address-block strong {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--color-blue-primary);
+  letter-spacing: 0.05em;
+}
+
+.mt-3 {
+  margin-top: 12px;
 }
 
 /* Social Connect Row */

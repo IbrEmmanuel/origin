@@ -219,7 +219,7 @@
               <div>
                 <label>Solar Array</label>
                 <strong>{{ solarCapacityKW.toFixed(2) }} kW</strong>
-                <small>{{ Math.ceil(solarCapacityKW * 1000 / config.specs.panel_wattage) }} x {{ config.specs.panel_wattage }}W Panels</small>
+                <small>{{ Math.ceil(solarCapacityKW * 1000 / (config.specs.panel_wattage || 450)) }} x {{ config.specs.panel_wattage || 450 }}W Panels</small>
               </div>
             </div>
           </div>
@@ -313,7 +313,16 @@ const fetchConfig = async () => {
       applianceService.getAppliances()
     ]);
     
-    if (configData) config.value = configData;
+    if (configData) {
+      config.value = {
+        ...config.value,
+        ...configData,
+        pricing: { ...config.value.pricing, ...(configData.pricing || {}) },
+        engineering: { ...config.value.engineering, ...(configData.engineering || {}) },
+        specs: { ...config.value.specs, ...(configData.specs || {}) },
+        thresholds: { ...config.value.thresholds, ...(configData.thresholds || {}) }
+      };
+    }
     if (appData) applianceLibrary.value = appData;
   } catch (err) {
     console.error('Failed to fetch load audit data:', err);
@@ -408,7 +417,7 @@ const requestInstallation = () => {
   message += `\n*System Recommendations:*\n`;
   message += `- Inverter: ${recommendedInverter.value}kVA\n`;
   message += `- Battery storage: ${batteryCapacityKWh.value.toFixed(1)}kWh (${batteryConfig.value})\n`;
-  message += `- Solar array: ${solarCapacityKW.value.toFixed(2)}kW (${Math.ceil(solarCapacityKW.value * 1000 / config.value.specs.panel_wattage)} x ${config.value.specs.panel_wattage}W Panels)\n`;
+  message += `- Solar array: ${solarCapacityKW.value.toFixed(2)}kW (${Math.ceil(solarCapacityKW.value * 1000 / (config.value.specs?.panel_wattage || 450))} x ${config.value.specs?.panel_wattage || 450}W Panels)\n`;
   
   message += `\n*Estimated Cost Range:* ₦${formatPrice(minCost.value)} - ₦${formatPrice(maxCost.value)}\n\n`;
   
@@ -432,7 +441,7 @@ const estimatedSurge = computed(() => {
 const recommendedInverter = computed(() => {
   if (totalWatts.value === 0) return 0;
   // Rule: (Total Watts * safety margin) / Power Factor
-  const va = (totalWatts.value * config.value.engineering.safety_margin) / config.value.engineering.power_factor;
+  const va = (totalWatts.value * (config.value.engineering?.safety_margin || 1.2)) / (config.value.engineering?.power_factor || 0.8);
   const kva = va / 1000;
   
   // Standard sizes: 1, 1.5, 2.5, 3.5, 5, 7.5, 10, 15...
@@ -447,19 +456,20 @@ const effectiveBackupHours = computed(() => {
 const batteryCapacityKWh = computed(() => {
   // kWh = (Watts * Hours) / (Efficiency * DoD)
   if (totalWatts.value === 0) return 0;
-  return (totalWatts.value * effectiveBackupHours.value / 1000) / (config.value.specs.battery_efficiency * config.value.specs.battery_dod);
+  return (totalWatts.value * effectiveBackupHours.value / 1000) / 
+         ((config.value.specs?.battery_efficiency || 0.85) * (config.value.specs?.battery_dod || 0.8));
 });
 
 const batteryConfig = computed(() => {
   if (batteryCapacityKWh.value === 0) return '-';
   
-  const voltage = recommendedInverter.value >= config.value.thresholds.voltage_24v_max 
+  const voltage = recommendedInverter.value >= (config.value.thresholds?.voltage_24v_max || 3.5) 
     ? '48V' 
-    : (recommendedInverter.value >= config.value.thresholds.voltage_12v_max ? '24V' : '12V');
+    : (recommendedInverter.value >= (config.value.thresholds?.voltage_12v_max || 1.5) ? '24V' : '12V');
     
   const vNum = parseInt(voltage);
   const totalAhAtVoltage = (batteryCapacityKWh.value * 1000) / vNum;
-  const ahPerBattery = config.value.specs.battery_ah;
+  const ahPerBattery = config.value.specs?.battery_ah || 200;
   
   if (voltage === '48V') {
      const chains = Math.ceil(totalAhAtVoltage / ahPerBattery);
@@ -476,7 +486,7 @@ const batteryConfig = computed(() => {
 const solarCapacityKW = computed(() => {
   // replenish battery in peak sun hours * speed multiplier
   const mult = chargeSpeeds.find(s => s.id === chargeSpeed.value)?.mult || 1;
-  return (batteryCapacityKWh.value / config.value.engineering.peak_sun_hours) * mult;
+  return (batteryCapacityKWh.value / (config.value.engineering?.peak_sun_hours || 4.5)) * mult;
 });
 
 // Cost Estimation Logic
@@ -489,8 +499,8 @@ const minCost = computed(() => {
 });
 const maxCost = computed(() => {
   if (minCost.value === 0) return 0;
-  const marginPercent = config.value.thresholds.margin_percentage / 100;
-  const margin = Math.min(minCost.value * marginPercent, config.value.thresholds.max_margin_cap);
+  const marginPercent = (config.value.thresholds?.margin_percentage || 15) / 100;
+  const margin = Math.min(minCost.value * marginPercent, (config.value.thresholds?.max_margin_cap || 500000));
   return minCost.value + margin;
 });
 

@@ -24,7 +24,7 @@
           <li><router-link to="/marketplace">Marketplace</router-link></li>
           <li><router-link to="/load-audit">Load Audit</router-link></li>
           <li><router-link to="/contact">Contact</router-link></li>
-          <li><router-link to="/vendor-apply">Become a Supplier</router-link></li>
+          <li><router-link to="/vendor-apply">Are you a supplier?</router-link></li>
         </ul>
       </div>
 
@@ -36,11 +36,17 @@
         </div>
         <div class="contact-item">
           <PhoneIcon class="icon-xs" />
-          <span>+234 704 188 0339</span>
+          <div class="contact-group">
+            <span>+234 704 188 0339</span>
+            <span>+234 913 070 3970 (Ibadan)</span>
+          </div>
         </div>
         <div class="contact-item">
           <MapPinIcon class="icon-xs" />
-          <span>Near FHV3+JQ7, OAU Muslim graduates centre, stadium road, Ile Ife</span>
+          <div class="contact-group">
+            <span><strong>Head Office:</strong> Near OAU Muslim Graduates Association Resource Centre, Stadium Road, Ile-Ife, Osun State.</span>
+            <span><strong>Ibadan Office:</strong> Ibadan Contact Office – Oyo State</span>
+          </div>
         </div>
       </div>
     </div>
@@ -131,6 +137,29 @@ import {
 .contact-item a {
   color: var(--text-primary);
   font-weight: 600;
+}
+
+.contact-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.contact-group span {
+  display: block;
+  font-size: 0.9rem;
+}
+
+.contact-group strong {
+  color: var(--color-blue-primary);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  display: block;
+  margin-top: 4px;
+}
+
+.contact-group span:first-child strong {
+  margin-top: 0;
 }
 
 .icon-xs {

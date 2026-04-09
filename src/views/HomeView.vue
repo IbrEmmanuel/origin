@@ -427,6 +427,7 @@ import cctv2 from '../assets/pdf-assets/cctv-2.png';
 import cctv3 from '../assets/pdf-assets/cctv-3.png';
 import access1 from '../assets/pdf-assets/access-1.jpg';
 import access2 from '../assets/pdf-assets/access-2.jpg';
+import access3 from '../assets/pdf-assets/access-3.jpg';
 import projectOndoImg from '../assets/pdf-assets/project-ondo.jpg';
 import projectGofamintImg from '../assets/pdf-assets/project-gofamint.jpg';
 import projectFcdaImg from '../assets/pdf-assets/project-fcda.jpg';
@@ -447,7 +448,7 @@ const nextSolarSlide = () => {
 };
 
 // Access Control Slider Logic
-const accessImages = [access1, access2, cctv1];
+const accessImages = [access1, access2, access3];
 const currentAccessSlide = ref(0);
 let accessTimer = null;
 
@@ -1259,5 +1260,15 @@ onUnmounted(() => {
   .hero-headline { font-size: 2.5rem; }
   .hero-actions { flex-direction: column; }
   .slider-container { min-height: 250px; }
+}
+
+.bg-grad-blue {
+  background: linear-gradient(135deg, var(--color-blue-primary), var(--color-blue-dark));
+  color: white;
+}
+
+.bg-grad-orange {
+  background: linear-gradient(135deg, var(--color-orange-primary), var(--color-orange-dark));
+  color: white;
 }
 </style>
