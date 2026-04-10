@@ -282,6 +282,20 @@
               <p>Hybrid solar solution for a premium residence, ensuring 24/7 uptime.</p>
             </div>
           </div>
+          <div class="project-card glass-card">
+            <div class="project-img-wrapper">
+              <img :src="projectIfeImg" alt="Ife Residential Solar" class="project-img" />
+              <div class="project-tag">Residential</div>
+            </div>
+            <div class="project-body">
+              <h3>Ife Residential Project</h3>
+              <div class="project-stats">
+                <div class="p-stat"><strong>5 kW</strong> Capacity</div>
+                <div class="p-stat"><strong>15 kWh</strong> Backup</div>
+              </div>
+              <p>A clean hybrid solar installation delivering stable, round-the-clock power for a premium residence.</p>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -432,6 +446,7 @@ import projectOndoImg from '../assets/pdf-assets/project-ondo.jpg';
 import projectGofamintImg from '../assets/pdf-assets/project-gofamint.jpg';
 import projectFcdaImg from '../assets/pdf-assets/project-fcda.jpg';
 import projectJudgeImg from '../assets/pdf-assets/project-judge.jpg';
+import projectIfeImg from '../assets/pdf-assets/project-ife.jpg';
 
 const scroll = (id) => {
   const el = document.getElementById(id);
