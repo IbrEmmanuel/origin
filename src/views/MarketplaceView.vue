@@ -17,10 +17,14 @@
         
         <div class="category-pills">
            <button :class="['pill-btn', { active: selectedCategory === '' }]" @click="selectedCategory = ''">All</button>
-           <button :class="['pill-btn', { active: selectedCategory === 'inverters' }]" @click="selectedCategory = 'inverters'">Inverters</button>
-           <button :class="['pill-btn', { active: selectedCategory === 'batteries' }]" @click="selectedCategory = 'batteries'">Batteries</button>
-           <button :class="['pill-btn', { active: selectedCategory === 'solar-panels' }]" @click="selectedCategory = 'solar-panels'">Solar</button>
-           <button :class="['pill-btn', { active: selectedCategory === 'accessories' }]" @click="selectedCategory = 'accessories'">Accessories</button>
+           <button 
+             v-for="cat in productCategories" 
+             :key="cat.id" 
+             :class="['pill-btn', { active: selectedCategory === cat.slug }]" 
+             @click="selectedCategory = cat.slug"
+           >
+             {{ cat.name }}
+           </button>
         </div>
       </div>
 
@@ -111,6 +115,7 @@ import ImageSlider from '@/components/ImageSlider.vue';
 const { cartItems, addToCart, updateQuantity } = useCart();
 
 const products = ref([]);
+const productCategories = ref([]);
 const loading = ref(true);
 const searchQuery = ref('');
 const selectedCategory = ref('');
@@ -144,19 +149,23 @@ const fetchProducts = async (reset = false) => {
   if (reset) loading.value = true;
   
   try {
-    const data = await marketplaceService.getProducts({
-      category: selectedCategory.value,
-      search: searchQuery.value,
-      page: page.value,
-      limit: 12
-    });
+    const [productsRes, categoriesRes] = await Promise.all([
+      marketplaceService.getProducts({
+        category: selectedCategory.value,
+        search: searchQuery.value,
+        page: page.value,
+        limit: 12
+      }),
+      marketplaceService.getCategories()
+    ]);
     
     if (reset) {
-       products.value = data.products;
+       products.value = productsRes.products;
     } else {
-       products.value.push(...data.products);
+       products.value.push(...productsRes.products);
     }
-    totalPages.value = data.totalPages;
+    productCategories.value = categoriesRes;
+    totalPages.value = productsRes.totalPages;
   } catch (err) {
     console.error('Failed to load marketplace products', err);
   } finally {

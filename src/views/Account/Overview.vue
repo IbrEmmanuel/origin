@@ -12,13 +12,13 @@
     
     <!-- Navigation Cards Section -->
     <div class="nav-cards">
-      <router-link to="/energy-ai" class="nav-item-card glass-card">
+      <router-link to="/origin-talk" class="nav-item-card glass-card">
         <div class="nav-icon ai-soft-bg">
           <SparklesIcon class="icon-sm" />
         </div>
         <div class="nav-info">
-          <h3>Energy AI</h3>
-          <p>Smart savings and analysis.</p>
+          <h3>Origin Talk</h3>
+          <p>24/7 technical support & engagement.</p>
         </div>
         <ArrowRightIcon class="icon-xs arrow" />
       </router-link>

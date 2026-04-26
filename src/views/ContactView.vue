@@ -111,7 +111,6 @@
                 <h4>Call Us</h4>
                 <div class="contact-links">
                   <a href="tel:+2347041880339">+234 704 188 0339</a>
-                  <a href="tel:+2349130703970">+234 913 070 3970 <small>(Ibadan)</small></a>
                 </div>
                 <p>Mon - Sat, 8am - 6pm</p>
               </div>
@@ -132,6 +131,7 @@
                   <div class="address-block mt-3">
                     <strong>Ibadan Office:</strong>
                     <p class="address-text">Ibadan Contact Office – Oyo State</p>
+                    <a href="tel:+2349130703970" class="sub-link-contact">+234 913 070 3970</a>
                   </div>
                 </div>
               </div>
@@ -488,6 +488,19 @@ textarea {
 
 .mt-3 {
   margin-top: 12px;
+}
+
+.sub-link-contact {
+  color: var(--color-blue-primary);
+  font-weight: 700;
+  font-size: 1rem;
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 4px;
+}
+
+.sub-link-contact:hover {
+  text-decoration: underline;
 }
 
 /* Social Connect Row */

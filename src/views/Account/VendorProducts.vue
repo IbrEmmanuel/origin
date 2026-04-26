@@ -32,10 +32,9 @@
               <div class="form-group">
                 <label>Category</label>
                 <select v-model="form.category">
-                  <option value="inverters">Inverters</option>
-                  <option value="batteries">Batteries</option>
-                  <option value="solar-panels">Solar Panels</option>
-                  <option value="accessories">Accessories</option>
+                  <option v-for="cat in productCategories" :key="cat.id" :value="cat.slug">
+                    {{ cat.name }}
+                  </option>
                 </select>
               </div>
               <div class="form-group">
@@ -168,8 +167,10 @@ import {
   X as XIcon
 } from 'lucide-vue-next';
 import vendorService from '@/services/vendor.service';
+import marketplaceService from '@/services/marketplace.service';
 
 const products = ref([]);
+const productCategories = ref([]);
 const loading = ref(true);
 const searchQuery = ref('');
 const showForm = ref(false);
@@ -208,9 +209,14 @@ const imagePreviews = ref([]); // Now stores { src, file, isExisting, path }
 const fetchProducts = async () => {
   loading.value = true;
   try {
-    products.value = await vendorService.getProducts();
+    const [productsRes, categoriesRes] = await Promise.all([
+      vendorService.getProducts(),
+      marketplaceService.getCategories()
+    ]);
+    products.value = productsRes;
+    productCategories.value = categoriesRes;
   } catch (err) {
-    console.error('Failed to fetch products', err);
+    console.error('Failed to fetch data', err);
   } finally {
     loading.value = false;
   }
@@ -282,7 +288,7 @@ const editProduct = (product) => {
 const closeForm = () => {
   showForm.value = false;
   editingProductData.value = null;
-  form.value = { name: '', price: 0, stock: 0, description: '', category: 'inverters' };
+  form.value = { name: '', price: 0, stock: 0, description: '', category: productCategories.value[0]?.slug || '' };
   displayPrice.value = '';
   imagePreviews.value = [];
 };

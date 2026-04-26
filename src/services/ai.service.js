@@ -2,7 +2,7 @@ import api from './api';
 
 const aiService = {
     /**
-     * Send a message to Energy AI
+     * Send a message to Origin Talk
      * @param {string} message - User message
      * @param {number|null} conversationId - Optional conversation ID
      * @returns {Promise}

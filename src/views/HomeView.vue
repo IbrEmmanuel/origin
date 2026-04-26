@@ -19,8 +19,8 @@
             </router-link>
           </div>
           <div class="hero-ai-trigger">
-            <router-link to="/energy-ai" class="btn btn-ai-glow">
-              <SparklesIcon class="ai-icon" /> Talk to Energy AI
+            <router-link to="/origin-talk" class="btn btn-ai-glow">
+              <SparklesIcon class="ai-icon" /> Talk to Origin
             </router-link>
           </div>
         </div>
@@ -407,12 +407,72 @@
         </div>
       </div>
     </section>
+
+    <!-- Latest Blog Section -->
+    <section v-if="featuredBlogs.length > 0" class="latest-blog bg-secondary">
+      <div class="container">
+        <div class="blog-header">
+          <h2 class="section-title">Latest <span class="grad-blue">Blog</span> Posts</h2>
+          <p class="section-desc mx-auto">Stay updated with the latest in sustainable energy, power solutions, and environmental impact.</p>
+        </div>
+
+        <div class="blog-grid">
+          <article 
+            v-for="post in featuredBlogs" 
+            :key="post.id" 
+            class="blog-card"
+            @click="$router.push(`/blog/${post.slug}`)"
+          >
+            <div class="blog-card-image-wrapper">
+              <img 
+                v-if="post.featured_image"
+                :src="getImgUrl(post.featured_image)" 
+                :alt="post.title"
+                class="blog-card-image"
+              />
+              <div v-else class="blog-placeholder">
+                <SunIcon class="icon-placeholder" />
+              </div>
+              <div class="blog-card-badge">
+                {{ post.category_name || 'Innovation' }}
+              </div>
+            </div>
+            
+            <div class="blog-card-content">
+              <div class="blog-card-meta">
+                <CalendarIcon class="icon-meta" />
+                <span>{{ formatDate(post.created_at) }}</span>
+              </div>
+              <h3 class="blog-card-title">
+                {{ post.title }}
+              </h3>
+              <p class="blog-card-excerpt">
+                {{ stripMarkdown(post.content) }}
+              </p>
+              <div class="blog-card-footer">
+                <div class="blog-read-more">
+                  <span>Read Article</span>
+                  <ArrowIcon class="icon-read" />
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <div class="blog-actions">
+          <router-link to="/blog" class="btn-blog-all">
+            View All Blog Posts <ArrowIcon class="icon-sm" />
+          </router-link>
+        </div>
+      </div>
+    </section>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
+import blogService from '@/services/blog.service';
 import { 
   Calculator as CalculatorIcon, 
   Calendar as CalendarIcon, 
@@ -480,10 +540,43 @@ const nextCctvSlide = () => {
   currentCctvSlide.value = (currentCctvSlide.value + 1) % cctvImages.length;
 };
 
+const featuredBlogs = ref([]);
+
+const fetchFeaturedBlogs = async () => {
+  try {
+    featuredBlogs.value = await blogService.getFeaturedPosts();
+  } catch (err) {
+    console.error('Failed to fetch featured blogs', err);
+  }
+};
+
+const formatDate = (dateString) => {
+  return new Date(dateString).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  });
+};
+
+const stripMarkdown = (content) => {
+  if (!content) return '';
+  return content
+    .replace(/[#*`_~]/g, '')
+    .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
+    .slice(0, 120) + '...';
+};
+
+const getImgUrl = (path) => {
+  if (!path) return '';
+  if (path.startsWith('http')) return path;
+  return `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}${path}`;
+};
+
 onMounted(() => {
   solarTimer = setInterval(nextSolarSlide, 4000);
   accessTimer = setInterval(nextAccessSlide, 4500);
   cctvTimer = setInterval(nextCctvSlide, 5000); // Slightly slower for variety
+  fetchFeaturedBlogs();
 });
 
 onUnmounted(() => {
@@ -1285,5 +1378,45 @@ onUnmounted(() => {
 .bg-grad-orange {
   background: linear-gradient(135deg, var(--color-orange-primary), var(--color-orange-dark));
   color: white;
+}
+
+/* Blog Section Specifics */
+.blog-header {
+  text-align: center;
+  margin-bottom: var(--space-lg);
+}
+
+.blog-actions {
+  margin-top: var(--space-lg);
+  text-align: center;
+}
+
+.btn-blog-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 1rem 2.8rem;
+  background: var(--bg-primary);
+  border: 2px solid var(--color-blue-primary);
+  color: var(--color-blue-primary);
+  border-radius: var(--radius-full);
+  font-weight: 800;
+  font-size: 1.05rem;
+  transition: all var(--transition-bounce);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-blog-all:hover {
+  background: var(--color-blue-primary);
+  color: white;
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 102, 204, 0.3);
+}
+
+.icon-sm {
+  width: 20px;
+  height: 20px;
 }
 </style>

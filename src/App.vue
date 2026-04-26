@@ -16,7 +16,7 @@ import Footer from './components/Footer.vue';
 
 const route = useRoute();
 const hideGlobalLayout = computed(() => {
-  return route.path.startsWith('/account') || route.path === '/energy-ai';
+  return route.path.startsWith('/account') || route.path === '/origin-talk';
 });
 </script>
 

@@ -180,7 +180,15 @@ const handleSignup = async () => {
     localStorage.setItem('user', JSON.stringify(data.user));
     
     // Redirect to verify email with email as query param
-    router.push('/verify-email?email=' + email.value);
+    // Redirect to verify email with email as query param, passing along any redirect
+    const verifyPath = {
+      path: '/verify-email',
+      query: { 
+        email: email.value,
+        ...(route.query.redirect ? { redirect: route.query.redirect } : {})
+      }
+    };
+    router.push(verifyPath);
   } catch (err) {
     error.value = err.response?.data?.message || 'Registration failed.';
     alert(error.value);
@@ -243,7 +251,8 @@ const completeGoogleSignup = async (referralCode) => {
 const finishAuth = (data) => {
   localStorage.setItem('token', data.token);
   localStorage.setItem('user', JSON.stringify({ ...data.user, is_verified: true }));
-  router.push('/account/dashboard');
+  const redirectPath = route.query.redirect || '/account/dashboard';
+  router.push(redirectPath);
 };
 
 </script>

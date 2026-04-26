@@ -105,7 +105,8 @@ const handleVerify = async () => {
 
     success.value = true
     setTimeout(() => {
-      router.push('/account/dashboard')
+      const redirectPath = route.query.redirect || '/account/dashboard';
+      router.push(redirectPath)
     }, 1500)
   } catch (err) {
     error.value = err.response?.data?.message || 'Verification failed. Please try again.'

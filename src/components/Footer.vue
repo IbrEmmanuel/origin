@@ -36,16 +36,16 @@
         </div>
         <div class="contact-item">
           <PhoneIcon class="icon-xs" />
-          <div class="contact-group">
-            <span>+234 704 188 0339</span>
-            <span>+234 913 070 3970 (Ibadan)</span>
-          </div>
+          <a href="tel:+2347041880339">+234 704 188 0339</a>
         </div>
         <div class="contact-item">
           <MapPinIcon class="icon-xs" />
           <div class="contact-group">
             <span><strong>Head Office:</strong> Near OAU Muslim Graduates Association Resource Centre, Stadium Road, Ile-Ife, Osun State.</span>
-            <span><strong>Ibadan Office:</strong> Ibadan Contact Office – Oyo State</span>
+            <span>
+              <strong>Ibadan Office:</strong> Ibadan Contact Office – Oyo State<br/>
+              <a href="tel:+2349130703970">+234 913 070 3970</a>
+            </span>
           </div>
         </div>
       </div>
@@ -156,6 +156,10 @@ import {
   text-transform: uppercase;
   display: block;
   margin-top: 4px;
+}
+
+.contact-group span:first-child strong {
+  margin-top: 0;
 }
 
 .contact-group span:first-child strong {

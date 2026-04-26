@@ -35,6 +35,7 @@
           <li><router-link to="/">Home</router-link></li>
           <li><router-link to="/marketplace">Marketplace</router-link></li>
           <li><router-link to="/load-audit">Load Audit</router-link></li>
+          <li><router-link to="/blog">Blog</router-link></li>
           <li><router-link to="/contact">Contact</router-link></li>
         </ul>
       </nav>
@@ -75,6 +76,7 @@
             <li><router-link to="/" @click="isMenuOpen = false"><HomeIcon class="icon-sm" /> Home</router-link></li>
             <li><router-link to="/marketplace" @click="isMenuOpen = false"><ShoppingBagIcon class="icon-sm" /> Marketplace</router-link></li>
             <li><router-link to="/load-audit" @click="isMenuOpen = false"><CalculatorIcon class="icon-sm" /> Load Audit</router-link></li>
+            <li><router-link to="/blog" @click="isMenuOpen = false"><BookOpenIcon class="icon-sm" /> Blog</router-link></li>
             <li><router-link to="/contact" @click="isMenuOpen = false"><MailIcon class="icon-sm" /> Contact</router-link></li>
             <li><router-link :to="accountPath" @click="isMenuOpen = false"><UserIcon class="icon-sm" /> Account</router-link></li>
           </ul>
@@ -101,7 +103,8 @@ import {
   Calculator as CalculatorIcon,
   Mail as MailIcon,
   Phone as PhoneIcon,
-  ShoppingCart as ShoppingCartIcon
+  ShoppingCart as ShoppingCartIcon,
+  BookOpen as BookOpenIcon
 } from 'lucide-vue-next';
 import { useCart } from '@/composables/useCart';
 

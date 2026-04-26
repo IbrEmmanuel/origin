@@ -9,10 +9,13 @@
       
       <div class="category-pills-wrapper">
         <div class="category-pills">
-          <button v-for="cat in categories" :key="cat.id" 
-                  :class="['pill-btn', { active: selectedCategory === cat.id }]" 
-                  @click="selectedCategory = cat.id">
-            {{ cat.label }}
+          <button 
+            v-for="cat in productCategories" 
+            :key="cat.id" 
+            :class="['pill-btn', { active: selectedCategory === cat.slug }]" 
+            @click="selectedCategory = cat.slug"
+          >
+            {{ cat.name }}
           </button>
         </div>
       </div>
@@ -89,14 +92,8 @@ const searchQuery = ref('');
 const selectedCategory = ref('');
 const page = ref(1);
 const totalPages = ref(1);
+const productCategories = ref([]);
 
-const categories = [
-  { id: '', label: 'All' },
-  { id: 'inverters', label: 'Inverters' },
-  { id: 'batteries', label: 'Batteries' },
-  { id: 'solar-panels', label: 'Solar' },
-  { id: 'accessories', label: 'Accessories' }
-];
 
 const fetchProducts = async (reset = false) => {
   if (reset) {
@@ -107,19 +104,23 @@ const fetchProducts = async (reset = false) => {
   }
   
   try {
-    const data = await marketplaceService.getProducts({
-      category: selectedCategory.value,
-      search: searchQuery.value,
-      page: page.value,
-      limit: 8
-    });
+    const [productsRes, categoriesRes] = await Promise.all([
+      marketplaceService.getProducts({
+        category: selectedCategory.value,
+        search: searchQuery.value,
+        page: page.value,
+        limit: 8
+      }),
+      marketplaceService.getCategories()
+    ]);
     
     if (reset) {
-      products.value = data.products;
+      products.value = productsRes.products;
     } else {
-      products.value.push(...data.products);
+      products.value.push(...productsRes.products);
     }
-    totalPages.value = data.totalPages;
+    productCategories.value = [{ id: 'all', name: 'All', slug: '' }, ...categoriesRes];
+    totalPages.value = productsRes.totalPages;
   } catch (err) {
     console.error('Market sync failed', err);
   } finally {

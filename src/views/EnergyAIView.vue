@@ -61,7 +61,7 @@
         <div class="header-center">
           <div class="ai-badge">
             <SparklesIcon class="ai-icon-glow" />
-            <span>Energy AI</span>
+            <span>Origin Talk</span>
           </div>
         </div>
 
@@ -80,8 +80,8 @@
           <div class="welcome-icon">
             <SparklesIcon class="icon-xl" />
           </div>
-          <h2>How can I help you?</h2>
-          <p>Describe your issue or select a common problem below:</p>
+          <h2>How can Origin help you today?</h2>
+          <p>Get 24/7 technical support, troubleshoot system issues, or ask about our premium energy products.</p>
           
           <div class="suggested-prompts">
             <button 

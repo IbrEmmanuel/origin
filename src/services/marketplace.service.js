@@ -25,6 +25,10 @@ const marketplaceService = {
     async submitComment(id, data) {
         const response = await api.post(`/marketplace/products/${id}/comments`, data);
         return response.data;
+    },
+    async getCategories() {
+        const response = await api.get('/marketplace/categories');
+        return response.data;
     }
 };
 

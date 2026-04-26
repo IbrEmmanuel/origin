@@ -124,7 +124,9 @@ const handleLogin = async () => {
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify({ ...data.user, is_verified: true }));
     
-    router.push('/account/dashboard');
+    // Redirect to the original destination if it exists, otherwise go to dashboard
+    const redirectPath = route.query.redirect || '/account/dashboard';
+    router.push(redirectPath);
   } catch (err) {
     if (err.response?.status === 403 && err.response.data.is_verified === false) {
       // User is not verified, redirect to verification page
@@ -194,7 +196,8 @@ const completeGoogleLogin = async (referralCode) => {
 const finishAuth = (data) => {
   localStorage.setItem('token', data.token);
   localStorage.setItem('user', JSON.stringify({ ...data.user, is_verified: true }));
-  router.push('/account/dashboard');
+  const redirectPath = route.query.redirect || '/account/dashboard';
+  router.push(redirectPath);
 };
 
 </script>

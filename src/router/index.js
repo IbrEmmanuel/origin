@@ -28,12 +28,23 @@ const routes = [
     {
         path: '/load-audit',
         name: 'LoadAudit',
-        component: LoadAuditView
+        component: LoadAuditView,
+        meta: { requiresAuth: true }
     },
     {
         path: '/contact',
         name: 'Contact',
         component: ContactView
+    },
+    {
+        path: '/blog',
+        name: 'Blog',
+        component: () => import('../views/BlogView.vue')
+    },
+    {
+        path: '/blog/:slug',
+        name: 'BlogPost',
+        component: () => import('../views/BlogPostView.vue')
     },
     {
         path: '/checkout',
@@ -117,8 +128,8 @@ const routes = [
         component: () => import('../views/VerifyEmailView.vue')
     },
     {
-        path: '/energy-ai',
-        name: 'EnergyAI',
+        path: '/origin-talk',
+        name: 'OriginTalk',
         component: () => import('@/views/EnergyAIView.vue'),
         meta: { requiresAuth: true }
     },
