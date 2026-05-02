@@ -131,7 +131,7 @@
                   <div class="address-block mt-3">
                     <strong>Ibadan Office:</strong>
                     <p class="address-text">Ibadan Contact Office – Oyo State</p>
-                    <a href="tel:+2349130703970" class="sub-link-contact">+234 913 070 3970</a>
+                    <!-- <a href="tel:+2349130703970" class="sub-link-contact">+234 913 070 3970</a> -->
                   </div>
                 </div>
               </div>

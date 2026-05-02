@@ -44,7 +44,7 @@
             <span><strong>Head Office:</strong> Near OAU Muslim Graduates Association Resource Centre, Stadium Road, Ile-Ife, Osun State.</span>
             <span>
               <strong>Ibadan Office:</strong> Ibadan Contact Office – Oyo State<br/>
-              <a href="tel:+2349130703970">+234 913 070 3970</a>
+              <!-- <a href="tel:+2349130703970">+234 913 070 3970</a> -->
             </span>
           </div>
         </div>

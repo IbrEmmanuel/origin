@@ -96,7 +96,7 @@
           <InverterIcon class="calc-icon grad-blue" />
           <h4>Recommended Inverter</h4>
           <div class="calc-value">{{ recommendedInverter }}kVA</div>
-          <p class="calc-note">Includes 20% safety margin & surge consideration.</p>
+          <p class="calc-note">Includes {{ Math.round((config.engineering.safety_margin - 1) * 100) }}% safety margin & surge consideration.</p>
         </div>
         <div class="calc-card">
           <ActivityIcon class="calc-icon" />
@@ -169,8 +169,8 @@
           <span>{{ solarCapacityKW.toFixed(2) }} kW</span>
         </div>
         <div class="preview-item">
-          <label>Panels (450W):</label>
-          <span>{{ Math.ceil(solarCapacityKW * 1000 / 450) }} Panels</span>
+          <label>Panels ({{ config.specs.panel_wattage || 450 }}W):</label>
+          <span>{{ Math.ceil(solarCapacityKW * 1000 / (config.specs.panel_wattage || 450)) }} Panels</span>
         </div>
       </div>
 
@@ -226,11 +226,11 @@
 
           <div class="divider"></div>
 
-          <div class="cost-range">
+          <!-- <div class="cost-range">
             <label>Estimated Cost Range</label>
             <div class="price">₦{{ formatPrice(minCost) }} - ₦{{ formatPrice(maxCost) }}</div>
             <p class="cost-disclaimer">Price includes professional installation, cabling, and 5-year warranty on core components.</p>
-          </div>
+          </div> -->
         </div>
 
         <div class="cta-section">
