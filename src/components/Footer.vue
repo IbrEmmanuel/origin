@@ -32,7 +32,7 @@
         <h4>Contact Experts</h4>
         <div class="contact-item">
           <MailIcon class="icon-xs" />
-          <a href="mailto:info@originelectric.com">info@originelectric.com</a>
+          <a href="mailto:info@originelectricltd.com">info@originelectricltd.com</a>
         </div>
         <div class="contact-item">
           <PhoneIcon class="icon-xs" />
@@ -55,8 +55,8 @@
         <div class="footer-bottom-flex">
           <p>&copy; 2024 Origin Electric. All Rights Reserved.</p>
           <div class="footer-legal">
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms of Service</a>
+            <router-link to="/use-policy">Acceptable Use Policy</router-link>
+            <router-link to="/refund-policy">Refund Policy</router-link>
           </div>
         </div>
       </div>

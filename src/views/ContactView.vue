@@ -97,7 +97,7 @@
               </div>
               <div class="info-text">
                 <h4>Email Us</h4>
-                <a href="mailto:info@originelectric.com">info@originelectric.com</a>
+                <a href="mailto:info@originelectricltd.com">info@originelectricltd.com</a>
                 <p>Reply within 24 hours</p>
               </div>
             </div>

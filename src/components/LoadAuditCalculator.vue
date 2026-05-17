@@ -419,7 +419,7 @@ const requestInstallation = () => {
   message += `- Battery storage: ${batteryCapacityKWh.value.toFixed(1)}kWh (${batteryConfig.value})\n`;
   message += `- Solar array: ${solarCapacityKW.value.toFixed(2)}kW (${Math.ceil(solarCapacityKW.value * 1000 / (config.value.specs?.panel_wattage || 450))} x ${config.value.specs?.panel_wattage || 450}W Panels)\n`;
   
-  message += `\n*Estimated Cost Range:* ₦${formatPrice(minCost.value)} - ₦${formatPrice(maxCost.value)}\n\n`;
+  // message += `\n*Estimated Cost Range:* ₦${formatPrice(minCost.value)} - ₦${formatPrice(maxCost.value)}\n\n`;
   
   message += `Please send me a detailed quotation including installation and warranty`;
   

@@ -60,7 +60,7 @@
 
           <div class="terms-check">
             <input type="checkbox" id="terms" v-model="acceptTerms" required />
-            <label for="terms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
+            <label for="terms">I agree to the <router-link to="/use-policy" target="_blank">Acceptable Use Policy</router-link> and <router-link to="/refund-policy" target="_blank">Refund Policy</router-link></label>
           </div>
 
           <div class="form-group">
@@ -206,10 +206,10 @@ const signupWithGoogle = async () => {
     const idToken = await result.user.getIdToken();
     googleIdToken.value = idToken;
 
-    // Check if we already have a referral in the URL
-    const urlRef = route.query.ref;
-    if (urlRef) {
-      await completeGoogleSignup(urlRef);
+    // Check if we already have a referral in the URL or input field
+    const refCodeToUse = route.query.ref || referralCode.value;
+    if (refCodeToUse) {
+      await completeGoogleSignup(refCodeToUse);
     } else {
       // Check if user is new
       try {

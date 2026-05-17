@@ -105,6 +105,21 @@
               </div>
             </div>
 
+            <div class="referrals-list-wrapper mt-6">
+              <label>Users You've Referred</label>
+              <div class="referrals-list">
+                <div v-for="ref in referralsList" :key="ref.id" class="referral-item">
+                  <div class="ref-user-avatar">{{ ref.first_name?.[0] || 'U' }}</div>
+                  <div class="ref-user-details">
+                    <p class="ref-name">{{ ref.first_name }} {{ ref.last_name }}</p>
+                    <p class="ref-date">Joined {{ new Date(ref.created_at).toLocaleDateString() }}</p>
+                  </div>
+                </div>
+                <div v-if="referralsList.length === 0" class="empty-referrals">
+                  <p>You haven't referred anyone yet.</p>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -193,6 +208,7 @@ const user = ref({ first_name: '', last_name: '', email: '', phone: '' });
 const addresses = ref([]);
 const favorites = ref([]);
 const referralData = ref({ code: '', count: 0, earnings: 0 });
+const referralsList = ref([]);
 const settings = ref({ email: true, sms: false, marketing: true });
 
 const getJoinYear = (dateString) => {
@@ -236,6 +252,14 @@ const fetchProfile = async () => {
       addresses.value = data.addresses;
       favorites.value = data.favorites;
       referralData.value = data.referralData;
+      
+      // Fetch referrals list
+      const refResponse = await fetch(`${baseUrl}/api/user/referrals`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (refResponse.ok) {
+        referralsList.value = await refResponse.json();
+      }
     }
   } catch (err) {
     console.error('Failed to load profile', err);
@@ -560,6 +584,68 @@ const saveProfile = async () => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* Referrals List */
+.referrals-list-wrapper label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  display: block;
+}
+
+.referrals-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.referral-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+}
+
+.ref-user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-blue-light);
+  color: var(--color-blue-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+
+.ref-user-details .ref-name {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.ref-user-details .ref-date {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.empty-referrals {
+  text-align: center;
+  padding: 24px;
+  background: var(--bg-primary);
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
 }
 
 

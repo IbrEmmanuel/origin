@@ -70,6 +70,20 @@
             <h3>Fire Detection</h3>
             <p>Reliable alarm systems built for speed and accuracy to protect lives and assets across all facilities.</p>
           </div>
+          <div class="service-card glass-card">
+            <div class="service-icon grad-blue">
+              <WindIcon class="icon-lg" />
+            </div>
+            <h3>Wind Turbine</h3>
+            <p>Sustainable wind energy solutions designed for efficiency and reliability to complement your power needs.</p>
+          </div>
+          <div class="service-card glass-card">
+            <div class="service-icon grad-orange">
+              <PenToolIcon class="icon-lg" />
+            </div>
+            <h3>M&E Drawing</h3>
+            <p>Mechanical & Electrical Protective Drawings, including engineering layouts, protection designs, and technical drafting services.</p>
+          </div>
         </div>
       </div>
     </section>
@@ -304,19 +318,25 @@
     <section class="why-us-modern">
       <div class="container">
         <div class="why-header">
-          <h2 class="section-title">The <span class="grad-blue">Origin</span> Advantage</h2>
+          <h2 class="section-title"><span class="grad-blue">Origin</span> Advantage</h2>
         </div>
         <div class="feature-strip">
           <div class="feature-item">
-            <span class="count">10+</span>
-            <span class="label">Years Excellence</span>
+            <div class="feature-icon-wrapper">
+              <AwardIcon class="feature-icon" />
+            </div>
+            <span class="label">Years of Excellence</span>
           </div>
           <div class="feature-item">
-            <span class="count">1,500+</span>
+            <div class="feature-icon-wrapper">
+              <UsersIcon class="feature-icon" />
+            </div>
             <span class="label">Happy Clients</span>
           </div>
           <div class="feature-item">
-            <span class="count">99.9%</span>
+            <div class="feature-icon-wrapper">
+              <ActivityIcon class="feature-icon" />
+            </div>
             <span class="label">System Uptime</span>
           </div>
         </div>
@@ -488,7 +508,12 @@ import {
   Quote as QuoteIcon,
   User as UserIcon,
   Plus as PlusIcon,
-  ArrowRight as ArrowIcon
+  ArrowRight as ArrowIcon,
+  Wind as WindIcon,
+  PenTool as PenToolIcon,
+  Award as AwardIcon,
+  Users as UsersIcon,
+  Activity as ActivityIcon
 } from 'lucide-vue-next';
 
 // PDF Assets
@@ -1158,34 +1183,51 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 12px;
 }
 
-.feature-item .count {
-  font-size: 3rem;
-  font-weight: 900;
+.feature-icon-wrapper {
+  width: 72px;
+  height: 72px;
+  background: var(--color-blue-light);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 102, 204, 0.1);
+}
+
+.feature-item:hover .feature-icon-wrapper {
+  transform: translateY(-5px);
+  background: var(--color-blue-primary);
+}
+
+.feature-icon {
+  width: 36px;
+  height: 36px;
   color: var(--color-blue-primary);
-  line-height: 1;
-  letter-spacing: -0.05em;
+  transition: all 0.3s ease;
+}
+
+.feature-item:hover .feature-icon {
+  color: white;
 }
 
 .feature-item .label {
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 1.1rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+  color: var(--text-primary);
 }
 
 @media (max-width: 768px) {
   .feature-strip {
     flex-direction: column;
-    gap: var(--space-lg);
+    gap: var(--space-xl);
     text-align: center;
-  }
-  
-  .feature-item .count {
-    font-size: 2.5rem;
   }
 }
 

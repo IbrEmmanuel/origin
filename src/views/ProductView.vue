@@ -393,6 +393,7 @@ onMounted(() => {
   line-height: 1.6;
   color: var(--text-primary);
   margin-bottom: 2.5rem;
+  white-space: pre-wrap;
 }
 
 .product-actions {

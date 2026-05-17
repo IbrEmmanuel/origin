@@ -37,6 +37,16 @@ const routes = [
         component: ContactView
     },
     {
+        path: '/refund-policy',
+        name: 'RefundPolicy',
+        component: () => import('../views/RefundPolicyView.vue')
+    },
+    {
+        path: '/use-policy',
+        name: 'AcceptableUsePolicy',
+        component: () => import('../views/AcceptableUsePolicyView.vue')
+    },
+    {
         path: '/blog',
         name: 'Blog',
         component: () => import('../views/BlogView.vue')

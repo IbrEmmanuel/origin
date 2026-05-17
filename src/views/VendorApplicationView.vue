@@ -175,6 +175,7 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import vendorService from '@/services/vendor.service';
 import authService from '@/services/auth.service';
+import api from '@/services/api';
 import { 
   ArrowLeft as ArrowLeftIcon, 
   Clock as ClockIcon, 
@@ -209,6 +210,20 @@ const form = ref({
   description: ''
 });
 
+const fetchProfile = async () => {
+  try {
+    const { data } = await api.get('/user/profile');
+    if (data && data.user) {
+      const full = `${data.user.first_name || ''} ${data.user.last_name || ''}`.trim();
+      if (full && !form.value.full_name) {
+        form.value.full_name = full;
+      }
+    }
+  } catch (err) {
+    console.error('Failed to fetch user profile', err);
+  }
+};
+
 const fetchStatus = async () => {
   try {
     const data = await vendorService.getStatus();
@@ -236,6 +251,7 @@ const handleSubmit = async () => {
 
 onMounted(() => {
   fetchStatus();
+  fetchProfile();
 });
 </script>
 

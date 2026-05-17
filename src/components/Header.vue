@@ -5,7 +5,7 @@
       <div class="container top-bar-content">
         <div class="contact-info">
           <a href="tel:+2347041880339" class="top-link"><PhoneIcon class="icon-xs" /> +234 704 188 0339</a>
-          <a href="mailto:hello@originelectric.com" class="top-link hidden-mobile"><MailIcon class="icon-xs" /> hello@originelectric.com</a>
+          <a href="mailto:hello@originelectricltd.com" class="top-link hidden-mobile"><MailIcon class="icon-xs" /> hello@originelectricltd.com</a>
         </div>
         <router-link to="/cart" class="top-cart">
           <ShoppingCartIcon class="icon-sm" /> 
