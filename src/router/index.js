@@ -8,65 +8,92 @@ const routes = [
     {
         path: '/',
         name: 'Home',
-        component: HomeView
+        component: HomeView,
+        meta: { title: 'Home' }
+    },
+    {
+        path: '/about',
+        name: 'About',
+        component: () => import('../views/AboutView.vue'),
+        meta: { title: 'About Us' }
+    },
+    {
+        path: '/services',
+        name: 'Services',
+        component: () => import('../views/ServicesView.vue'),
+        meta: { title: 'Our Services' }
+    },
+    {
+        path: '/projects',
+        name: 'Projects',
+        component: () => import('../views/ProjectsView.vue'),
+        meta: { title: 'Featured Projects' }
     },
     {
         path: '/marketplace',
         name: 'Marketplace',
-        component: MarketplaceView
+        component: MarketplaceView,
+        meta: { title: 'Marketplace' }
     },
     {
         path: '/product/:id',
         name: 'Product',
-        component: () => import('../views/ProductView.vue')
+        component: () => import('../views/ProductView.vue'),
+        meta: { title: 'Product Details' }
     },
     {
         path: '/cart',
         name: 'Cart',
-        component: () => import('../views/CartView.vue')
+        component: () => import('../views/CartView.vue'),
+        meta: { title: 'Shopping Cart' }
     },
     {
         path: '/load-audit',
         name: 'LoadAudit',
         component: LoadAuditView,
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, title: 'Power Load Calculator' }
     },
     {
         path: '/contact',
         name: 'Contact',
-        component: ContactView
+        component: ContactView,
+        meta: { title: 'Contact Us' }
     },
     {
         path: '/refund-policy',
         name: 'RefundPolicy',
-        component: () => import('../views/RefundPolicyView.vue')
+        component: () => import('../views/RefundPolicyView.vue'),
+        meta: { title: 'Refund Policy' }
     },
     {
         path: '/use-policy',
         name: 'AcceptableUsePolicy',
-        component: () => import('../views/AcceptableUsePolicyView.vue')
+        component: () => import('../views/AcceptableUsePolicyView.vue'),
+        meta: { title: 'Acceptable Use Policy' }
     },
     {
         path: '/blog',
         name: 'Blog',
-        component: () => import('../views/BlogView.vue')
+        component: () => import('../views/BlogView.vue'),
+        meta: { title: 'Energy Blog & Insights' }
     },
     {
         path: '/blog/:slug',
         name: 'BlogPost',
-        component: () => import('../views/BlogPostView.vue')
+        component: () => import('../views/BlogPostView.vue'),
+        meta: { title: 'Blog Post' }
     },
     {
         path: '/checkout',
         name: 'Checkout',
         component: () => import('../views/CheckoutView.vue'),
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, title: 'Checkout' }
     },
     {
         path: '/order-success',
         name: 'OrderSuccess',
         component: () => import('../views/OrderSuccessView.vue'),
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, title: 'Order Placed Successfully' }
     },
     {
         path: '/account',
@@ -80,37 +107,44 @@ const routes = [
             {
                 path: 'dashboard',
                 name: 'AccountDashboard',
-                component: () => import('../views/Account/Overview.vue')
+                component: () => import('../views/Account/Overview.vue'),
+                meta: { title: 'Account Dashboard' }
             },
             {
                 path: 'orders',
                 name: 'AccountOrders',
-                component: () => import('../views/Account/Orders.vue')
+                component: () => import('../views/Account/Orders.vue'),
+                meta: { title: 'My Orders' }
             },
             {
                 path: 'orders/:id',
                 name: 'AccountOrderDetails',
-                component: () => import('../views/Account/OrderDetails.vue')
+                component: () => import('../views/Account/OrderDetails.vue'),
+                meta: { title: 'Order Details' }
             },
             {
                 path: 'vendor',
                 name: 'AccountVendor',
-                component: () => import('../views/Account/Vendor.vue')
+                component: () => import('../views/Account/Vendor.vue'),
+                meta: { title: 'Vendor Dashboard' }
             },
             {
                 path: 'market',
                 name: 'AccountMarket',
-                component: () => import('../views/Account/MarketDashboard.vue')
+                component: () => import('../views/Account/MarketDashboard.vue'),
+                meta: { title: 'Marketplace Dashboard' }
             },
             {
                 path: 'consultations',
                 name: 'AccountConsultations',
-                component: () => import('../views/Account/Consultations.vue')
+                component: () => import('../views/Account/Consultations.vue'),
+                meta: { title: 'My Consultations' }
             },
             {
                 path: 'profile',
                 name: 'AccountProfile',
-                component: () => import('../views/Account/Profile.vue')
+                component: () => import('../views/Account/Profile.vue'),
+                meta: { title: 'My Profile' }
             }
         ]
     },
@@ -118,36 +152,37 @@ const routes = [
         path: '/login',
         name: 'Login',
         component: () => import('../views/LoginView.vue'),
-        meta: { guestOnly: true }
+        meta: { guestOnly: true, title: 'Login' }
     },
     {
         path: '/signup',
         name: 'Signup',
         component: () => import('../views/SignupView.vue'),
-        meta: { guestOnly: true }
+        meta: { guestOnly: true, title: 'Sign Up' }
     },
     {
         path: '/forgot-password',
         name: 'ForgotPassword',
         component: () => import('../views/ForgotPasswordView.vue'),
-        meta: { guestOnly: true }
+        meta: { guestOnly: true, title: 'Forgot Password' }
     },
     {
         path: '/verify-email',
         name: 'VerifyEmail',
-        component: () => import('../views/VerifyEmailView.vue')
+        component: () => import('../views/VerifyEmailView.vue'),
+        meta: { title: 'Verify Email' }
     },
     {
         path: '/origin-talk',
         name: 'OriginTalk',
         component: () => import('@/views/EnergyAIView.vue'),
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, title: 'Origin Talk - AI Energy Consultant' }
     },
     {
         path: '/vendor-apply',
         name: 'VendorApply',
         component: () => import('@/views/VendorApplicationView.vue'),
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, title: 'Apply as Vendor' }
     }
 ]
 
@@ -185,6 +220,30 @@ router.beforeEach((to, from, next) => {
     } else {
         next();
     }
+});
+
+router.afterEach((to) => {
+    const defaultTitle = 'Origin Electric | Smart Energy & Security Solutions';
+    if (to.meta && to.meta.title) {
+        if (to.meta.title === 'Home') {
+            document.title = defaultTitle;
+        } else {
+            document.title = `${to.meta.title} | Origin Electric`;
+        }
+    } else {
+        document.title = defaultTitle;
+    }
+
+    // Dynamic Canonical Link Sync
+    const baseDomain = 'https://originelectric.com';
+    const canonicalUrl = `${baseDomain}${to.path === '/' ? '' : to.path}`;
+    let link = document.querySelector('link[rel="canonical"]');
+    if (!link) {
+        link = document.createElement('link');
+        link.setAttribute('rel', 'canonical');
+        document.head.appendChild(link);
+    }
+    link.setAttribute('href', canonicalUrl);
 });
 
 export default router

@@ -166,6 +166,7 @@ import {
   Trash as TrashIcon,
   X as XIcon
 } from 'lucide-vue-next';
+import imageCompression from 'browser-image-compression';
 import vendorService from '@/services/vendor.service';
 import marketplaceService from '@/services/marketplace.service';
 
@@ -249,22 +250,48 @@ const getStockLevel = (stock) => {
   return 'high';
 };
 
-const handleFileSelect = (e) => {
+const handleFileSelect = async (e) => {
   const files = Array.from(e.target.files);
   const remaining = 5 - imagePreviews.value.length;
   const toAdd = files.slice(0, remaining);
 
-  toAdd.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      imagePreviews.value.push({
-        src: e.target.result,
-        file: file,
-        isExisting: false
+  for (const file of toAdd) {
+    try {
+      const options = {
+        maxSizeMB: 0.1, // Compress to 100KB (0.1 MB)
+        maxWidthOrHeight: 1920,
+        useWebWorker: true
+      };
+      const compressedFile = await imageCompression(file, options);
+      
+      // Wrap compressed file in a new File object to preserve original name and extension
+      const finalFile = new File([compressedFile], file.name, {
+        type: file.type,
+        lastModified: Date.now()
       });
-    };
-    reader.readAsDataURL(file);
-  });
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        imagePreviews.value.push({
+          src: e.target.result,
+          file: finalFile,
+          isExisting: false
+        });
+      };
+      reader.readAsDataURL(finalFile);
+    } catch (err) {
+      console.error('Image compression failed, using original file:', err);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        imagePreviews.value.push({
+          src: e.target.result,
+          file: file,
+          isExisting: false
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  }
 };
 
 const removeImage = (index) => {

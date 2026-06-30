@@ -36,6 +36,10 @@
           <label>Qty</label>
           <input type="number" v-model.number="entryQuantity" min="1" />
         </div>
+        <div class="form-group hours-group">
+          <label>Daily Use (Hours)</label>
+          <input type="number" v-model.number="entryHours" min="1" max="24" placeholder="8" />
+        </div>
         <div class="form-group btn-group">
           <button class="btn btn-primary add-btn" @click="addAppliance" :disabled="!entryName || !entryWattage">
             <PlusIcon class="icon-sm" /> Add Appliance
@@ -52,6 +56,7 @@
                 <th>Appliance</th>
                 <th>Watts</th>
                 <th>Qty</th>
+                <th>Hrs/Day</th>
                 <th>Total</th>
                 <th></th>
               </tr>
@@ -61,6 +66,7 @@
                 <td data-label="Appliance">{{ app.name }}</td>
                 <td data-label="Watts">{{ app.wattage }}W</td>
                 <td data-label="Qty">{{ app.quantity }}</td>
+                <td data-label="Hrs/Day">{{ app.hours || 8 }}h</td>
                 <td data-label="Total">{{ app.wattage * app.quantity }}W</td>
                 <td>
                   <button class="remove-btn" @click="removeAppliance(index)">
@@ -200,10 +206,24 @@
               </div>
             </div>
             <div class="result-item">
+              <ActivityIcon class="res-icon" />
+              <div>
+                <label>Daily Energy Demand</label>
+                <strong>{{ (totalDailyWh / 1000).toFixed(2) }} kWh/day</strong>
+              </div>
+            </div>
+            <div class="result-item">
               <InverterIcon class="res-icon" />
               <div>
                 <label>Inverter Size</label>
                 <strong>{{ recommendedInverter }} kVA</strong>
+              </div>
+            </div>
+            <div class="result-item">
+              <ClockIcon class="res-icon" />
+              <div>
+                <label>Backup Outage Support</label>
+                <strong>{{ effectiveBackupHours }} Hours</strong>
               </div>
             </div>
             <div class="result-item">
@@ -274,6 +294,7 @@ const selectedAppliance = ref('');
 const entryName = ref('');
 const entryWattage = ref(null);
 const entryQuantity = ref(1);
+const entryHours = ref(8);
 
 const backupHours = ref(10);
 const isCustomBackup = ref(false);
@@ -350,25 +371,32 @@ const handlePresetSelect = () => {
   if (selectedAppliance.value && selectedAppliance.value !== 'custom') {
     entryName.value = selectedAppliance.value.name;
     entryWattage.value = selectedAppliance.value.wattage;
+    entryHours.value = selectedAppliance.value.defaultHours || selectedAppliance.value.hours || 8;
   } else {
     entryName.value = '';
     entryWattage.value = null;
+    entryHours.value = 8;
   }
 };
 
 const addAppliance = () => {
   if (entryName.value && entryWattage.value > 0) {
     const surge = selectedAppliance.value?.surgeFactor || 1;
+    let hrs = parseFloat(entryHours.value) || 8;
+    if (hrs < 1) hrs = 1;
+    if (hrs > 24) hrs = 24;
     appliances.value.push({
       name: entryName.value,
       wattage: entryWattage.value,
       quantity: entryQuantity.value,
-      surgeFactor: surge
+      surgeFactor: surge,
+      hours: hrs
     });
     // Reset
     entryName.value = '';
     entryWattage.value = null;
     entryQuantity.value = 1;
+    entryHours.value = 8;
     selectedAppliance.value = '';
   }
 };
@@ -410,9 +438,10 @@ const requestInstallation = () => {
   
   message += `*Load Details:*\n`;
   appliances.value.forEach(app => {
-    message += `- ${app.name}: ${app.wattage}W x ${app.quantity} = ${app.wattage * app.quantity}W\n`;
+    message += `- ${app.name}: ${app.wattage}W x ${app.quantity} (${app.hours || 8} hrs/day) = ${app.wattage * app.quantity}W\n`;
   });
   message += `\n*Total Load:* ${totalWatts.value}W\n`;
+  message += `*Daily Energy Demand:* ${(totalDailyWh.value / 1000).toFixed(2)} kWh/day\n`;
   
   message += `\n*System Recommendations:*\n`;
   message += `- Inverter: ${recommendedInverter.value}kVA\n`;
@@ -432,6 +461,10 @@ const requestInstallation = () => {
 // Calculations
 const totalWatts = computed(() => {
   return appliances.value.reduce((sum, app) => sum + (app.wattage * app.quantity), 0);
+});
+
+const totalDailyWh = computed(() => {
+  return appliances.value.reduce((sum, app) => sum + (app.wattage * app.quantity * (app.hours || 8)), 0);
 });
 
 const estimatedSurge = computed(() => {
@@ -454,9 +487,12 @@ const effectiveBackupHours = computed(() => {
 });
 
 const batteryCapacityKWh = computed(() => {
-  // kWh = (Watts * Hours) / (Efficiency * DoD)
   if (totalWatts.value === 0) return 0;
-  return (totalWatts.value * effectiveBackupHours.value / 1000) / 
+  const outageEnergyWh = appliances.value.reduce((sum, app) => {
+    const hoursInOutage = Math.min(app.hours || 8, effectiveBackupHours.value);
+    return sum + (app.wattage * app.quantity * hoursInOutage);
+  }, 0);
+  return (outageEnergyWh / 1000) / 
          ((config.value.specs?.battery_efficiency || 0.85) * (config.value.specs?.battery_dod || 0.8));
 });
 
@@ -503,6 +539,19 @@ const maxCost = computed(() => {
   const margin = Math.min(minCost.value * marginPercent, (config.value.thresholds?.max_margin_cap || 500000));
   return minCost.value + margin;
 });
+
+// Bridge calculations to localStorage for RequestInstallerFAB consumption
+watch([totalWatts, recommendedInverter], ([watts, inverter]) => {
+  if (watts > 0) {
+    localStorage.setItem('origin_last_load_audit', JSON.stringify({
+      totalWatts: watts,
+      recommendedInverter: inverter,
+      timestamp: Date.now()
+    }));
+  } else {
+    localStorage.removeItem('origin_last_load_audit');
+  }
+}, { immediate: true });
 
 </script>
 
@@ -613,14 +662,15 @@ const maxCost = computed(() => {
   border-radius: var(--radius-md);
   margin-bottom: var(--space-lg);
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: var(--space-md);
   align-items: flex-end;
 }
 
-.preset-group, .name-group { grid-column: span 1; }
-.watt-group, .qty-group { grid-column: span 1; }
-.btn-group { grid-column: span 2; display: flex; justify-content: center; }
+.preset-group { grid-column: span 1; }
+.name-group { grid-column: span 2; }
+.watt-group, .qty-group, .hours-group { grid-column: span 1; }
+.btn-group { grid-column: span 3; display: flex; justify-content: center; }
 
 @media (max-width: 768px) {
   .appliance-form {
@@ -629,7 +679,7 @@ const maxCost = computed(() => {
     gap: var(--space-sm);
     margin-bottom: var(--space-md);
   }
-  .preset-group, .name-group, .watt-group, .qty-group, .btn-group { 
+  .preset-group, .name-group, .watt-group, .qty-group, .hours-group, .btn-group { 
     grid-column: span 1; 
   }
 }

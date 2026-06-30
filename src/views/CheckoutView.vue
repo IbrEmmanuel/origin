@@ -38,10 +38,6 @@
               
               <div class="form-row">
                 <div class="form-group half">
-                  <label>Street Address</label>
-                  <input type="text" v-model="form.street" class="form-input" placeholder="123 Main St" required />
-                </div>
-                <div class="form-group half">
                   <label>City</label>
                   <input type="text" v-model="form.city" class="form-input" placeholder="Lagos" required />
                 </div>
@@ -59,6 +55,20 @@
                 <div class="form-group third">
                   <label>Postal Code (Optional)</label>
                   <input type="text" v-model="form.postalCode" class="form-input" placeholder="100001" />
+                </div>
+              </div>
+
+              <!-- Map Pinpointing -->
+              <div class="form-group map-section mt-4">
+                <label>Pinpoint Delivery Address on Map</label>
+                <span class="field-note">Search for your address or click/drag the pin on the map to pinpoint.</span>
+                <input type="text" ref="mapSearchInput" placeholder="Search address (e.g. 12 Ring Road, Ibadan...)" class="map-search-input" @keydown.enter.prevent />
+                <div class="checkout-map-wrapper">
+                  <div ref="mapContainer" class="checkout-map-container"></div>
+                </div>
+                <div class="coords-display mt-2" v-if="form.latitude && form.longitude">
+                  <span class="coords-badge">Pinned: {{ form.latitude.toFixed(6) }}, {{ form.longitude.toFixed(6) }}</span>
+                  <span v-if="closestPartner" class="closest-partner-info">Closest Partner: {{ closestPartner }} ({{ shippingDistance }} km)</span>
                 </div>
               </div>
             </form>
@@ -85,7 +95,8 @@
             </div>
             <div class="summary-row">
               <span>Delivery Fee</span>
-              <span>₦{{ Number(deliveryFee).toLocaleString() }}</span>
+              <span v-if="deliveryFee !== null">₦{{ Number(deliveryFee).toLocaleString() }}</span>
+              <span v-else class="text-secondary" style="font-size: 0.9rem;">Pin address on map...</span>
             </div>
             <div class="summary-divider"></div>
             <div class="summary-row total-row">
@@ -94,8 +105,8 @@
             </div>
           </div>
           
-          <button @click="processCheckout" class="primary-btn mt-4 full-width" :disabled="isProcessing || cartItems.length === 0">
-            {{ isProcessing ? 'Processing...' : 'Pay with Paystack' }}
+          <button @click="processCheckout" class="primary-btn mt-4 full-width" :disabled="isProcessing || cartItems.length === 0 || deliveryFee === null">
+            {{ isProcessing ? 'Processing...' : (deliveryFee === null ? 'Select address on map' : 'Pay with Paystack') }}
           </button>
           <p v-if="error" class="error-msg mt-2">{{ error }}</p>
         </div>
@@ -119,16 +130,25 @@ const userPhone = ref('');
 const isProcessing = ref(false);
 const error = ref('');
 
+const mapContainer = ref(null);
+const mapSearchInput = ref(null);
+const map = ref(null);
+const marker = ref(null);
+const closestPartner = ref('');
+const shippingDistance = ref(0);
+
 const form = ref({
   phone: '',
   street: '',
   city: '',
   state: '',
   country: '',
-  postalCode: ''
+  postalCode: '',
+  latitude: null,
+  longitude: null
 });
 
-const deliveryFee = ref(2000);
+const deliveryFee = ref(null);
 const grandTotal = computed(() => {
   return cartTotal.value + deliveryFee.value;
 });
@@ -171,6 +191,115 @@ const selectAddress = (addr) => {
   form.value.state = parts.length > 2 ? parts[2] : '';
   form.value.country = 'Nigeria'; // default guess
   form.value.postalCode = '';
+  
+  if (addr.fullAddress && mapSearchInput.value) {
+    mapSearchInput.value.value = addr.fullAddress;
+  }
+};
+
+const initCheckoutMap = () => {
+  if (!mapContainer.value) return;
+  const initialCenter = { lat: 9.0820, lng: 8.6753 }; // Nigeria center
+  
+  map.value = new google.maps.Map(mapContainer.value, {
+    center: initialCenter,
+    zoom: 6
+  });
+
+  map.value.addListener('click', (event) => {
+    const lat = event.latLng.lat();
+    const lng = event.latLng.lng();
+    setPinPosition(lat, lng);
+  });
+
+  if (mapSearchInput.value) {
+    const autocomplete = new google.maps.places.Autocomplete(mapSearchInput.value, {
+      componentRestrictions: { country: 'ng' },
+      fields: ['geometry', 'formatted_address']
+    });
+
+    autocomplete.addListener('place_changed', () => {
+      const place = autocomplete.getPlace();
+      if (place && place.geometry && place.geometry.location) {
+        const lat = place.geometry.location.lat();
+        const lng = place.geometry.location.lng();
+        
+        if (place.formatted_address) {
+          form.value.street = place.formatted_address;
+        }
+        
+        setPinPosition(lat, lng);
+        if (map.value) {
+          map.value.setZoom(15);
+        }
+      }
+    });
+  }
+};
+
+const setPinPosition = (lat, lng) => {
+  if (!map.value) return;
+  const pos = { lat: parseFloat(lat), lng: parseFloat(lng) };
+  
+  if (!marker.value) {
+    marker.value = new google.maps.Marker({
+      position: pos,
+      map: map.value,
+      draggable: true
+    });
+    
+    marker.value.addListener('dragend', () => {
+      const currentPos = marker.value.getPosition();
+      updateDeliveryFeeAndCoords(currentPos.lat(), currentPos.lng());
+    });
+  } else {
+    marker.value.setPosition(pos);
+  }
+  
+  map.value.panTo(pos);
+  updateDeliveryFeeAndCoords(lat, lng);
+};
+
+const updateDeliveryFeeAndCoords = async (lat, lng) => {
+  form.value.latitude = parseFloat(lat);
+  form.value.longitude = parseFloat(lng);
+  
+  try {
+    const token = localStorage.getItem('token');
+    const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/api/user/calculate-shipping`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ latitude: lat, longitude: lng })
+    });
+    
+    if (res.ok) {
+      const data = await res.json();
+      deliveryFee.value = parseFloat(data.delivery_fee);
+      closestPartner.value = data.company_name;
+      shippingDistance.value = data.distance;
+    }
+  } catch (err) {
+    console.error('Failed to calculate shipping fee', err);
+  }
+};
+
+const loadGoogleMaps = () => {
+  if (window.google && window.google.maps && window.google.maps.places) {
+    initCheckoutMap();
+    return;
+  }
+  const key = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
+  const script = document.createElement('script');
+  script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=places`;
+  script.async = true;
+  script.defer = true;
+  script.onload = () => {
+    initCheckoutMap();
+  };
+  document.head.appendChild(script);
 };
 
 const loadPaystackScript = () => {
@@ -187,8 +316,13 @@ const loadPaystackScript = () => {
 
 const processCheckout = async () => {
   error.value = '';
-  if (!form.value.street || !form.value.city || !form.value.state || !form.value.country || !form.value.phone) {
-    error.value = 'Please fill out all required delivery address components and your contact phone number.';
+  if (!form.value.city || !form.value.state || !form.value.country || !form.value.phone) {
+    error.value = 'Please fill out all required delivery address fields (City, State, Country) and your contact phone number.';
+    return;
+  }
+
+  if (!form.value.latitude || !form.value.longitude) {
+    error.value = 'Please search and pinpoint your delivery address on the map to calculate shipping.';
     return;
   }
 
@@ -208,12 +342,14 @@ const processCheckout = async () => {
       },
       body: JSON.stringify({
         items: cartItems.value.map(item => ({ id: item.id, quantity: item.quantity })),
-        delivery_street: form.value.street,
+        delivery_street: mapSearchInput.value ? mapSearchInput.value.value : form.value.street,
         delivery_city: form.value.city,
         delivery_state: form.value.state,
         delivery_country: form.value.country,
         delivery_postal_code: form.value.postalCode,
-        contact_phone: form.value.phone
+        contact_phone: form.value.phone,
+        latitude: form.value.latitude,
+        longitude: form.value.longitude
       })
     });
     
@@ -274,6 +410,7 @@ const verifyPayment = async (response, orderId, token) => {
 
 onMounted(() => {
   fetchProfile();
+  loadGoogleMaps();
 });
 </script>
 
@@ -460,4 +597,67 @@ onMounted(() => {
 .mt-4 { margin-top: 1.5rem; }
 .mt-2 { margin-top: 0.5rem; }
 .mb-4 { margin-bottom: 1.5rem; }
+
+/* Map Pinpointing Style */
+.checkout-map-wrapper {
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+  margin-bottom: 1rem;
+}
+
+.checkout-map-container {
+  height: 300px;
+  width: 100%;
+  background: var(--bg-secondary);
+}
+
+.map-search-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  transition: all 0.2s ease-in-out;
+  margin-bottom: 0.75rem;
+}
+
+.map-search-input:focus {
+  outline: none;
+  border-color: var(--color-blue-primary);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+}
+
+.field-note {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.coords-display {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.9rem;
+}
+
+.coords-badge {
+  font-family: monospace;
+  background: rgba(0, 102, 204, 0.08);
+  color: var(--color-blue-primary);
+  border: 1px solid rgba(0, 102, 204, 0.2);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 700;
+}
+
+.closest-partner-info {
+  font-weight: 600;
+  color: var(--text-secondary);
+}
 </style>

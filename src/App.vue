@@ -5,6 +5,7 @@
       <router-view />
     </main>
     <Footer v-if="!hideGlobalLayout" />
+    <RequestInstallerFAB />
   </div>
 </template>
 
@@ -13,6 +14,7 @@ import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import Header from './components/Header.vue';
 import Footer from './components/Footer.vue';
+import RequestInstallerFAB from './components/RequestInstallerFAB.vue';
 
 const route = useRoute();
 const hideGlobalLayout = computed(() => {

@@ -200,6 +200,15 @@ const fetchProduct = async () => {
     avgRating.value = data.avgRating || 0;
     relatedProducts.value = data.related || [];
     
+    if (product.value) {
+      document.title = `${product.value.name} | Origin Electric`;
+      
+      const metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc && product.value.description) {
+        metaDesc.setAttribute('content', `${product.value.description.slice(0, 150)}...`);
+      }
+    }
+    
     if (isLoggedIn.value) {
         const eligibility = await marketplaceService.checkEligibility(route.params.id);
         eligibleToReview.value = eligibility.eligible;

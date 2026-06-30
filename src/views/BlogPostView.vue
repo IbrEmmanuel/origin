@@ -78,6 +78,19 @@ const fetchPost = async () => {
   try {
     loading.value = true;
     post.value = await blogService.getPostBySlug(route.params.slug);
+    if (post.value) {
+      document.title = `${post.value.title} | Origin Electric`;
+      
+      const metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc && post.value.content) {
+        const plainText = post.value.content
+          .replace(/[#*`_~]/g, '')
+          .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
+          .trim()
+          .slice(0, 150);
+        metaDesc.setAttribute('content', `${plainText}...`);
+      }
+    }
   } catch (error) {
     console.error('Error fetching blog post:', error);
   } finally {

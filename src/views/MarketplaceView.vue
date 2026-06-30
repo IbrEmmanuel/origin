@@ -221,7 +221,7 @@ onMounted(() => {
 <style scoped>
 /* Page Level Overrides */
 .marketplace-page {
-  padding-top: 80px; /* Offset for the fixed headers */
+  padding-top: 0; /* Offset for the fixed headers */
   min-height: 100vh;
   background-color: var(--bg-primary);
   color: var(--text-primary);

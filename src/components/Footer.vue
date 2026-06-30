@@ -18,13 +18,24 @@
       </div>
       
       <div class="footer-links">
-        <h4>Quick Links</h4>
+        <h4>Company</h4>
         <ul>
           <li><router-link to="/">Home</router-link></li>
+          <li><router-link to="/about">About Us</router-link></li>
+          <li><router-link to="/services">Services</router-link></li>
+          <li><router-link to="/projects">Projects</router-link></li>
+          <li><router-link to="/blog">Blog</router-link></li>
+        </ul>
+      </div>
+      
+      <div class="footer-links">
+        <h4>Resources</h4>
+        <ul>
           <li><router-link to="/marketplace">Marketplace</router-link></li>
           <li><router-link to="/load-audit">Load Audit</router-link></li>
+          <li><router-link to="/origin-talk">Origin Talk AI</router-link></li>
           <li><router-link to="/contact">Contact</router-link></li>
-          <li><router-link to="/vendor-apply">Are you a supplier?</router-link></li>
+          <li><router-link to="/vendor-apply">Become a Supplier</router-link></li>
         </ul>
       </div>
 
@@ -85,8 +96,8 @@ import {
 
 .footer-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: var(--space-xl);
+  grid-template-columns: 2fr 1fr 1fr 2fr;
+  gap: var(--space-md);
   margin-bottom: var(--space-xl);
 }
 
@@ -227,9 +238,16 @@ import {
   color: var(--color-blue-primary);
 }
 
+@media (max-width: 1024px) {
+  .footer-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--space-md);
+  }
+}
+
 @media (max-width: 768px) {
   .footer-grid {
-    gap: var(--space-lg);
+    gap: var(--space-sm);
   }
 }
 </style>

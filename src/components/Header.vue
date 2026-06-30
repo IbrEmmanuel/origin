@@ -74,6 +74,9 @@
           </div>
           <ul class="mobile-links">
             <li><router-link to="/" @click="isMenuOpen = false"><HomeIcon class="icon-sm" /> Home</router-link></li>
+            <li><router-link to="/about" @click="isMenuOpen = false"><InfoIcon class="icon-sm" /> About Us</router-link></li>
+            <li><router-link to="/services" @click="isMenuOpen = false"><WrenchIcon class="icon-sm" /> Services</router-link></li>
+            <li><router-link to="/projects" @click="isMenuOpen = false"><BriefcaseIcon class="icon-sm" /> Projects</router-link></li>
             <li><router-link to="/marketplace" @click="isMenuOpen = false"><ShoppingBagIcon class="icon-sm" /> Marketplace</router-link></li>
             <li><router-link to="/load-audit" @click="isMenuOpen = false"><CalculatorIcon class="icon-sm" /> Load Audit</router-link></li>
             <li><router-link to="/blog" @click="isMenuOpen = false"><BookOpenIcon class="icon-sm" /> Blog</router-link></li>
@@ -104,7 +107,10 @@ import {
   Mail as MailIcon,
   Phone as PhoneIcon,
   ShoppingCart as ShoppingCartIcon,
-  BookOpen as BookOpenIcon
+  BookOpen as BookOpenIcon,
+  Info as InfoIcon,
+  Wrench as WrenchIcon,
+  Briefcase as BriefcaseIcon
 } from 'lucide-vue-next';
 import { useCart } from '@/composables/useCart';
 
@@ -429,17 +435,20 @@ onUnmounted(() => {
   max-width: 340px;
   height: 100%;
   background: var(--bg-primary);
-  padding: var(--space-md);
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg);
+  gap: 1.5rem;
   box-shadow: -10px 0 40px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .mobile-menu-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .close-btn {
@@ -454,14 +463,14 @@ onUnmounted(() => {
 .mobile-links {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  gap: 0.5rem;
 }
 
 .mobile-links a {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 1.25rem;
+  padding: 0.85rem 1.25rem;
   border-radius: var(--radius-md);
   font-weight: 700;
   color: var(--text-primary);
