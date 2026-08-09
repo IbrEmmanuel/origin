@@ -2,7 +2,7 @@
   <div class="home-view">
     <!-- HERO SECTION -->
     <section class="hero" id="home">
-      <div class="hero-bg" :style="{ backgroundImage: `url(${heroSolarBg})` }"></div>
+      <div class="hero-bg"></div>
       <svg class="circuit-line" viewBox="0 0 600 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <path class="circuit-path" d="M580 0 L580 80 L500 80 L500 160 L420 160 L420 120 L340 120 L340 200 L260 200 L260 140 L180 140 L180 260 L300 260 L300 340 L220 340 L220 420 L380 420 L380 360 L460 360 L460 480 L340 480 L340 560 L500 560 L500 640 L400 640 L400 720 L580 720 L580 800" style="animation-delay:0.3s"/>
         <path class="circuit-path" d="M480 0 L480 60 L560 60" style="animation-delay:0.6s"/>
@@ -118,7 +118,7 @@
     </section>
 
     <!-- PROCESS -->
-    <section class="process" id="process" :style="{ backgroundImage: `url(${processEngineeringBg})` }">
+    <section class="process" id="process">
       <div class="container">
         <div class="process-header reveal">
           <span class="section-eyebrow">How We Work</span>
@@ -416,7 +416,7 @@
     </section>
 
     <!-- CTA -->
-    <section class="cta-section" id="contact" :style="{ backgroundImage: `url(${ctaSolarDuskBg})` }">
+    <section class="cta-section" id="contact">
       <div class="cta-glow"></div>
       <div class="container text-center">
         <span class="section-eyebrow">Ready to Start?</span>
@@ -471,11 +471,6 @@ import projectGofamintImg from '../assets/pdf-assets/project-gofamint.jpg';
 import projectFcdaImg from '../assets/pdf-assets/project-fcda.jpg';
 import projectJudgeImg from '../assets/pdf-assets/project-judge.jpg';
 import projectIfeImg from '../assets/pdf-assets/project-ife.jpg';
-
-// Section Background Images
-import heroSolarBg from '../assets/hero_solar_bg.jpg';
-import processEngineeringBg from '../assets/process_engineering_bg.jpg';
-import ctaSolarDuskBg from '../assets/cta_solar_dusk_bg.jpg';
 
 // ----------------- FINANCING PLAN CALCULATOR -----------------
 const sysType = ref('');
@@ -571,18 +566,10 @@ onMounted(() => {
   position: absolute;
   inset: 0;
   z-index: 0;
-  background-size: cover;
-  background-position: center 40%;
-  background-repeat: no-repeat;
-}
-
-.hero-bg::after {
-  content: '';
-  position: absolute;
-  inset: 0;
   background:
-    radial-gradient(ellipse 60% 80% at 70% 50%, rgba(255, 153, 0, 0.10) 0%, transparent 70%),
-    linear-gradient(160deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.45) 60%);
+    radial-gradient(ellipse 60% 80% at 70% 50%, rgba(255, 153, 0, 0.05) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 70% at 10% 80%, rgba(0, 102, 204, 0.03) 0%, transparent 60%),
+    linear-gradient(160deg, var(--bg-secondary) 0%, var(--bg-primary) 60%);
 }
 
 .hero-container-layout {
@@ -644,16 +631,21 @@ onMounted(() => {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(255, 153, 0, 0.15);
-  border: 1px solid rgba(255, 153, 0, 0.3);
+  background: var(--color-orange-light);
+  border: 1px solid var(--border);
   border-radius: 100px;
   padding: 6px 14px;
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.08em;
-  color: var(--orange);
+  color: var(--orange2);
   text-transform: uppercase;
   margin-bottom: 28px;
+}
+
+.dark-mode .hero-eyebrow {
+  background: rgba(255, 153, 0, 0.1);
+  color: var(--orange);
 }
 
 .hero-eyebrow::before {
@@ -676,7 +668,7 @@ onMounted(() => {
   line-height: 1.1;
   margin-bottom: 24px;
   letter-spacing: -0.02em;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .hero h1 .highlight {
@@ -690,7 +682,7 @@ onMounted(() => {
 
 .hero-sub {
   font-size: 1.1rem;
-  color: rgba(255, 255, 255, 0.82);
+  color: var(--text-secondary);
   max-width: 520px;
   line-height: 1.7;
   margin-bottom: 40px;
@@ -753,17 +745,6 @@ onMounted(() => {
   border-color: var(--orange);
   color: var(--orange2);
   transform: translateY(-2px);
-}
-
-/* Hero & any dark-bg section: force secondary btn to white */
-.hero .btn-secondary {
-  color: #fff !important;
-  border-color: rgba(255, 255, 255, 0.45) !important;
-}
-
-.hero .btn-secondary:hover {
-  color: var(--orange) !important;
-  border-color: var(--orange) !important;
 }
 
 .btn-ai-glow {
@@ -1169,50 +1150,7 @@ onMounted(() => {
 
 /* ----------------- PROCESS SECTION ----------------- */
 .process {
-  background-color: var(--bg-secondary);
-  background-size: cover;
-  background-position: center center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  position: relative;
-}
-
-.process::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0.48) 0%,
-    rgba(0, 0, 0, 0.40) 50%,
-    rgba(0, 0, 0, 0.52) 100%
-  );
-  z-index: 0;
-  pointer-events: none;
-}
-
-.process .container {
-  position: relative;
-  z-index: 1;
-}
-
-.process .section-title,
-.process .section-sub {
-  color: #fff !important;
-}
-
-.process .process-step h3 {
-  color: #fff !important;
-}
-
-.process .process-step p {
-  color: rgba(255, 255, 255, 0.78) !important;
-}
-
-.process .step-num {
-  background: rgba(0, 0, 0, 0.45);
-  border-color: var(--orange);
-  color: var(--orange);
+  background: var(--bg-secondary);
 }
 
 .process-header {
@@ -2218,56 +2156,12 @@ onMounted(() => {
 
 /* ----------------- CTA SECTION ----------------- */
 .cta-section {
-  background-color: var(--bg-secondary);
-  background-size: cover;
-  background-position: center 30%;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
+  background: var(--bg-secondary);
   border-top: 1px solid var(--border-color);
   text-align: center;
   padding: 110px 0;
   position: relative;
   overflow: hidden;
-}
-
-.cta-section::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0.48) 0%,
-    rgba(5, 2, 0, 0.52) 100%
-  );
-  z-index: 0;
-  pointer-events: none;
-}
-
-.cta-section .container {
-  position: relative;
-  z-index: 1;
-}
-
-.cta-section h2 {
-  color: #fff !important;
-}
-
-.cta-section .section-eyebrow {
-  color: var(--orange) !important;
-}
-
-.cta-section .cta-desc {
-  color: rgba(255, 255, 255, 0.82) !important;
-}
-
-.cta-section .btn-secondary {
-  color: #fff !important;
-  border-color: rgba(255, 255, 255, 0.45) !important;
-}
-
-.cta-section .btn-secondary:hover {
-  color: var(--orange) !important;
-  border-color: var(--orange) !important;
 }
 
 .cta-glow {

@@ -45,17 +45,33 @@
               </div>
             </div>
 
-            <div class="form-group">
-              <label for="subject">Subject</label>
-              <div class="input-wrapper">
-                <TagIcon class="input-icon" />
-                <input 
-                  type="text" 
-                  id="subject" 
-                  v-model="form.subject" 
-                  placeholder="How can we help?" 
-                  :disabled="loading"
-                />
+            <div class="form-group-row">
+              <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <div class="input-wrapper">
+                  <PhoneIcon class="input-icon" />
+                  <input 
+                    type="tel" 
+                    id="phone" 
+                    v-model="form.phone" 
+                    placeholder="+234 700 000 0000" 
+                    :disabled="loading"
+                  />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="subject">Subject</label>
+                <div class="input-wrapper">
+                  <TagIcon class="input-icon" />
+                  <input 
+                    type="text" 
+                    id="subject" 
+                    v-model="form.subject" 
+                    placeholder="How can we help?" 
+                    :disabled="loading"
+                  />
+                </div>
               </div>
             </div>
 
@@ -179,6 +195,7 @@ import contactService from '@/services/contact.service';
 const form = ref({
   name: '',
   email: '',
+  phone: '',
   subject: '',
   message: ''
 });
@@ -203,6 +220,7 @@ const handleSubmit = async () => {
     form.value = {
       name: '',
       email: '',
+      phone: '',
       subject: '',
       message: ''
     };
