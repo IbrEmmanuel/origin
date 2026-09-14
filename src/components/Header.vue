@@ -34,6 +34,7 @@
         <ul class="nav-links">
           <li><router-link to="/">Home</router-link></li>
           <li><router-link to="/marketplace">Marketplace</router-link></li>
+          <li><router-link to="/sales-chat">Sales Chat</router-link></li>
           <li><router-link to="/load-audit">Load Audit</router-link></li>
           <li><router-link to="/blog">Blog</router-link></li>
           <li><router-link to="/contact">Contact</router-link></li>
@@ -78,6 +79,7 @@
             <li><router-link to="/services" @click="isMenuOpen = false"><WrenchIcon class="icon-sm" /> Services</router-link></li>
             <li><router-link to="/projects" @click="isMenuOpen = false"><BriefcaseIcon class="icon-sm" /> Projects</router-link></li>
             <li><router-link to="/marketplace" @click="isMenuOpen = false"><ShoppingBagIcon class="icon-sm" /> Marketplace</router-link></li>
+            <li><router-link to="/sales-chat" @click="isMenuOpen = false"><MessageSquareIcon class="icon-sm" /> Sales Chat</router-link></li>
             <li><router-link to="/load-audit" @click="isMenuOpen = false"><CalculatorIcon class="icon-sm" /> Load Audit</router-link></li>
             <li><router-link to="/blog" @click="isMenuOpen = false"><BookOpenIcon class="icon-sm" /> Blog</router-link></li>
             <li><router-link to="/contact" @click="isMenuOpen = false"><MailIcon class="icon-sm" /> Contact</router-link></li>
@@ -110,7 +112,8 @@ import {
   BookOpen as BookOpenIcon,
   Info as InfoIcon,
   Wrench as WrenchIcon,
-  Briefcase as BriefcaseIcon
+  Briefcase as BriefcaseIcon,
+  MessageSquare as MessageSquareIcon
 } from 'lucide-vue-next';
 import { useCart } from '@/composables/useCart';
 

@@ -5,7 +5,8 @@
       <router-view />
     </main>
     <Footer v-if="!hideGlobalLayout" />
-    <RequestInstallerFAB />
+    <RequestInstallerFAB v-if="!hideGlobalLayout" />
+    <FloatingActions v-if="!hideGlobalLayout" />
   </div>
 </template>
 
@@ -15,10 +16,16 @@ import { useRoute } from 'vue-router';
 import Header from './components/Header.vue';
 import Footer from './components/Footer.vue';
 import RequestInstallerFAB from './components/RequestInstallerFAB.vue';
+import FloatingActions from './components/FloatingActions.vue';
 
 const route = useRoute();
 const hideGlobalLayout = computed(() => {
-  return route.path.startsWith('/account') || route.path === '/origin-talk';
+  const p = route.path.replace(/\/$/, '') || '/';
+  return (
+    p.startsWith('/account') ||
+    p === '/origin-talk' ||
+    p === '/sales-chat'
+  );
 });
 </script>
 

@@ -179,6 +179,20 @@ const routes = [
         meta: { requiresAuth: true, title: 'Origin Talk - AI Energy Consultant' }
     },
     {
+        path: '/sales-chat',
+        name: 'SalesChat',
+        component: () => import('../views/SalesChatView.vue'),
+        meta: { title: 'Solar Consultation Chat - Origin Electric' }
+    },
+    {
+        path: '/sales',
+        redirect: { name: 'SalesChat' }
+    },
+    {
+        path: '/chat',
+        redirect: { name: 'SalesChat' }
+    },
+    {
         path: '/vendor-apply',
         name: 'VendorApply',
         component: () => import('@/views/VendorApplicationView.vue'),
