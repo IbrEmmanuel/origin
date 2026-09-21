@@ -1,9 +1,15 @@
 /**
  * Origin Sales Agent — AgentOS native client.
  * POST /agents/{id}/runs (SSE) + GET /sessions/{id}/runs for resume.
- * Docs: http://localhost:7777/docs
+ *
+ * On Vercel: calls /api/agent/* (local proxy) to avoid CORS.
+ * In dev: calls VITE_SALES_AGENT_URL directly.
  */
-const BASE = (import.meta.env.VITE_SALES_AGENT_URL || 'http://localhost:7777').replace(/\/$/, '');
+
+// Use proxy on production (Vercel), direct URL in dev
+const isProduction = import.meta.env.PROD;
+const DIRECT_URL = (import.meta.env.VITE_SALES_AGENT_URL || 'http://localhost:7777').replace(/\/$/, '');
+const BASE = isProduction ? '/api/agent' : DIRECT_URL;
 const AGENT_ID = import.meta.env.VITE_SALES_AGENT_ID || 'sales-agent';
 const STORAGE_KEY = 'origin_sales_chat_v1';
 
