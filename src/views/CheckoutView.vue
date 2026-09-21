@@ -448,9 +448,10 @@ onMounted(() => {
 
 .glass-card {
   background: var(--bg-secondary);
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
   padding: 2rem;
   border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
 }
 
 .section-title {
@@ -474,14 +475,14 @@ onMounted(() => {
 .address-card {
   border: 2px solid var(--border-color);
   padding: 1rem;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   transition: all 0.2s;
   background: var(--bg-primary);
 }
 
-.address-card:hover { border-color: #b0c4de; }
-.address-card.selected { border-color: var(--color-blue-primary); background: rgba(0, 102, 204, 0.05); }
+.address-card:hover { border-color: var(--color-blue-primary); opacity: 0.85; }
+.address-card.selected { border-color: var(--color-blue-primary); background: var(--color-blue-light); }
 
 .addr-type { font-weight: 700; font-size: 0.9rem; margin-bottom: 4px; }
 .addr-text { font-size: 0.95rem; color: var(--text-secondary); }
@@ -509,18 +510,20 @@ onMounted(() => {
 .form-input {
   width: 100%;
   padding: 12px 16px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
   background: var(--bg-primary);
   color: var(--text-primary);
-  font-family: inherit;
+  font-family: var(--font-main);
   font-size: 1rem;
   box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .form-input:focus {
   outline: none;
   border-color: var(--color-blue-primary);
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
 }
 
 .form-row {
@@ -575,22 +578,24 @@ onMounted(() => {
 
 .primary-btn {
   background: var(--color-blue-primary);
-  color: #ffffff;
+  color: white;
   border: none;
-  border-radius: 12px;
-  padding: 16px;
-  font-size: 1.1rem;
-  font-weight: 700;
+  border-radius: var(--radius-full);
+  padding: 14px 16px;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-bounce);
   text-align: center;
+  font-family: var(--font-main);
+  letter-spacing: 0em;
 }
 .primary-btn.full-width { width: 100%; }
-.primary-btn:hover:not(:disabled) { background: var(--color-blue-dark); }
-.primary-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
+.primary-btn:hover:not(:disabled) { background: var(--color-blue-dark); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.primary-btn:disabled { background: var(--text-secondary); opacity: 0.5; cursor: not-allowed; }
 
 .error-msg {
-  color: #ff3b30;
+  color: var(--color-orange-primary);
   font-size: 0.9rem;
   text-align: center;
 }
@@ -601,9 +606,9 @@ onMounted(() => {
 /* Map Pinpointing Style */
 .checkout-map-wrapper {
   border: 1px solid var(--border-color);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   overflow: hidden;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+  box-shadow: var(--shadow-sm);
   margin-bottom: 1rem;
 }
 
@@ -617,18 +622,19 @@ onMounted(() => {
   width: 100%;
   padding: 12px 16px;
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   font-size: 0.95rem;
   background: var(--bg-secondary);
   color: var(--text-primary);
-  transition: all 0.2s ease-in-out;
+  transition: border-color 0.2s, box-shadow 0.2s;
   margin-bottom: 0.75rem;
+  font-family: var(--font-main);
 }
 
 .map-search-input:focus {
   outline: none;
   border-color: var(--color-blue-primary);
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
 }
 
 .field-note {
@@ -648,11 +654,11 @@ onMounted(() => {
 
 .coords-badge {
   font-family: monospace;
-  background: rgba(0, 102, 204, 0.08);
+  background: var(--color-blue-light);
   color: var(--color-blue-primary);
-  border: 1px solid rgba(0, 102, 204, 0.2);
+  border: 1px solid var(--glass-border);
   padding: 4px 10px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   font-weight: 700;
 }
 

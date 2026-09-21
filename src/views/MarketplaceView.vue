@@ -149,23 +149,43 @@ const fetchProducts = async (reset = false) => {
   if (reset) loading.value = true;
   
   try {
+    // Fetch products and categories in parallel
+    // Use limit=20 to show more products per page
     const [productsRes, categoriesRes] = await Promise.all([
       marketplaceService.getProducts({
-        category: selectedCategory.value,
-        search: searchQuery.value,
+        category: selectedCategory.value || undefined,
+        search: searchQuery.value || undefined,
         page: page.value,
-        limit: 12
+        limit: 20
       }),
-      marketplaceService.getCategories()
+      productCategories.value.length === 0
+        ? marketplaceService.getCategories().catch(() => [])
+        : Promise.resolve(productCategories.value)
     ]);
     
+    // Handle products array — API returns { products: [], total, page, limit, totalPages }
+    const newProducts = productsRes.products || productsRes || [];
     if (reset) {
-       products.value = productsRes.products;
+       products.value = newProducts;
     } else {
-       products.value.push(...productsRes.products);
+       products.value.push(...newProducts);
     }
-    productCategories.value = categoriesRes;
-    totalPages.value = productsRes.totalPages;
+
+    // Handle categories — API returns { value: [], Count: N }
+    if (productCategories.value.length === 0) {
+      const cats = categoriesRes;
+      if (Array.isArray(cats)) {
+        productCategories.value = cats;
+      } else if (cats && Array.isArray(cats.value)) {
+        productCategories.value = cats.value;
+      } else if (cats && typeof cats === 'object') {
+        productCategories.value = Object.entries(cats).map(([slug, name]) => ({
+          id: slug, slug, name: typeof name === 'string' ? name : slug
+        }));
+      }
+    }
+
+    totalPages.value = productsRes.totalPages || 1;
   } catch (err) {
     console.error('Failed to load marketplace products', err);
   } finally {
@@ -200,7 +220,9 @@ const parseImages = (images) => {
 const getImageUrl = (path) => {
   if (!path) return '';
   if (path.startsWith('http')) return path;
-  return `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}${path}`;
+  // Use production API base for relative paths
+  const base = import.meta.env.VITE_API_BASE_URL || 'https://api.originelectricltd.com';
+  return `${base}${path}`;
 };
 
 const resolveImages = (imagesStr) => {
@@ -354,30 +376,28 @@ onMounted(() => {
 .minimal-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 2.5rem 1.75rem;
+  gap: 20px;
+  align-items: stretch;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1100px) {
   .minimal-grid {
     grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
   }
 }
 
 @media (max-width: 768px) {
   .minimal-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem 0.75rem;
+    gap: 14px;
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 420px) {
   .minimal-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem 0.5rem;
-  }
-  
-  .minimal-card {
-    padding: 8px;
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
 }
 
@@ -385,18 +405,19 @@ onMounted(() => {
 .minimal-card {
   display: flex;
   flex-direction: column;
+  height: 100%;
   background: var(--bg-primary);
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
   padding: 12px;
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow-sm);
-  transition: all 0.3s ease;
+  transition: all 0.3s var(--transition-bounce);
 }
 
 .minimal-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 35px rgba(0,0,0,0.06);
-  border-color: #e2e8f0;
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-color);
 }
 
 .card-image-wrapper {
@@ -404,7 +425,7 @@ onMounted(() => {
   width: 100%;
   aspect-ratio: 1;
   background: var(--bg-secondary);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -621,7 +642,7 @@ onMounted(() => {
   padding: 6rem 2rem;
   text-align: center;
   background: var(--bg-secondary);
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
 }
 .empty-icon { width: 48px; height: 48px; color: var(--text-secondary); margin-bottom: 1rem; }
 .state-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-primary);}

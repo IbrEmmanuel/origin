@@ -306,7 +306,7 @@ input {
 input:focus {
   outline: none;
   border-color: var(--color-blue-primary);
-  box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.1);
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
 }
 
 .password-toggle {
@@ -334,28 +334,31 @@ input:focus {
 
 .auth-btn {
   width: 100%;
-  padding: 1rem;
-  border-radius: var(--radius-md);
-  font-weight: 700;
+  padding: 0.875rem 1.75rem;
+  border-radius: var(--radius-full);
+  font-weight: 600;
   font-size: 1rem;
   cursor: pointer;
-  transition: all var(--transition-speed);
+  transition: all var(--transition-bounce);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
+  font-family: var(--font-main);
+  letter-spacing: 0em;
 }
 
 .primary-btn {
   background: var(--color-blue-primary);
   color: white;
   border: none;
-  box-shadow: 0 10px 20px -5px rgba(0, 102, 204, 0.3);
+  box-shadow: var(--shadow-md);
 }
 
 .primary-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 15px 30px -10px rgba(0, 102, 204, 0.4);
+  background: var(--color-blue-dark);
+  box-shadow: var(--shadow-lg);
 }
 
 .primary-btn:disabled {
@@ -365,13 +368,14 @@ input:focus {
 }
 
 .google-btn {
-  background: white;
-  color: #1f2937;
-  border: 1.5px solid #e5e7eb;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1.5px solid var(--border-color);
 }
 
 .google-btn:hover {
-  background: #f9fafb;
+  background: var(--bg-secondary);
+  border-color: var(--color-blue-primary);
 }
 
 .google-icon {

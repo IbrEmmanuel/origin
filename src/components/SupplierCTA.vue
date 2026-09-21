@@ -31,13 +31,13 @@ import { Store as StoreIcon, ArrowRight as ArrowRightIcon } from 'lucide-vue-nex
   margin: 0 auto;
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   padding: 1.5rem 2rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 2rem;
-  transition: all 0.3s ease;
+  transition: all var(--transition-bounce);
 }
 
 .cta-minimal:hover {
@@ -56,7 +56,7 @@ import { Store as StoreIcon, ArrowRight as ArrowRightIcon } from 'lucide-vue-nex
   color: var(--color-blue-primary);
   background: var(--bg-primary);
   padding: 10px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   width: 44px;
   height: 44px;
 }
@@ -67,35 +67,40 @@ import { Store as StoreIcon, ArrowRight as ArrowRightIcon } from 'lucide-vue-nex
 }
 
 .cta-title {
-  font-size: 1.15rem;
-  font-weight: 700;
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   color: var(--text-primary);
 }
 
 .cta-subtitle {
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   color: var(--text-secondary);
   font-weight: 500;
+  letter-spacing: 0em;
 }
 
 .cta-link {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
   background: var(--color-blue-primary);
   color: white;
-  padding: 10px 20px;
-  border-radius: 10px;
-  font-weight: 700;
-  font-size: 0.9rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  font-size: 0.875rem;
+  letter-spacing: 0em;
   text-decoration: none;
-  transition: all 0.2s;
+  transition: all var(--transition-bounce);
   white-space: nowrap;
+  box-shadow: 0 8px 20px -5px rgba(0, 102, 204, 0.3);
 }
 
 .cta-link:hover {
   background: var(--color-blue-dark);
-  transform: translateX(4px);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 @media (max-width: 640px) {

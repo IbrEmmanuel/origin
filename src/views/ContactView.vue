@@ -355,7 +355,7 @@ input:focus, textarea:focus {
   outline: none;
   border-color: var(--color-blue-primary);
   background: var(--bg-primary);
-  box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.1);
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
 }
 
 textarea {
@@ -395,15 +395,15 @@ textarea {
 }
 
 .status-box.success {
-  background: rgba(34, 197, 94, 0.1);
-  color: #16a34a;
-  border: 1px solid rgba(34, 197, 94, 0.2);
+  background: var(--color-blue-light);
+  color: var(--color-blue-primary);
+  border: 1px solid var(--glass-border);
 }
 
 .status-box.error {
-  background: rgba(239, 68, 68, 0.1);
-  color: #dc2626;
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  background: var(--color-orange-light);
+  color: var(--color-orange-dark);
+  border: 1px solid rgba(255, 153, 0, 0.2);
 }
 
 /* Info Cards Info Side */
@@ -438,7 +438,7 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   flex-shrink: 0;
 }
 
@@ -553,7 +553,7 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   background: var(--bg-secondary);
   color: var(--text-primary);
   transition: all var(--transition-bounce);

@@ -164,7 +164,7 @@ const getImageUrl = (path) => {
     "image details"
     "image actions";
   background: var(--bg-primary);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   padding: 12px;
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow-sm);
@@ -179,7 +179,7 @@ const getImageUrl = (path) => {
     align-items: center;
     padding: 16px;
     gap: 16px;
-    border-radius: 20px;
+    border-radius: var(--radius-lg);
   }
 }
 
@@ -188,7 +188,7 @@ const getImageUrl = (path) => {
   width: 84px;
   height: 84px;
   background: var(--bg-secondary);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -212,7 +212,7 @@ const getImageUrl = (path) => {
 .fallback-icon {
   width: 40px;
   height: 40px;
-  color: #d2d2d7;
+  color: var(--border-color);
 }
 
 .item-details {
@@ -257,14 +257,14 @@ const getImageUrl = (path) => {
   align-items: center;
   justify-content: space-between;
   background: var(--bg-secondary);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   padding: 4px;
 }
 
 .step-btn {
   background: var(--bg-primary);
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   width: 36px;
   height: 36px;
   display: flex;
@@ -276,7 +276,7 @@ const getImageUrl = (path) => {
 }
 
 .step-btn:hover { background: var(--border-color); }
-.text-danger { color: #ff3b30; }
+.text-danger { color: var(--color-orange-primary); }
 
 .step-val {
   font-weight: 700;
@@ -303,7 +303,7 @@ const getImageUrl = (path) => {
 .order-summary {
   width: 100%;
   background: var(--bg-primary);
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
   padding: 2rem;
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow-sm);
@@ -344,29 +344,32 @@ const getImageUrl = (path) => {
 .primary-btn {
   width: 100%;
   background: var(--color-blue-primary);
-  color: #ffffff;
+  color: white;
   border: none;
-  border-radius: 10px;
-  padding: 16px;
+  border-radius: var(--radius-full);
+  padding: 14px 16px;
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-bounce);
   text-align: center;
   text-decoration: none;
   display: block;
-  font-family: inherit;
+  font-family: var(--font-main);
+  letter-spacing: 0em;
 }
 
 .primary-btn:hover {
   background: var(--color-blue-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
 .state-container {
   padding: 6rem 2rem;
   text-align: center;
   background: var(--bg-secondary);
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
   max-width: 600px;
   margin: 0 auto;
 }

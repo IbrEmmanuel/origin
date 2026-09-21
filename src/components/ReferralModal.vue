@@ -92,7 +92,7 @@ const submit = () => {
   height: 60px;
   background: var(--color-blue-light);
   color: var(--color-blue-primary);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;

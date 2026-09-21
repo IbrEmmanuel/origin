@@ -12,7 +12,7 @@
             <div class="sc-title-row">
               <h1>
                 <span class="sc-title-full">Solar Consultation</span>
-                <span class="sc-title-short">Sales Chat</span>
+                <span class="sc-title-short">Origin Customer Care</span>
               </h1>
               <span class="sc-pill">Ile-Ife</span>
             </div>

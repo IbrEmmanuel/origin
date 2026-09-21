@@ -51,7 +51,7 @@ const routes = [
         path: '/load-audit',
         name: 'LoadAudit',
         component: LoadAuditView,
-        meta: { requiresAuth: true, title: 'Power Load Calculator' }
+        meta: { title: 'Power Load Calculator' }
     },
     {
         path: '/contact',
@@ -182,7 +182,7 @@ const routes = [
         path: '/sales-chat',
         name: 'SalesChat',
         component: () => import('../views/SalesChatView.vue'),
-        meta: { title: 'Solar Consultation Chat - Origin Electric' }
+        meta: { title: 'Origin Customer Care Agent' }
     },
     {
         path: '/sales',

@@ -3,6 +3,15 @@
     <!-- HERO SECTION -->
     <section class="hero" id="home">
       <div class="hero-bg" :style="{ backgroundImage: `url(${heroSolarBg})` }"></div>
+
+      <!-- Radar glow decorative elements -->
+      <div class="hero-radar" aria-hidden="true">
+        <div class="hero-radar-core"></div>
+        <div class="hero-radar-ring"></div>
+        <div class="hero-radar-ring" style="animation-delay:0.9s"></div>
+        <div class="hero-radar-ring" style="animation-delay:1.8s"></div>
+      </div>
+
       <svg class="circuit-line" viewBox="0 0 600 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <path class="circuit-path" d="M580 0 L580 80 L500 80 L500 160 L420 160 L420 120 L340 120 L340 200 L260 200 L260 140 L180 140 L180 260 L300 260 L300 340 L220 340 L220 420 L380 420 L380 360 L460 360 L460 480 L340 480 L340 560 L500 560 L500 640 L400 640 L400 720 L580 720 L580 800" style="animation-delay:0.3s"/>
         <path class="circuit-path" d="M480 0 L480 60 L560 60" style="animation-delay:0.6s"/>
@@ -15,11 +24,11 @@
 
       <div class="container hero-container-layout">
         <div class="hero-content">
-          <div class="hero-eyebrow">Nigeria's Energy Engineering Authority</div>
-          <h1>Engineering <span class="highlight">Energy Independence</span> for Nigeria.</h1>
-          <p class="hero-sub">We design, install, and maintain solar, BESS, security, and EV charging systems for businesses, institutions, and government — built to last, backed by engineering.</p>
+          <div class="hero-eyebrow reveal-fade" style="--reveal-delay:0ms">Nigeria's Energy Engineering Authority</div>
+          <h1 class="reveal" style="--reveal-delay:100ms">Engineering <span class="highlight">Energy Independence</span> for Nigeria.</h1>
+          <p class="hero-sub reveal" style="--reveal-delay:200ms">We design, install, and maintain solar, BESS, security, and EV charging systems for businesses, institutions, and government — built to last, backed by engineering.</p>
           
-          <div class="hero-actions">
+          <div class="hero-actions reveal" style="--reveal-delay:320ms">
             <router-link to="/load-audit" class="btn-primary">
               <CalculatorIcon class="btn-icon" />
               Get Free Energy Audit
@@ -35,31 +44,69 @@
           </div>
         </div>
 
-        <div class="hero-visual">
+        <div class="hero-visual reveal-right" style="--reveal-delay:150ms">
           <div class="hero-card-stack">
             <div class="hero-main-card">
-              <div class="hero-card-label">System Performance — Ibadan Commercial Site</div>
-              <div class="hero-card-stat">98.4%</div>
-              <div class="hero-card-desc">Grid uptime since installation</div>
-              <div class="mini-chart">
-                <div class="chart-bar" style="height:40%"></div>
-                <div class="chart-bar" style="height:65%"></div>
-                <div class="chart-bar" style="height:55%"></div>
-                <div class="chart-bar" style="height:80%"></div>
-                <div class="chart-bar" style="height:70%"></div>
-                <div class="chart-bar" style="height:90%"></div>
-                <div class="chart-bar" style="height:85%"></div>
-                <div class="chart-bar" style="height:100%"></div>
+              <div class="hero-card-label">Live Marketplace — All Products</div>
+
+              <!-- Scrolling product list -->
+              <div
+                class="hero-product-scroll"
+                ref="heroScrollRef"
+                @mouseenter="stopHeroScroll"
+                @mouseleave="startHeroScroll"
+              >
+                <!-- Render list twice for seamless infinite loop -->
+                <template v-for="pass in 2" :key="pass">
+                  <router-link
+                    v-for="product in heroProducts"
+                    :key="`${pass}-${product.id}`"
+                    :to="`/product/${product.id}`"
+                    class="hero-product-row"
+                  >
+                    <div class="hero-product-img-wrap">
+                      <img
+                        v-if="product.image"
+                        :src="product.image"
+                        :alt="product.name"
+                        class="hero-product-img"
+                        loading="lazy"
+                      />
+                      <div v-else class="hero-product-img-placeholder">
+                        <ZapIcon style="width:16px;height:16px;opacity:0.4" />
+                      </div>
+                    </div>
+                    <div class="hero-product-info">
+                      <span class="hero-product-name">{{ product.name }}</span>
+                      <span class="hero-product-cat">{{ product.category }}</span>
+                    </div>
+                    <span class="hero-product-price">₦{{ product.price }}</span>
+                  </router-link>
+                </template>
+
+                <!-- Skeleton rows while loading -->
+                <template v-if="heroProducts.length === 0">
+                  <div v-for="n in 8" :key="n" class="hero-product-row hero-product-skeleton">
+                    <div class="hero-product-img-wrap skeleton-box"></div>
+                    <div class="hero-product-info">
+                      <div class="skeleton-box" style="height:10px;width:70%;border-radius:4px"></div>
+                      <div class="skeleton-box" style="height:8px;width:40%;border-radius:4px;margin-top:4px"></div>
+                    </div>
+                    <div class="skeleton-box" style="height:10px;width:55px;border-radius:4px"></div>
+                  </div>
+                </template>
               </div>
+
               <div class="hero-card-divider"></div>
               <div class="hero-status-row">
                 <span class="status-dot"></span>
-                <span>42 sites actively monitored — all nominal</span>
+                <span>{{ heroProducts.length > 0 ? `${heroProducts.length} products live` : 'Loading products…' }}</span>
+                <router-link to="/marketplace" class="hero-shop-link">Shop all →</router-link>
               </div>
             </div>
             <div class="hero-floating-card">
-              <div class="float-card-num">1.2 MW</div>
-              <div class="float-card-label">Total Installed Capacity</div>
+              <div class="float-card-num">{{ heroProducts.length > 0 ? `${heroProducts.length}+` : '…' }}</div>
+              <div class="float-card-label">Products Available</div>
             </div>
           </div>
         </div>
@@ -69,63 +116,90 @@
 
 
     <!-- SERVICES -->
-    <section class="services" id="services">
+    <section class="services section-clipped section-divider" id="services">
       <div class="container">
-        <div class="services-header reveal">
+
+        <div class="svc-intro reveal">
           <span class="section-eyebrow">What We Do</span>
-          <h2 class="section-title text-left">End-to-end energy and security engineering</h2>
-          <p class="section-sub text-left">From feasibility to commissioning, we handle every stage of your project with engineering discipline and long-term thinking.</p>
+          <h2 class="section-title text-left">Engineering solutions that <span class="highlight">actually work</span></h2>
         </div>
-        <div class="services-grid">
-          <div class="service-card reveal">
-            <div class="service-icon"><SunIcon /></div>
-            <h3>Solar PV & BESS Systems</h3>
-            <p>Grid-tied, off-grid and hybrid solar installations paired with lithium battery energy storage. We size systems precisely for your load profile and future growth.</p>
-            <router-link to="/services" class="service-card-link">Learn more →</router-link>
+
+        <!-- Bento-style service grid -->
+        <div class="svc-bento reveal-stagger">
+
+          <!-- CCTV -->
+          <div class="svc-bento-card">
+            <img src="../assets/pdf-assets/cctv-pole.jpg" alt="CCTV & Surveillance" class="svc-bento-img" />
+            <div class="svc-bento-overlay"></div>
+            <div class="svc-bento-glass">
+              <div class="svc-bento-icon svc-bento-icon--orange"><CctvIcon /></div>
+              <div class="svc-bento-content">
+                <span class="svc-bento-tag">Surveillance</span>
+                <h3>CCTV &amp; Surveillance</h3>
+                <p>4K IP camera networks, NVR/DVR and AI video analytics for zero blind spots.</p>
+              </div>
+              <router-link to="/services" class="svc-bento-link">Explore <ArrowRightIcon class="svc-bento-arrow" /></router-link>
+            </div>
           </div>
-          <div class="service-card reveal">
-            <div class="service-icon"><PenToolIcon /></div>
-            <h3>M&E Engineering Drawings</h3>
-            <p>Full mechanical and electrical design documentation to regulatory and international standards — for construction, compliance, and tender submissions.</p>
-            <router-link to="/services" class="service-card-link">Learn more →</router-link>
+
+          <!-- Access Control -->
+          <div class="svc-bento-card">
+            <img src="../assets/pdf-assets/access-biometric.jpg" alt="Access Control" class="svc-bento-img" />
+            <div class="svc-bento-overlay"></div>
+            <div class="svc-bento-glass">
+              <div class="svc-bento-icon"><FingerprintIcon /></div>
+              <div class="svc-bento-content">
+                <span class="svc-bento-tag">Access Control</span>
+                <h3>Access Control Systems</h3>
+                <p>Biometric readers, RFID cards and boom barriers — one platform from door to campus perimeter.</p>
+              </div>
+              <router-link to="/services" class="svc-bento-link">Explore <ArrowRightIcon class="svc-bento-arrow" /></router-link>
+            </div>
           </div>
-          <div class="service-card reveal">
-            <div class="service-icon"><CctvIcon /></div>
-            <h3>CCTV & Surveillance</h3>
-            <p>IP camera networks, NVR/DVR systems, remote monitoring, and integrated video analytics for commercial, industrial, and government facilities.</p>
-            <router-link to="/services" class="service-card-link">Learn more →</router-link>
+
+          <!-- Fire -->
+          <div class="svc-bento-card">
+            <img src="../assets/pdf-assets/fire-detector.jpg" alt="Fire Detection" class="svc-bento-img" />
+            <div class="svc-bento-overlay"></div>
+            <div class="svc-bento-glass">
+              <div class="svc-bento-icon svc-bento-icon--orange"><FlameIcon /></div>
+              <div class="svc-bento-content">
+                <span class="svc-bento-tag">Fire Safety</span>
+                <h3>Fire Detection &amp; Suppression</h3>
+                <p>NFPA &amp; BS compliant alarm systems, detectors and suppression for any facility size.</p>
+              </div>
+              <router-link to="/services" class="svc-bento-link">Explore <ArrowRightIcon class="svc-bento-arrow" /></router-link>
+            </div>
           </div>
-          <div class="service-card reveal">
-            <div class="service-icon"><FingerprintIcon /></div>
-            <h3>Access Control Systems</h3>
-            <p>Biometric readers, card-based entry, boom barriers and integrated security management platforms. Scalable from a single entrance to campus-wide control.</p>
-            <router-link to="/services" class="service-card-link">Learn more →</router-link>
+
+          <!-- EV Charging -->
+          <div class="svc-bento-card">
+            <img src="../assets/pdf-assets/img-017.jpg" alt="EV Charging" class="svc-bento-img" />
+            <div class="svc-bento-overlay"></div>
+            <div class="svc-bento-glass">
+              <div class="svc-bento-icon svc-bento-icon--orange"><ZapIcon /></div>
+              <div class="svc-bento-content">
+                <span class="svc-bento-tag">EV Charging</span>
+                <h3>EV Charging Infrastructure</h3>
+                <p>Home wall-boxes to public DC fast chargers — we install Nigeria's next EV charging network.</p>
+              </div>
+              <router-link to="/services" class="svc-bento-link">Explore <ArrowRightIcon class="svc-bento-arrow" /></router-link>
+            </div>
           </div>
-          <div class="service-card reveal">
-            <div class="service-icon"><FlameIcon /></div>
-            <h3>Fire Detection & Suppression</h3>
-            <p>Design and installation of fire alarm systems, heat/smoke detectors, suppression systems, and emergency lighting compliant with NFPA and BS standards.</p>
-            <router-link to="/services" class="service-card-link">Learn more →</router-link>
-          </div>
-          <div class="service-card reveal">
-            <div class="service-icon"><WindIcon /></div>
-            <h3>Wind Energy Solutions</h3>
-            <p>Small-to-mid scale wind turbine installations, hybrid wind-solar systems, and site wind resource assessments for remote and off-grid locations.</p>
-            <router-link to="/services" class="service-card-link">Learn more →</router-link>
-          </div>
+
         </div>
       </div>
     </section>
 
     <!-- PROCESS -->
-    <section class="process" id="process" :style="{ backgroundImage: `url(${processEngineeringBg})` }">
+    <section class="process section-clipped section-divider" id="process" :style="{ backgroundImage: `url(${processEngineeringBg})` }">
       <div class="container">
         <div class="process-header reveal">
           <span class="section-eyebrow">How We Work</span>
           <h2 class="section-title">A disciplined process. Every project, every time.</h2>
           <p class="section-sub text-center">We follow a rigorous four-stage methodology so nothing is guessed, and nothing is left to chance.</p>
         </div>
-        <div class="process-steps reveal">
+        <div class="process-steps reveal-stagger">
           <div class="process-step">
             <div class="step-num">01</div>
             <h3>Audit & Assess</h3>
@@ -151,7 +225,7 @@
     </section>
 
     <!-- CASE STUDIES -->
-    <section class="cases" id="cases">
+    <section class="cases section-clipped section-divider" id="cases">
       <div class="container">
         <div class="cases-header reveal">
           <div>
@@ -160,80 +234,85 @@
           </div>
           <router-link to="/projects" class="btn-secondary">View All Projects</router-link>
         </div>
-        <div class="cases-grid">
+        <div class="cases-grid reveal-stagger">
           <!-- Ondo Installation -->
-          <div class="case-card reveal">
+          <div class="case-card">
             <div class="case-card-img-wrapper">
               <img :src="projectOndoImg" alt="Ondo Solar Installation" class="case-card-img-src" />
               <div class="case-tag-badge">Solar Plant</div>
             </div>
-            <div class="case-card-body">
-              <h3>Ondo Installation</h3>
-              <div class="case-metrics-layout">
-                <div><span class="case-metric-val">85 kWh</span><span class="case-metric-label">Capacity</span></div>
-                <div><span class="case-metric-val">247 tons</span><span class="case-metric-label">CO2 Sav./yr</span></div>
+            <div class="case-drawer">
+              <div class="case-drawer-metrics">
+                <div class="case-metric-pill"><span class="case-metric-val">85 kWh</span><span class="case-metric-label">Capacity</span></div>
+                <div class="case-metric-pill"><span class="case-metric-val">247 t</span><span class="case-metric-label">CO₂/yr</span></div>
               </div>
+              <h3>Ondo Installation</h3>
               <p>State-of-the-art solar plant for Mr. Festus, achieving significant carbon savings.</p>
+              <router-link to="/projects" class="case-drawer-link">View project →</router-link>
             </div>
           </div>
           <!-- Ibadan Security -->
-          <div class="case-card reveal">
+          <div class="case-card">
             <div class="case-card-img-wrapper">
               <img :src="projectGofamintImg" alt="Ibadan CCTV Installation" class="case-card-img-src" />
               <div class="case-tag-badge">CCTV</div>
             </div>
-            <div class="case-card-body">
-              <h3>Ibadan Security</h3>
-              <div class="case-metrics-layout">
-                <div><span class="case-metric-val">40 Cameras</span><span class="case-metric-label">Setup</span></div>
-                <div><span class="case-metric-val">Risk</span><span class="case-metric-label">Mitigated</span></div>
+            <div class="case-drawer">
+              <div class="case-drawer-metrics">
+                <div class="case-metric-pill"><span class="case-metric-val">40</span><span class="case-metric-label">Cameras</span></div>
+                <div class="case-metric-pill"><span class="case-metric-val">✓</span><span class="case-metric-label">Risk Mitigated</span></div>
               </div>
+              <h3>Ibadan Security</h3>
               <p>Comprehensive CCTV network for GOFAMINT Printing Press Bookshop.</p>
+              <router-link to="/projects" class="case-drawer-link">View project →</router-link>
             </div>
           </div>
           <!-- Abuja FCDA Project -->
-          <div class="case-card reveal">
+          <div class="case-card">
             <div class="case-card-img-wrapper">
               <img :src="projectFcdaImg" alt="Abuja FCDA Project" class="case-card-img-src" />
               <div class="case-tag-badge">Government</div>
             </div>
-            <div class="case-card-body">
-              <h3>Abuja FCDA Project</h3>
-              <div class="case-metrics-layout">
-                <div><span class="case-metric-val">58 kWh</span><span class="case-metric-label">Capacity</span></div>
-                <div><span class="case-metric-val">₦62M</span><span class="case-metric-label">Sec. Value</span></div>
+            <div class="case-drawer">
+              <div class="case-drawer-metrics">
+                <div class="case-metric-pill"><span class="case-metric-val">58 kWh</span><span class="case-metric-label">Capacity</span></div>
+                <div class="case-metric-pill"><span class="case-metric-val">₦62M</span><span class="case-metric-label">Sec. Value</span></div>
               </div>
+              <h3>Abuja FCDA Project</h3>
               <p>Robust energy infrastructure delivered to sustain government operations.</p>
+              <router-link to="/projects" class="case-drawer-link">View project →</router-link>
             </div>
           </div>
           <!-- Ibadan Residential -->
-          <div class="case-card reveal">
+          <div class="case-card">
             <div class="case-card-img-wrapper">
               <img :src="projectJudgeImg" alt="Ibadan Residential Solar" class="case-card-img-src" />
               <div class="case-tag-badge">Residential</div>
             </div>
-            <div class="case-card-body">
-              <h3>Ibadan Residential</h3>
-              <div class="case-metrics-layout">
-                <div><span class="case-metric-val">3.5 kW</span><span class="case-metric-label">System</span></div>
-                <div><span class="case-metric-val">Stable</span><span class="case-metric-label">Power</span></div>
+            <div class="case-drawer">
+              <div class="case-drawer-metrics">
+                <div class="case-metric-pill"><span class="case-metric-val">3.5 kW</span><span class="case-metric-label">System</span></div>
+                <div class="case-metric-pill"><span class="case-metric-val">24/7</span><span class="case-metric-label">Uptime</span></div>
               </div>
-              <p>Hybrid solar solution for a premium residence, ensuring 24/7 uptime.</p>
+              <h3>Ibadan Residential</h3>
+              <p>Hybrid solar solution for a premium residence, ensuring stable 24/7 power.</p>
+              <router-link to="/projects" class="case-drawer-link">View project →</router-link>
             </div>
           </div>
           <!-- Ife Residential Project -->
-          <div class="case-card reveal">
+          <div class="case-card">
             <div class="case-card-img-wrapper">
               <img :src="projectIfeImg" alt="Ife Residential Solar" class="case-card-img-src" />
               <div class="case-tag-badge">Residential</div>
             </div>
-            <div class="case-card-body">
-              <h3>Ife Residential Project</h3>
-              <div class="case-metrics-layout">
-                <div><span class="case-metric-val">5 kW</span><span class="case-metric-label">Capacity</span></div>
-                <div><span class="case-metric-val">15 kWh</span><span class="case-metric-label">Backup</span></div>
+            <div class="case-drawer">
+              <div class="case-drawer-metrics">
+                <div class="case-metric-pill"><span class="case-metric-val">5 kW</span><span class="case-metric-label">Capacity</span></div>
+                <div class="case-metric-pill"><span class="case-metric-val">15 kWh</span><span class="case-metric-label">Backup</span></div>
               </div>
-              <p>A clean hybrid solar installation delivering stable, round-the-clock power for a premium residence.</p>
+              <h3>Ife Residential Project</h3>
+              <p>Clean hybrid solar installation delivering round-the-clock power.</p>
+              <router-link to="/projects" class="case-drawer-link">View project →</router-link>
             </div>
           </div>
         </div>
@@ -241,7 +320,7 @@
     </section>
 
     <!-- TRUST BAR -->
-    <div class="trust-bar">
+    <div class="trust-bar section-divider reveal-fade">
       <div class="container text-center">
         <div class="trust-bar-label">Trusted by forward-thinking organisations</div>
         <div class="trust-logos">
@@ -258,7 +337,7 @@
 
 
     <!-- FINANCING -->
-    <section class="financing" id="financing">
+    <section class="financing section-clipped section-divider" id="financing">
       <div class="container financing-inner">
         <div class="financing-content reveal">
           <span class="section-eyebrow">Flexible Financing</span>
@@ -314,44 +393,44 @@
     </section>
 
     <!-- TESTIMONIALS -->
-    <section class="testimonials" id="testimonials">
+    <section class="testimonials section-clipped section-divider" id="testimonials">
       <div class="container">
         <div class="testimonials-header reveal text-center">
           <span class="section-eyebrow">Client Voices</span>
           <h2 class="section-title">What our clients say</h2>
         </div>
-        <div class="testimonials-grid">
-          <div class="testi-card reveal">
-            <div class="testi-stars"><StarIcon v-for="n in 5" :key="n" class="star" /></div>
+        <div class="testimonials-grid reveal-stagger">
+          <div class="testi-card">
+            <div class="testi-card-top">
+              <div class="testi-avatar">AO</div>
+              <div class="testi-stars"><StarIcon v-for="n in 5" :key="n" class="star" /></div>
+            </div>
             <p class="testi-quote">"Origin Electrical engineered an energy solution that has completely eliminated our generator costs. The installation was professional, the documentation thorough, and the monitoring app gives us total peace of mind."</p>
             <div class="testi-author">
-              <div class="testi-avatar">AO</div>
-              <div>
-                <div class="testi-name">Adewale Okonkwo</div>
-                <div class="testi-role">MD, Okonkwo Manufacturing Ltd — Ibadan</div>
-              </div>
+              <div class="testi-name">Adewale Okonkwo</div>
+              <div class="testi-role">MD, Okonkwo Manufacturing Ltd — Ibadan</div>
             </div>
           </div>
-          <div class="testi-card reveal">
-            <div class="testi-stars"><StarIcon v-for="n in 5" :key="n" class="star" /></div>
+          <div class="testi-card">
+            <div class="testi-card-top">
+              <div class="testi-avatar">FK</div>
+              <div class="testi-stars"><StarIcon v-for="n in 5" :key="n" class="star" /></div>
+            </div>
             <p class="testi-quote">"We awarded the campus energy contract to Origin after seeing their M&E drawings and engineering rigour. 18 months later, we have zero unplanned outages and our electricity bill has dropped 78%."</p>
             <div class="testi-author">
-              <div class="testi-avatar">FK</div>
-              <div>
-                <div class="testi-name">Prof. Funmi Kassim</div>
-                <div class="testi-role">Director of Works, Obafemi Awolowo University</div>
-              </div>
+              <div class="testi-name">Prof. Funmi Kassim</div>
+              <div class="testi-role">Director of Works, Obafemi Awolowo University</div>
             </div>
           </div>
-          <div class="testi-card reveal">
-            <div class="testi-stars"><StarIcon v-for="n in 5" :key="n" class="star" /></div>
+          <div class="testi-card">
+            <div class="testi-card-top">
+              <div class="testi-avatar">BI</div>
+              <div class="testi-stars"><StarIcon v-for="n in 5" :key="n" class="star" /></div>
+            </div>
             <p class="testi-quote">"The integrated CCTV and access control system has transformed our hospital's security posture. Their team understood the sensitivity of a healthcare environment and delivered accordingly."</p>
             <div class="testi-author">
-              <div class="testi-avatar">BI</div>
-              <div>
-                <div class="testi-name">Dr. Bola Idowu</div>
-                <div class="testi-role">CEO, Ondo State Teaching Hospital</div>
-              </div>
+              <div class="testi-name">Dr. Bola Idowu</div>
+              <div class="testi-role">CEO, Ondo State Teaching Hospital</div>
             </div>
           </div>
         </div>
@@ -359,28 +438,40 @@
     </section>
 
     <!-- EV SECTION -->
-    <section class="ev-section" id="ev">
+    <section class="ev-section section-clipped section-divider" id="ev">
       <div class="container ev-inner">
-        <div class="ev-visual reveal">
+        <div class="ev-visual reveal-left">
           <div class="ev-icon"><ZapIcon class="ev-zap-icon" /></div>
           <h3>EV Charging Infrastructure</h3>
           <div class="ev-badge"><RocketIcon class="ev-badge-icon" /> First-Mover in Nigeria</div>
           <div class="ev-charging-pricing">
             <div class="ev-price-item">
-              <div class="ev-price-label">Home Charger (AC)</div>
-              <div class="ev-price-val">7 kW — from ₦350,000</div>
+              <div class="ev-price-header">
+                <div class="ev-price-label">Home Charger (AC)</div>
+                <div class="ev-price-val">from ₦350,000</div>
+              </div>
+              <div class="ev-gauge"><div class="ev-gauge-fill" style="width:14%"></div></div>
+              <div class="ev-price-kw">7 kW</div>
             </div>
             <div class="ev-price-item">
-              <div class="ev-price-label">Commercial Fleet (AC)</div>
-              <div class="ev-price-val">22 kW — from ₦1.2m</div>
+              <div class="ev-price-header">
+                <div class="ev-price-label">Commercial Fleet (AC)</div>
+                <div class="ev-price-val">from ₦1.2m</div>
+              </div>
+              <div class="ev-gauge"><div class="ev-gauge-fill" style="width:44%"></div></div>
+              <div class="ev-price-kw">22 kW</div>
             </div>
             <div class="ev-price-item">
-              <div class="ev-price-label">Public Fast Charger (DC)</div>
-              <div class="ev-price-val">50 kW — from ₦6.5m</div>
+              <div class="ev-price-header">
+                <div class="ev-price-label">Public Fast Charger (DC)</div>
+                <div class="ev-price-val">from ₦6.5m</div>
+              </div>
+              <div class="ev-gauge"><div class="ev-gauge-fill" style="width:100%"></div></div>
+              <div class="ev-price-kw">50 kW</div>
             </div>
           </div>
         </div>
-        <div class="reveal">
+        <div class="reveal-right">
           <span class="section-eyebrow">EV Charging Division</span>
           <h2 class="section-title text-left">Nigeria is going electric. We'll wire the infrastructure.</h2>
           <p class="section-sub text-left">As EV adoption accelerates, the charging infrastructure gap is Nigeria's biggest opportunity. Origin Electrical is positioning to be the dominant installer — bundled with our solar expertise for truly clean charging.</p>
@@ -416,7 +507,7 @@
     </section>
 
     <!-- CTA -->
-    <section class="cta-section" id="contact" :style="{ backgroundImage: `url(${ctaSolarDuskBg})` }">
+    <section class="cta-section section-clipped section-divider" id="contact" :style="{ backgroundImage: `url(${ctaSolarDuskBg})` }">
       <div class="cta-glow"></div>
       <div class="container text-center">
         <span class="section-eyebrow">Ready to Start?</span>
@@ -438,7 +529,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { 
   Calculator as CalculatorIcon, 
   Calendar as CalendarIcon, 
@@ -462,8 +553,16 @@ import {
   Home as HomeIcon,
   Rocket as RocketIcon,
   HelpingHand as HandshakeIcon,
-  MapPin as MapPinIcon
+  MapPin as MapPinIcon,
+  ShieldCheck as ShieldCheckIcon,
+  Battery as BatteryIcon,
+  Clock as ClockIcon,
+  Award as AwardIcon,
+  Users as UsersIcon,
+  Activity as ActivityIcon
 } from 'lucide-vue-next';
+
+import marketplaceService from '@/services/marketplace.service';
 
 // PDF Assets
 import projectOndoImg from '../assets/pdf-assets/project-ondo.jpg';
@@ -514,9 +613,75 @@ const calcPayment = () => {
   showResult.value = true;
 };
 
+// ----------------- HERO PRODUCT SCROLL -----------------
+const heroProducts = ref([]);
+const heroScrollRef = ref(null);
+let heroScrollTimer = null;
+
+const getHeroImageUrl = (path) => {
+  if (!path) return '';
+  if (path.startsWith('http')) return path;
+  return `https://api.originelectricltd.com${path}`;
+};
+
+const parseHeroImages = (images) => {
+  try {
+    const arr = typeof images === 'string' ? JSON.parse(images || '[]') : (images || []);
+    return arr.length ? arr : [];
+  } catch { return []; }
+};
+
+const fetchHeroProducts = async () => {
+  try {
+    // Fetch all products in one call (limit 51 covers everything currently in DB)
+    const res = await marketplaceService.getProducts({ page: 1, limit: 60 });
+    const raw = res.products || res || [];
+    heroProducts.value = raw.map(p => ({
+      id: p.id,
+      name: p.name,
+      price: Number(p.price).toLocaleString('en-NG'),
+      category: p.category || '',
+      image: getHeroImageUrl(parseHeroImages(p.images)[0] || '')
+    }));
+  } catch (e) {
+    console.error('Hero products fetch error:', e);
+  }
+};
+
+const startHeroScroll = () => {
+  const el = heroScrollRef.value;
+  if (!el) return;
+  let pos = 0;
+  const step = () => {
+    pos += 0.7;
+    // Seamless loop: when we've scrolled through one full copy, reset silently
+    if (pos >= el.scrollHeight / 2) pos = 0;
+    el.scrollTop = pos;
+    heroScrollTimer = requestAnimationFrame(step);
+  };
+  heroScrollTimer = requestAnimationFrame(step);
+};
+
+const stopHeroScroll = () => {
+  if (heroScrollTimer) {
+    cancelAnimationFrame(heroScrollTimer);
+    heroScrollTimer = null;
+  }
+};
+
+onUnmounted(() => {
+  stopHeroScroll();
+});
+
 // ----------------- LIFECYCLE -----------------
 onMounted(() => {
-  // Scroll Reveal Observer
+  // Load hero products, then start scroll animation
+  fetchHeroProducts().then(() => {
+    // Small delay to let DOM render the duplicated list
+    setTimeout(startHeroScroll, 400);
+  });
+
+  // Scroll Reveal Observer — handles .reveal, .reveal-left, .reveal-right, .reveal-fade, .reveal-stagger
   const revealObserver = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
@@ -524,10 +689,17 @@ onMounted(() => {
         revealObserver.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.1 });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
 
-  document.querySelectorAll('.reveal').forEach((el) => {
+  document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-fade, .reveal-stagger').forEach((el) => {
     revealObserver.observe(el);
+  });
+
+  // Hero elements — trigger with staggered CSS animation delays
+  const heroEls = document.querySelectorAll('.hero .reveal, .hero .reveal-right, .hero .reveal-fade');
+  heroEls.forEach((el, i) => {
+    const delay = el.style.getPropertyValue('--reveal-delay') || `${i * 100}ms`;
+    setTimeout(() => el.classList.add('visible'), parseInt(delay) || i * 100);
   });
 });
 </script>
@@ -558,13 +730,42 @@ onMounted(() => {
 
 /* ----------------- HERO SECTION ----------------- */
 .hero {
-  min-height: 90vh;
+  min-height: min(90vh, 760px);
   padding: 5.5rem 0 3.5rem;
   display: flex;
   align-items: center;
   position: relative;
   overflow: hidden;
   background-color: var(--bg-primary);
+}
+
+/* --- Radar glow decorative --- */
+.hero-radar {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px;
+  height: 600px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.18;
+}
+
+.hero-radar-core {
+  position: absolute;
+  inset: 30%;
+  border-radius: var(--radius-full);
+  background: radial-gradient(circle, rgba(255, 153, 0, 0.6) 0%, rgba(0, 102, 204, 0.3) 50%, transparent 70%);
+  animation: radarPulse 4s ease-in-out infinite;
+}
+
+.hero-radar-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-full);
+  border: 1.5px solid rgba(255, 153, 0, 0.5);
+  animation: radarRing 2.8s ease-out infinite;
 }
 
 .hero-bg {
@@ -645,15 +846,15 @@ onMounted(() => {
   align-items: center;
   gap: 8px;
   background: rgba(255, 153, 0, 0.15);
-  border: 1px solid rgba(255, 153, 0, 0.3);
-  border-radius: 100px;
-  padding: 6px 14px;
-  font-size: 0.75rem;
+  border: 1px solid rgba(255, 153, 0, 0.35);
+  border-radius: var(--radius-full);
+  padding: 6px 16px;
+  font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   color: var(--orange);
   text-transform: uppercase;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
 
 .hero-eyebrow::before {
@@ -671,11 +872,11 @@ onMounted(() => {
 }
 
 .hero h1 {
-  font-size: clamp(2.4rem, 4.5vw, 4rem);
-  font-weight: 800;
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  font-weight: 700;
   line-height: 1.1;
-  margin-bottom: 24px;
-  letter-spacing: -0.02em;
+  margin-bottom: 20px;
+  letter-spacing: -0.03em;
   color: #fff;
 }
 
@@ -689,11 +890,12 @@ onMounted(() => {
 }
 
 .hero-sub {
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: rgba(255, 255, 255, 0.82);
   max-width: 520px;
-  line-height: 1.7;
-  margin-bottom: 40px;
+  line-height: 1.65;
+  letter-spacing: 0em;
+  margin-bottom: 36px;
 }
 
 @media (max-width: 992px) {
@@ -716,37 +918,39 @@ onMounted(() => {
 }
 
 .btn-primary, .btn-secondary, .btn-ai-glow {
-  padding: 14px 28px;
-  border-radius: 8px;
+  padding: 0.8125rem 1.625rem;
+  border-radius: var(--radius-full);
   font-family: var(--font-main);
-  font-weight: 700;
-  font-size: 0.95rem;
+  font-weight: 600;
+  font-size: 0.9375rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
   transition: all var(--transition-speed) var(--transition-bounce);
   cursor: pointer;
   border: none;
+  letter-spacing: 0em;
+  line-height: 1;
 }
 
 .btn-primary {
   background: var(--orange);
   color: white;
-  box-shadow: 0 8px 20px -6px rgba(255, 153, 0, 0.4);
+  box-shadow: 0 8px 20px -6px rgba(255, 153, 0, 0.45);
 }
 
 .btn-primary:hover {
   background: var(--orange2);
   transform: translateY(-2px);
-  box-shadow: 0 12px 24px -6px rgba(255, 153, 0, 0.6);
+  box-shadow: 0 14px 28px -6px rgba(255, 153, 0, 0.6);
   color: white;
 }
 
 .btn-secondary {
   background: transparent;
   color: var(--text-primary);
-  border: 1px solid var(--border-color);
+  border: 1.5px solid var(--border-color);
 }
 
 .btn-secondary:hover {
@@ -770,7 +974,8 @@ onMounted(() => {
   position: relative;
   background: var(--glass-bg);
   backdrop-filter: blur(20px);
-  border: 1px solid var(--glass-border);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1.5px solid var(--glass-border);
   color: var(--text-primary);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
@@ -800,7 +1005,7 @@ onMounted(() => {
   background: linear-gradient(90deg, var(--color-blue-primary), var(--orange), var(--color-blue-primary));
   background-size: 200% 100%;
   z-index: -1;
-  border-radius: 8px;
+  border-radius: var(--radius-full);
   opacity: 0.3;
   animation: borderGlow 3s linear infinite;
 }
@@ -811,8 +1016,9 @@ onMounted(() => {
 }
 
 .btn-icon {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
 }
 
 .ai-icon {
@@ -847,113 +1053,249 @@ onMounted(() => {
 .hero-main-card {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   padding: 28px;
   position: relative;
   z-index: 2;
-  backdrop-filter: blur(14px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+/* Subtle background glow */
+.hero-main-card::before {
+  content: '';
+  position: absolute;
+  top: -30px;
+  right: -30px;
+  width: 140px;
+  height: 140px;
+  background: radial-gradient(circle, rgba(255, 153, 0, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+  animation: radarPulse 3.5s ease-in-out infinite;
 }
 
 .hero-card-label {
-  font-size: 0.72rem;
+  font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--text-secondary);
-  margin-bottom: 16px;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 10px;
 }
 
-.hero-card-stat {
-  font-family: var(--font-main);
-  font-size: 2.8rem;
-  font-weight: 800;
-  color: var(--orange);
-  line-height: 1;
-  margin-bottom: 4px;
+/* ── Hero product scroll ── */
+.hero-product-scroll {
+  height: 220px;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 0;
 }
 
-.hero-card-desc {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  margin-bottom: 24px;
+/* Fade mask top and bottom for smooth disappearance */
+.hero-product-scroll::before,
+.hero-product-scroll::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 32px;
+  z-index: 2;
+  pointer-events: none;
+}
+.hero-product-scroll::before {
+  top: 0;
+  background: linear-gradient(to bottom, rgba(5, 10, 20, 0.85), transparent);
+}
+.hero-product-scroll::after {
+  bottom: 0;
+  background: linear-gradient(to top, rgba(5, 10, 20, 0.85), transparent);
 }
 
-.mini-chart {
+.hero-product-row {
   display: flex;
-  align-items: flex-end;
-  gap: 6px;
-  height: 60px;
-  margin-bottom: 20px;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 6px;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: background 0.2s ease;
+  cursor: pointer;
 }
 
-.chart-bar {
+.hero-product-row:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.hero-product-img-wrap {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-product-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-product-img-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-product-info {
   flex: 1;
-  background: rgba(255, 153, 0, 0.15);
-  border-radius: 4px 4px 0 0;
-  border-top: 2px solid var(--orange);
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hero-product-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0em;
+}
+
+.hero-product-cat {
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.hero-product-price {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--color-orange-primary);
+  white-space: nowrap;
+  flex-shrink: 0;
+  letter-spacing: -0.01em;
+}
+
+/* Skeleton shimmer for loading state */
+.hero-product-skeleton {
+  pointer-events: none;
+}
+
+.hero-shop-link {
+  color: var(--color-blue-primary);
+  font-weight: 700;
+  font-size: 0.76rem;
+  text-decoration: none;
+  margin-left: auto;
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+.hero-shop-link:hover {
+  color: var(--color-orange-primary);
 }
 
 .hero-card-divider {
   height: 1px;
-  background: var(--border-color);
-  margin: 20px 0;
+  background: rgba(255, 255, 255, 0.12);
+  margin: 14px 0 10px;
 }
 
 .hero-status-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 0.8rem;
-  color: var(--text-secondary);
+  gap: 8px;
+  font-size: 0.76rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .status-dot {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: #22c55e;
   box-shadow: 0 0 8px #22c55e;
+  flex-shrink: 0;
   animation: pulse-dot 2s infinite;
 }
 
+/* Floating card — pulsing border */
 .hero-floating-card {
   position: absolute;
   bottom: -24px;
   left: -28px;
-  background: var(--bg-secondary);
+  background: var(--bg-primary);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 16px 20px;
+  border-radius: var(--radius-lg);
+  padding: 14px 18px;
   z-index: 3;
-  min-width: 180px;
+  min-width: 170px;
   box-shadow: var(--shadow-md);
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  overflow: hidden;
+}
+
+/* Floating card — animated top border */
+.hero-floating-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-blue-primary), var(--color-orange-primary));
+  background-size: 200% 100%;
+  animation: gradientShift 2.5s linear infinite;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
 }
 
 .float-card-num {
   font-family: var(--font-main);
-  font-size: 1.6rem;
+  font-size: 1.45rem;
   font-weight: 800;
-  color: var(--orange);
+  letter-spacing: -0.03em;
+  color: var(--color-blue-primary);
+  line-height: 1;
+  margin-bottom: 3px;
 }
 
 .float-card-label {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
   color: var(--text-secondary);
 }
 
 /* ----------------- STATS BAR ----------------- */
 .stats-bar {
   background: var(--bg-secondary);
-  border-top: 4px solid var(--orange);
-  padding: 40px 0;
+  border-top: 3px solid var(--orange);
+  padding: 36px 0;
   border-bottom: 1px solid var(--border-color);
 }
 
 .stats-container-layout {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  gap: 0;
 }
 
 @media (max-width: 900px) {
@@ -978,10 +1320,9 @@ onMounted(() => {
 
 .stat-item {
   text-align: center;
-  padding: 0 20px;
+  padding: 12px 20px;
   border-right: 1px solid var(--border-color);
 }
-
 
 .stat-item:last-child {
   border-right: none;
@@ -989,40 +1330,32 @@ onMounted(() => {
 
 .stat-number {
   font-family: var(--font-main);
-  font-size: 2.8rem;
-  font-weight: 800;
+  font-size: clamp(1.75rem, 2.5vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
   color: var(--text-primary);
   line-height: 1;
   margin-bottom: 6px;
 }
 
 .stat-label {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--text-secondary);
   font-weight: 500;
+  letter-spacing: 0.01em;
 }
-
 
 @media (max-width: 900px) {
   .stat-item {
-    padding: 24px 20px;
+    padding: 20px 16px;
   }
   .stat-number {
-    font-size: 2rem;
+    font-size: 1.75rem;
   }
 }
 
-/* ----------------- REVEAL ANIMATIONS ----------------- */
-.reveal {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.reveal.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
+/* ----------------- REVEAL ANIMATIONS (handled by global.css) ----------------- */
+/* Local .reveal is now provided globally — no override needed here */
 
 /* ----------------- SERVICES SECTION ----------------- */
 .services {
@@ -1030,141 +1363,577 @@ onMounted(() => {
 }
 
 .services-header {
-  margin-bottom: 48px;
+  margin-bottom: 40px;
 }
 
 .section-eyebrow {
-  font-size: 0.75rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--orange);
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   display: block;
 }
 
 .section-title {
-  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
-  font-weight: 800;
+  font-size: clamp(1.6rem, 3vw, 2.75rem);
+  font-weight: 600;
   letter-spacing: -0.02em;
-  margin-bottom: 16px;
+  line-height: 1.2;
+  margin-bottom: 14px;
   color: var(--text-primary);
 }
 
 .section-sub {
-  font-size: 1.05rem;
+  font-size: 1rem;
   color: var(--text-secondary);
-  max-width: 600px;
-  line-height: 1.65;
+  max-width: 580px;
+  line-height: 1.6;
+  letter-spacing: 0em;
 }
 
 .services-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+  gap: 20px;
+  align-items: stretch;
 }
 
 @media (max-width: 900px) {
   .services-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
   }
 }
 
 @media (max-width: 560px) {
   .services-grid {
     grid-template-columns: 1fr;
+    gap: 14px;
   }
 }
 
+/* ═══════════════════════════════════════════════════
+   UNIQUE CARD SYSTEM
+   ═══════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════
+   SERVICE CARD — Photo card design
+   Real image + diagonal wave + icon
+   ═══════════════════════════════ */
 .service-card {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-md);
-  padding: 36px 32px;
-  transition: all var(--transition-bounce) var(--transition-speed);
-  position: relative;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
-}
-
-.service-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: var(--orange);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.35s var(--transition-bounce);
+  height: 100%;
+  position: relative;
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 0.45s var(--transition-bounce),
+    box-shadow 0.45s var(--transition-bounce),
+    border-color 0.3s ease;
 }
 
 .service-card:hover {
-  background: var(--bg-primary);
-  border-color: rgba(255, 153, 0, 0.3);
-  transform: translateY(-6px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-10px);
+  box-shadow: var(--shadow-lg);
+  border-color: transparent;
 }
 
-.service-card:hover::before {
-  transform: scaleX(1);
+/* ── Photo section (top 55% of card) ── */
+.svc-img-wrap {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--bg-secondary);
 }
 
-.service-icon {
-  width: 48px;
-  height: 48px;
-  background: var(--color-orange-light);
-  border-radius: 10px;
+.svc-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  display: block;
+  transition: transform 0.7s var(--transition-bounce);
+}
+
+/* Per-card image focus — ensures subject is always visible */
+.service-card:nth-child(1) .svc-img { object-position: center 30%; }   /* Solar — panels top */
+.service-card:nth-child(2) .svc-img { object-position: center center; } /* CCTV — pole centre */
+.service-card:nth-child(3) .svc-img { object-position: center 40%; }   /* Access — device centre */
+.service-card:nth-child(4) .svc-img { object-position: center 50%; }   /* Fire — equipment */
+.service-card:nth-child(5) .svc-img { object-position: center 40%; }   /* M&E — engineer */
+.service-card:nth-child(6) .svc-img { object-position: center 50%; }   /* EV — charger */
+
+.service-card:hover .svc-img {
+  transform: scale(1.06);
+}
+
+/* Dark gradient at bottom of image — bleeds into body */
+.svc-img-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.08) 0%,
+    rgba(0,0,0,0.48) 100%
+  );
+  transition: opacity 0.3s ease;
+}
+
+.service-card:hover .svc-img-overlay {
+  opacity: 0.85;
+}
+
+/* Category tag — top-left of image */
+.svc-tag {
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(255,255,255,0.15);
+  z-index: 2;
+}
+
+/* Service number — top-right of image */
+.svc-num {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: 28px;
+  height: 28px;
+  background: var(--color-blue-primary);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 20px;
-  color: var(--orange);
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(0,102,204,0.4);
 }
 
-.dark-mode .service-icon {
-  background: rgba(255, 153, 0, 0.1);
+/* ── Card body ── */
+.svc-body {
+  padding: 16px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  /* Slight diagonal top-left cut using clip-path on the wrapper */
+  position: relative;
 }
 
-.service-icon svg {
-  width: 24px;
-  height: 24px;
-  stroke-width: 1.8;
+/* Diagonal coloured bar across the join */
+.svc-body::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    var(--color-blue-primary) 0%,
+    var(--color-orange-primary) 100%
+  );
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s var(--transition-bounce);
+}
+
+.service-card:hover .svc-body::before {
+  transform: scaleX(1);
+}
+
+/* Icon row — small pill icon below the join */
+.svc-icon-row {
+  margin-bottom: 14px;
+  margin-top: -32px; /* pulls icon up into the image */
+  z-index: 3;
+  position: relative;
+}
+
+.svc-icon {
+  width: 46px;
+  height: 46px;
+  background: var(--color-blue-primary);
+  color: #fff;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0, 102, 204, 0.35);
+  border: 3px solid var(--bg-primary);
+  transition:
+    transform 0.35s var(--transition-bounce),
+    box-shadow 0.35s ease;
+}
+
+.svc-icon--orange {
+  background: var(--color-orange-primary);
+  box-shadow: 0 4px 16px rgba(255, 153, 0, 0.35);
+}
+
+.service-card:hover .svc-icon {
+  transform: scale(1.1) rotate(-4deg);
+  box-shadow: 0 8px 24px rgba(0, 102, 204, 0.45);
+}
+
+.service-card:hover .svc-icon--orange {
+  box-shadow: 0 8px 24px rgba(255, 153, 0, 0.45);
+}
+
+.svc-icon svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2;
 }
 
 .service-card h3 {
-  font-size: 1.15rem;
+  font-size: 1rem;
   font-weight: 700;
-  margin-bottom: 12px;
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+  line-height: 1.3;
   color: var(--text-primary);
 }
 
 .service-card p {
-  font-size: 0.9rem;
+  font-size: 0.84rem;
   color: var(--text-secondary);
-  line-height: 1.65;
-  margin-bottom: 20px;
+  line-height: 1.6;
+  margin-bottom: 16px;
   flex: 1;
 }
 
+/* Link — always visible but slides on hover */
 .service-card-link {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.85rem;
-  color: var(--orange2);
+  font-size: 0.8rem;
   font-weight: 700;
+  color: var(--color-blue-primary);
   text-decoration: none;
-  opacity: 0.85;
-  transition: opacity 0.2s, transform 0.2s;
+  padding: 8px 14px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--color-blue-primary);
+  width: fit-content;
+  transition:
+    background 0.25s ease,
+    color 0.25s ease,
+    gap 0.2s ease,
+    transform 0.3s var(--transition-bounce);
+}
+
+.service-card-link span {
+  transition: transform 0.25s ease;
 }
 
 .service-card:hover .service-card-link {
+  background: var(--color-blue-primary);
+  color: #fff;
+  gap: 10px;
+  transform: translateY(-1px);
+}
+
+.service-card:hover .service-card-link span {
+  transform: translateX(3px);
+}
+
+/* Dark mode adjustments */
+.dark-mode .svc-icon {
+  border-color: var(--bg-primary);
+}
+
+/* ═══════════════════════════════════════════
+   SERVICES — BENTO GRID
+   ═══════════════════════════════════════════ */
+
+/* Intro */
+.svc-intro {
+  margin-bottom: 40px;
+}
+
+.svc-intro .highlight {
+  background: linear-gradient(135deg, var(--color-blue-primary), var(--color-orange-primary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Bento grid — magazine-style asymmetric layout */
+.svc-bento {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: auto;
+  gap: 16px;
+}
+
+/* Wide cards span 2 columns */
+.svc-bento-card--wide {
+  grid-column: span 2;
+}
+
+@media (max-width: 900px) {
+  .svc-bento {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+  .svc-bento-card--wide {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 560px) {
+  .svc-bento {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .svc-bento-card--wide {
+    grid-column: span 1;
+  }
+}
+
+/* Individual card */
+.svc-bento-card {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  height: 160px;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.45s var(--transition-bounce), box-shadow 0.45s var(--transition-bounce);
+}
+
+.svc-bento-card--wide {
+  height: 160px;
+}
+
+.svc-bento-card:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Full-bleed photo */
+.svc-bento-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.7s var(--transition-bounce);
+}
+
+.svc-bento-card:hover .svc-bento-img {
+  transform: scale(1.07);
+}
+
+/* Dark gradient overlay — always visible, deepens on hover */
+.svc-bento-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(5, 10, 20, 0.92) 0%,
+    rgba(5, 10, 20, 0.5) 50%,
+    rgba(5, 10, 20, 0.1) 100%
+  );
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+.svc-bento-card:hover .svc-bento-overlay {
+  opacity: 1.1;
+}
+
+/* Glass info panel — sits at bottom, slides up on hover */
+.svc-bento-glass {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  padding: 14px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  transform: translateY(0);
+  transition: transform 0.45s var(--transition-bounce);
+}
+
+/* Icon badge — top of glass panel */
+.svc-bento-icon {
+  width: 32px;
+  height: 32px;
+  background: var(--color-blue-primary);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 3px 10px rgba(0, 102, 204, 0.5);
+  transition: transform 0.35s var(--transition-bounce);
+}
+
+.svc-bento-icon--orange {
+  background: var(--color-orange-primary);
+  box-shadow: 0 3px 10px rgba(255, 153, 0, 0.45);
+}
+
+.svc-bento-card:hover .svc-bento-icon {
+  transform: scale(1.1) rotate(-5deg);
+}
+
+.svc-bento-icon svg {
+  width: 15px;
+  height: 15px;
+  stroke-width: 2;
+}
+
+/* Content */
+.svc-bento-content {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.svc-bento-tag {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-orange-primary);
+}
+
+.svc-bento-content h3 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #fff;
+  line-height: 1.25;
+  margin: 0;
+}
+
+.svc-bento-content p {
+  font-size: 0.74rem;
+  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.5;
+  margin: 0;
+  /* Hidden on default — slides in on hover */
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    max-height 0.4s var(--transition-bounce),
+    opacity 0.35s ease 0.05s,
+    transform 0.35s var(--transition-bounce) 0.05s;
+}
+
+.svc-bento-card:hover .svc-bento-content p {
+  max-height: 80px;
   opacity: 1;
-  transform: translateX(4px);
+  transform: translateY(0);
+}
+
+/* Stats row — only on wide cards */
+.svc-bento-stats {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.4s var(--transition-bounce), opacity 0.3s ease 0.1s;
+}
+
+.svc-bento-card:hover .svc-bento-stats {
+  max-height: 40px;
+  opacity: 1;
+}
+
+.svc-bento-stats span {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.svc-bento-stats strong {
+  color: var(--color-orange-primary);
+  font-weight: 800;
+}
+
+/* CTA link */
+.svc-bento-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+  padding: 7px 14px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-full);
+  backdrop-filter: blur(8px);
+  width: fit-content;
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 0.3s ease 0.12s,
+    transform 0.35s var(--transition-bounce) 0.12s,
+    background 0.25s ease,
+    gap 0.2s ease;
+}
+
+.svc-bento-card:hover .svc-bento-link {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.svc-bento-link:hover {
+  background: var(--color-blue-primary);
+  border-color: var(--color-blue-primary);
+  gap: 10px;
+}
+
+.svc-bento-arrow {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .svc-bento-card,
+  .svc-bento-img,
+  .svc-bento-content p,
+  .svc-bento-link {
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    max-height: none !important;
+  }
 }
 
 /* ----------------- PROCESS SECTION ----------------- */
@@ -1217,7 +1986,7 @@ onMounted(() => {
 
 .process-header {
   text-align: center;
-  margin-bottom: 72px;
+  margin-bottom: 56px;
 }
 
 .process-header .section-title, .process-header .section-sub {
@@ -1228,20 +1997,22 @@ onMounted(() => {
 .process-steps {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
+  gap: 20px;
   position: relative;
+  align-items: stretch;
 }
 
 @media (max-width: 900px) {
   .process-steps {
     grid-template-columns: repeat(2, 1fr);
-    gap: 40px;
+    gap: 20px;
   }
 }
 
 @media (max-width: 560px) {
   .process-steps {
     grid-template-columns: 1fr;
+    gap: 14px;
   }
 }
 
@@ -1253,33 +2024,36 @@ onMounted(() => {
 }
 
 .step-num {
-  width: 80px;
-  height: 80px;
+  width: 68px;
+  height: 68px;
   border-radius: 50%;
   background: var(--bg-primary);
   border: 2px solid var(--orange);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 24px;
+  margin: 0 auto 20px;
   font-family: var(--font-main);
-  font-size: 1.5rem;
-  font-weight: 800;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   color: var(--orange);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 0 0 6px rgba(255, 153, 0, 0.08);
 }
 
 .process-step h3 {
-  font-size: 1.05rem;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   color: var(--text-primary);
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .process-step p {
-  font-size: 0.88rem;
+  font-size: 0.875rem;
   color: var(--text-secondary);
   line-height: 1.6;
+  letter-spacing: 0em;
 }
 
 /* ----------------- CASE STUDIES SECTION ----------------- */
@@ -1291,38 +2065,204 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  margin-bottom: 56px;
+  margin-bottom: 40px;
   flex-wrap: wrap;
-  gap: 24px;
+  gap: 20px;
 }
 
 .cases-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+  gap: 20px;
+  align-items: stretch;
 }
 
 @media (max-width: 900px) {
   .cases-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
   }
 }
 
+@media (max-width: 560px) {
+  .cases-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+}
+
+/* ── CASE CARD — full-bleed image + slide-up frosted drawer ── */
 .case-card {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  transition: all var(--transition-bounce) var(--transition-speed);
-  box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
+  position: relative;
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 0.4s var(--transition-bounce),
+    box-shadow 0.4s var(--transition-bounce);
+  /* remove old bg/border — image is the card face */
+  background: var(--bg-secondary);
+  border: none;
+  /* Uniform height — all case cards in a row are identical height */
+  height: 340px;
 }
 
 .case-card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(255, 153, 0, 0.3);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-8px) scale(1.01);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Full-bleed image wrapper */
+.case-card-img-wrapper {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+}
+
+.case-card-img-src {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.7s var(--transition-bounce);
+}
+
+.case-card:hover .case-card-img-src {
+  transform: scale(1.08);
+}
+
+/* Dark gradient over image always visible at bottom */
+.case-card-img-wrapper::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(10, 12, 18, 0.92) 0%,
+    rgba(10, 12, 18, 0.45) 50%,
+    transparent 100%
+  );
+  transition: opacity 0.3s ease;
+}
+
+/* Tag badge — top-left */
+.case-tag-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  background: rgba(0, 102, 204, 0.9);
+  backdrop-filter: blur(8px);
+  color: white;
+  border-radius: var(--radius-full);
+  padding: 4px 12px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  z-index: 3;
+}
+
+/* Slide-up drawer — sits at bottom, expands on hover */
+.case-drawer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  padding: 20px 20px 18px;
+  /* Frosted glass effect */
+  background: rgba(10, 12, 18, 0.75);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  /* Start collapsed — only show metrics + title */
+  max-height: 110px;
+  transition: max-height 0.5s var(--transition-bounce), padding 0.3s ease;
+  overflow: hidden;
+}
+
+.case-card:hover .case-drawer {
+  max-height: 280px;
+}
+
+/* Metric pills row */
+.case-drawer-metrics {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.case-metric-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-full);
+  padding: 3px 10px;
+}
+
+.case-metric-val {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--color-orange-primary);
+  letter-spacing: -0.01em;
+  display: inline;
+}
+
+.case-metric-label {
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.03em;
+  display: inline;
+}
+
+/* Title always visible */
+.case-drawer h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: white;
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+/* Description — hidden until hover */
+.case-drawer p {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.55;
+  margin-bottom: 14px;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.3s ease 0.1s, transform 0.35s var(--transition-bounce) 0.1s;
+}
+
+.case-card:hover .case-drawer p {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* CTA link */
+.case-drawer-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-blue-primary);
+  text-decoration: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.25s ease 0.18s, transform 0.3s var(--transition-bounce) 0.18s;
+  letter-spacing: 0.01em;
+}
+
+.case-card:hover .case-drawer-link {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .case-card-img {
@@ -1342,7 +2282,7 @@ onMounted(() => {
   width: 64px;
   height: 64px;
   background: rgba(255, 153, 0, 0.12);
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1375,97 +2315,7 @@ onMounted(() => {
   margin-bottom: 8px;
 }
 
-.case-card-body {
-  padding: 24px;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.case-card-body h3 {
-  font-size: 1.15rem;
-  font-weight: 800;
-  margin-bottom: 10px;
-  line-height: 1.35;
-  color: var(--text-primary);
-}
-
-.case-card-body p {
-  font-size: 0.88rem;
-  color: var(--text-secondary);
-  line-height: 1.6;
-  margin-bottom: 20px;
-}
-
-.case-metrics {
-  display: flex;
-  gap: 16px;
-  margin-top: auto;
-  padding-top: 16px;
-  border-top: 1px solid var(--border-color);
-}
-
-.case-metrics > div {
-  flex: 1;
-}
-
-.case-metric-val {
-  font-family: var(--font-main);
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: var(--orange);
-}
-
-.case-metric-label {
-  font-size: 0.7rem;
-  color: var(--text-secondary);
-}
-
-.case-card-img-wrapper {
-  position: relative;
-  height: 200px;
-  overflow: hidden;
-}
-
-.case-card-img-src {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.5s ease;
-}
-
-.case-card:hover .case-card-img-src {
-  transform: scale(1.05);
-}
-
-.case-tag-badge {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  background: var(--orange);
-  color: white;
-  border-radius: 100px;
-  padding: 4px 12px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  z-index: 2;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
-}
-
-.case-metrics-layout {
-  display: flex;
-  gap: 16px;
-  padding: 12px 0;
-  margin-bottom: 12px;
-  border-top: 1px solid var(--border-color);
-  border-bottom: 1px solid var(--border-color);
-}
-
-.case-metrics-layout > div {
-  flex: 1;
-}
+/* (old case-card-body/metrics removed — replaced by .case-drawer system above) */
 
 /* ----------------- TRUST BAR ----------------- */
 .trust-bar {
@@ -1476,29 +2326,30 @@ onMounted(() => {
 }
 
 .trust-bar-label {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--text-secondary);
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .trust-logos {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 40px;
+  gap: 36px;
   flex-wrap: wrap;
 }
 
 .trust-logo {
   font-family: var(--font-main);
-  font-weight: 800;
-  font-size: 1.05rem;
+  font-weight: 700;
+  font-size: 0.9rem;
   color: var(--text-secondary);
-  opacity: 0.5;
-  letter-spacing: 0.04em;
+  opacity: 0.45;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   transition: opacity 0.3s, color 0.3s;
   cursor: default;
 }
@@ -1557,25 +2408,28 @@ onMounted(() => {
 .products-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+  gap: 20px;
+  align-items: stretch;
 }
 
 @media (max-width: 900px) {
   .products-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
   }
 }
 
 @media (max-width: 560px) {
   .products-grid {
     grid-template-columns: 1fr;
+    gap: 14px;
   }
 }
 
 .product-card {
   background: var(--bg-primary);
   border: 1px solid var(--border-color);
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
   transition: all 0.3s var(--transition-bounce);
   cursor: pointer;
@@ -1702,7 +2556,7 @@ onMounted(() => {
 .empty-state-container {
   background: var(--bg-primary);
   border: 1px solid var(--border-color);
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   padding: 48px;
   max-width: 600px;
   margin: 0 auto;
@@ -1731,7 +2585,7 @@ onMounted(() => {
   margin-top: 56px;
   background: var(--bg-primary);
   border: 1px solid var(--border-color);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   padding: 48px 32px;
   display: flex;
   flex-direction: column;
@@ -1743,7 +2597,7 @@ onMounted(() => {
   width: 60px;
   height: 60px;
   background: rgba(255, 153, 0, 0.1);
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1813,23 +2667,25 @@ onMounted(() => {
 
 .financing-bullets {
   list-style: none;
-  margin-top: 28px;
+  margin-top: 24px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .financing-bullets li {
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-size: 0.9rem;
+  gap: 10px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  letter-spacing: 0em;
   color: var(--text-secondary);
 }
 
 .bullet-check-icon {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
   color: var(--orange);
   flex-shrink: 0;
 }
@@ -1837,61 +2693,67 @@ onMounted(() => {
 .financing-tool {
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
-  border-radius: 16px;
-  padding: 36px;
+  border-radius: var(--radius-lg);
+  padding: 32px;
   box-shadow: var(--shadow-sm);
 }
 
 .tool-title {
   font-family: var(--font-main);
-  font-weight: 800;
-  font-size: 1.15rem;
+  font-weight: 600;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
   margin-bottom: 20px;
   color: var(--text-primary);
 }
 
 .tool-label {
-  font-size: 0.75rem;
+  font-size: 0.68rem;
   font-weight: 700;
+  letter-spacing: 0.1em;
   color: var(--text-secondary);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   text-transform: uppercase;
 }
 
 .tool-select, .tool-input {
   width: 100%;
-  padding: 12px 16px;
+  padding: 11px 14px;
   background: var(--bg-primary);
   color: var(--text-primary);
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   font-family: var(--font-main);
   font-size: 0.9rem;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .tool-select:focus, .tool-input:focus {
   border-color: var(--orange);
+  box-shadow: 0 0 0 3px rgba(255, 153, 0, 0.1);
 }
 
 .tool-btn {
   width: 100%;
-  padding: 14px;
+  padding: 12px;
   background: var(--orange);
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-full);
   font-family: var(--font-main);
-  font-weight: 700;
-  font-size: 0.95rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 0em;
   cursor: pointer;
-  transition: all var(--transition-speed);
+  transition: all var(--transition-bounce);
 }
 
 .tool-btn:hover {
   background: var(--orange2);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px -6px rgba(255, 153, 0, 0.45);
 }
 
 .tool-result {
@@ -1899,14 +2761,14 @@ onMounted(() => {
   overflow: hidden;
   transition: max-height 0.4s var(--transition-bounce), margin-top 0.4s;
   background: rgba(255, 153, 0, 0.04);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   border: 0 solid var(--border);
 }
 
 .tool-result.visible {
   max-height: 500px;
-  margin-top: 24px;
-  padding: 20px;
+  margin-top: 20px;
+  padding: 18px;
   border: 1px solid var(--border);
 }
 
@@ -1919,8 +2781,9 @@ onMounted(() => {
 }
 
 .result-plan-name {
-  font-size: 0.78rem;
+  font-size: 0.7rem;
   font-weight: 700;
+  letter-spacing: 0.08em;
   color: var(--text-secondary);
   margin-bottom: 2px;
   text-transform: uppercase;
@@ -1928,13 +2791,14 @@ onMounted(() => {
 
 .result-plan-amount {
   font-family: var(--font-main);
-  font-size: 1.25rem;
-  font-weight: 800;
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   color: var(--orange);
 }
 
 .result-plan-term {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--text-secondary);
 }
 
@@ -1945,10 +2809,11 @@ onMounted(() => {
 }
 
 .btn-sm-fit {
-  padding: 8px 18px;
+  padding: 8px 20px;
   font-size: 0.85rem;
-  border-radius: 6px;
+  border-radius: var(--radius-full);
   display: inline-flex;
+  font-weight: 600;
 }
 
 /* ----------------- TESTIMONIALS SECTION ----------------- */
@@ -1968,83 +2833,152 @@ onMounted(() => {
 .testimonials-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+  gap: 20px;
+  align-items: stretch;
 }
 
 @media (max-width: 900px) {
   .testimonials-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
   }
 }
 
+@media (max-width: 560px) {
+  .testimonials-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+}
+
+/* ── TESTIMONIAL CARD — thick left band + asymmetric layout ── */
 .testi-card {
   background: var(--bg-primary);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 28px;
-  transition: all var(--transition-bounce) var(--transition-speed);
+  border-radius: var(--radius-lg);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.4s var(--transition-bounce),
+    box-shadow 0.4s var(--transition-bounce);
+  /* Thick left color band */
+  border-left: 4px solid var(--border-color);
 }
 
 .testi-card:hover {
-  border-color: rgba(255, 153, 0, 0.3);
-  box-shadow: var(--shadow-sm);
+  transform: translateY(-7px);
+  box-shadow: var(--shadow-lg);
+  border-left-color: var(--color-blue-primary);
 }
 
-.testi-stars {
-  color: var(--orange);
-  margin-bottom: 16px;
-  display: flex;
-  gap: 4px;
-}
-
-.star {
-  width: 14px;
-  height: 14px;
-  fill: var(--orange);
-}
-
-.testi-quote {
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-  line-height: 1.7;
-  margin-bottom: 24px;
-  font-style: italic;
-}
-
-.testi-author {
+/* Inner content wrapper with proper padding */
+.testi-card-top {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between;
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid var(--border-color);
+  transition: border-color 0.3s ease;
 }
 
+.testi-card:hover .testi-card-top {
+  border-bottom-color: rgba(0, 102, 204, 0.15);
+}
+
+/* Avatar — prominent top-left */
 .testi-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--color-orange-light);
-  color: var(--orange2);
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--color-blue-primary), var(--color-blue-dark));
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-main);
   font-weight: 800;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
   flex-shrink: 0;
+  box-shadow: 0 4px 14px -4px rgba(0, 102, 204, 0.5);
+  transition: transform 0.35s var(--transition-bounce), box-shadow 0.3s ease;
 }
 
-.dark-mode .testi-avatar {
-  background: rgba(255, 153, 0, 0.1);
-  color: var(--orange);
+.testi-card:hover .testi-avatar {
+  transform: scale(1.1);
+  box-shadow: 0 8px 20px -4px rgba(0, 102, 204, 0.55);
+}
+
+/* Stars */
+.testi-stars {
+  display: flex;
+  gap: 2px;
+}
+
+.star {
+  width: 13px;
+  height: 13px;
+  fill: var(--color-orange-primary);
+  color: var(--color-orange-primary);
+}
+
+/* Quote */
+.testi-quote {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  padding: 20px 24px 16px;
+  font-style: italic;
+  flex: 1;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+/* Large opening quote mark — decorative */
+.testi-quote::before {
+  content: '\201C';
+  position: absolute;
+  top: 8px;
+  left: 16px;
+  font-size: 3.5rem;
+  line-height: 1;
+  color: var(--color-blue-primary);
+  opacity: 0.12;
+  font-family: Georgia, serif;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.testi-card:hover .testi-quote::before {
+  opacity: 0.22;
+}
+
+/* Author section */
+.testi-author {
+  padding: 14px 24px 20px;
+  border-top: 1px solid var(--border-color);
+  transition: border-color 0.3s ease;
+}
+
+.testi-card:hover .testi-author {
+  border-top-color: rgba(0, 102, 204, 0.15);
 }
 
 .testi-name {
   font-weight: 700;
   font-size: 0.88rem;
+  letter-spacing: -0.01em;
   color: var(--text-primary);
+  margin-bottom: 2px;
 }
 
 .testi-role {
   font-size: 0.72rem;
+  letter-spacing: 0.01em;
   color: var(--text-secondary);
 }
 
@@ -2070,8 +3004,8 @@ onMounted(() => {
 .ev-visual {
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
-  border-radius: 20px;
-  padding: 48px;
+  border-radius: var(--radius-lg);
+  padding: 40px 36px;
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -2121,8 +3055,9 @@ onMounted(() => {
 }
 
 .ev-visual h3 {
-  font-size: 1.35rem;
-  font-weight: 800;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
   color: var(--text-primary);
   margin-bottom: 8px;
   position: relative;
@@ -2133,10 +3068,11 @@ onMounted(() => {
   display: inline-block;
   background: var(--color-orange-light);
   border: 1px solid var(--border);
-  border-radius: 100px;
-  padding: 6px 16px;
-  font-size: 0.75rem;
+  border-radius: var(--radius-full);
+  padding: 5px 14px;
+  font-size: 0.7rem;
   font-weight: 700;
+  letter-spacing: 0.04em;
   color: var(--orange2);
   position: relative;
   z-index: 1;
@@ -2148,41 +3084,92 @@ onMounted(() => {
 }
 
 .ev-charging-pricing {
-  margin-top: 32px;
+  margin-top: 24px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   position: relative;
   z-index: 1;
 }
 
+/* ── EV PRICE ITEMS — capacity gauge bar ── */
 .ev-price-item {
   background: var(--bg-primary);
   border: 1px solid var(--border-color);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   padding: 14px 16px;
-  text-align: left;
+  transition:
+    border-color 0.25s ease,
+    transform 0.3s var(--transition-bounce),
+    box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.ev-price-item:hover {
+  border-color: var(--color-blue-primary);
+  transform: translateX(4px);
+  box-shadow: var(--shadow-sm);
+}
+
+.ev-price-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 10px;
 }
 
 .ev-price-label {
   font-size: 0.72rem;
   color: var(--text-secondary);
-  margin-bottom: 2px;
   text-transform: uppercase;
   font-weight: 700;
+  letter-spacing: 0.08em;
 }
 
 .ev-price-val {
   font-family: var(--font-main);
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+/* Gauge bar track */
+.ev-gauge {
+  height: 5px;
+  background: var(--border-color);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+/* Gauge fill — animates on parent hover */
+.ev-gauge-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-blue-primary), var(--color-orange-primary));
+  border-radius: var(--radius-full);
+  transition: width 0.8s var(--transition-bounce), opacity 0.3s ease;
+  opacity: 0.7;
+}
+
+.ev-price-item:hover .ev-gauge-fill {
+  opacity: 1;
+}
+
+/* kW label */
+.ev-price-kw {
+  font-size: 0.75rem;
   font-weight: 800;
-  color: var(--orange);
+  color: var(--color-blue-primary);
+  letter-spacing: -0.01em;
 }
 
 .ev-features {
-  margin: 36px 0;
+  margin: 28px 0;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 18px;
 }
 
 .ev-feature {
@@ -2192,28 +3179,29 @@ onMounted(() => {
 }
 
 .ev-feature-icon {
-  width: 38px;
-  height: 38px;
-  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
   background: rgba(255, 153, 0, 0.08);
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.1rem;
 }
 
 .ev-feature-title {
-  font-weight: 700;
-  font-size: 0.95rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: -0.01em;
   color: var(--text-primary);
-  margin-bottom: 2px;
+  margin-bottom: 3px;
 }
 
 .ev-feature-desc {
   font-size: 0.84rem;
   color: var(--text-secondary);
-  line-height: 1.5;
+  line-height: 1.55;
+  letter-spacing: 0em;
 }
 
 /* ----------------- CTA SECTION ----------------- */
@@ -2282,28 +3270,31 @@ onMounted(() => {
 }
 
 .cta-section h2 {
-  font-size: clamp(2rem, 4vw, 3.2rem);
-  font-weight: 800;
-  max-width: 640px;
-  margin: 0 auto 20px;
+  font-size: clamp(1.75rem, 3.5vw, 2.75rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  max-width: 600px;
+  margin: 0 auto 16px;
   position: relative;
   z-index: 1;
   color: var(--text-primary);
 }
 
 .cta-desc {
-  font-size: 1.05rem;
+  font-size: 1rem;
   color: var(--text-secondary);
-  max-width: 480px;
-  margin: 0 auto 40px;
+  max-width: 460px;
+  margin: 0 auto 36px;
   position: relative;
   z-index: 1;
-  line-height: 1.7;
+  line-height: 1.6;
+  letter-spacing: 0em;
 }
 
 .cta-actions {
   display: flex;
-  gap: 16px;
+  gap: 14px;
   justify-content: center;
   flex-wrap: wrap;
   position: relative;

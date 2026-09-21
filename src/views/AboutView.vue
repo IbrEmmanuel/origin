@@ -39,19 +39,16 @@
             <h4>Audit</h4>
             <p>Intelligent load profiling for your space using advanced metrics.</p>
           </div>
-          <div class="process-line"></div>
           <div class="process-step">
             <div class="step-blob">02</div>
             <h4>Design</h4>
             <p>Custom blueprinting and layout diagrams for maximum efficiency.</p>
           </div>
-          <div class="process-line"></div>
           <div class="process-step">
             <div class="step-blob">03</div>
             <h4>Install</h4>
             <p>Rapid, high-performance deployment with precision engineering care.</p>
           </div>
-          <div class="process-line"></div>
           <div class="process-step">
             <div class="step-blob">04</div>
             <h4>Support</h4>
@@ -236,16 +233,13 @@ import {
 }
 
 .process-steps {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  gap: 2rem;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  align-items: start;
 }
 
 .process-step {
-  flex: 1;
-  min-width: 220px;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -255,7 +249,7 @@ import {
 .step-blob {
   width: 60px;
   height: 60px;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   background: var(--color-blue-light);
   color: var(--color-blue-primary);
   display: flex;
@@ -264,7 +258,7 @@ import {
   font-weight: 800;
   font-size: 1.25rem;
   margin-bottom: var(--space-sm);
-  border: 1px solid rgba(0, 102, 204, 0.1);
+  border: 1px solid var(--glass-border);
   transition: all 0.3s;
 }
 
@@ -287,8 +281,15 @@ import {
     display: none;
   }
   .process-steps {
-    flex-direction: column;
-    align-items: center;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (max-width: 560px) {
+  .process-steps {
+    grid-template-columns: 1fr;
+    gap: 14px;
   }
 }
 
@@ -299,15 +300,30 @@ import {
 
 .testimonial-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  align-items: stretch;
+}
+
+@media (max-width: 900px) {
+  .testimonial-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (max-width: 560px) {
+  .testimonial-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
 }
 
 .t-card {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 220px;
+  height: 100%;
 }
 
 .quote-icon {
@@ -336,7 +352,7 @@ import {
 .t-avatar {
   width: 40px;
   height: 40px;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   background: var(--color-blue-light);
   color: var(--color-blue-primary);
   display: flex;

@@ -562,9 +562,9 @@ onMounted(() => {
 /* Similar Products Mini-Grid */
 .minimal-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
 @media (max-width: 992px) { .minimal-grid { grid-template-columns: repeat(2, 1fr); } }
-.minimal-card { background: var(--bg-secondary); padding: 12px; border-radius: 16px; border: 1px solid var(--border-color); transition: transform 0.2s; }
+.minimal-card { background: var(--bg-secondary); padding: 12px; border-radius: var(--radius-lg); border: 1px solid var(--border-color); transition: transform 0.2s; }
 .minimal-card:hover { transform: translateY(-4px); }
-.card-image-wrapper { width: 100%; aspect-ratio: 1; border-radius: 12px; overflow: hidden; margin-bottom: 12px; }
+.card-image-wrapper { width: 100%; aspect-ratio: 1; border-radius: var(--radius-md); overflow: hidden; margin-bottom: 12px; }
 .product-img { width: 100%; height: 100%; object-fit: cover; }
 .card-title { font-size: 1rem; font-weight: 700; margin: 0 0 4px 0; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .card-price { font-weight: 800; color: var(--color-blue-primary); }

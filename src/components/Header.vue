@@ -1,5 +1,5 @@
 <template>
-  <div class="header-wrapper">
+  <div class="header-wrapper" :class="{ 'is-scrolled': isScrolled }">
     <!-- Top Bar -->
     <div class="top-bar">
       <div class="container top-bar-content">
@@ -16,7 +16,7 @@
     </div>
 
     <!-- Main Header -->
-    <header class="main-header" :class="{ 'header-scrolled': isScrolled }">
+    <header class="main-header" :class="{ 'header-scrolled': isScrolled, 'header-shrunk': isScrolled }">
     <div class="container header-content">
       <!-- Logo -->
       <div class="logo">
@@ -34,7 +34,7 @@
         <ul class="nav-links">
           <li><router-link to="/">Home</router-link></li>
           <li><router-link to="/marketplace">Marketplace</router-link></li>
-          <li><router-link to="/sales-chat">Sales Chat</router-link></li>
+          <li><router-link to="/sales-chat">Origin Customer Care</router-link></li>
           <li><router-link to="/load-audit">Load Audit</router-link></li>
           <li><router-link to="/blog">Blog</router-link></li>
           <li><router-link to="/contact">Contact</router-link></li>
@@ -79,7 +79,7 @@
             <li><router-link to="/services" @click="isMenuOpen = false"><WrenchIcon class="icon-sm" /> Services</router-link></li>
             <li><router-link to="/projects" @click="isMenuOpen = false"><BriefcaseIcon class="icon-sm" /> Projects</router-link></li>
             <li><router-link to="/marketplace" @click="isMenuOpen = false"><ShoppingBagIcon class="icon-sm" /> Marketplace</router-link></li>
-            <li><router-link to="/sales-chat" @click="isMenuOpen = false"><MessageSquareIcon class="icon-sm" /> Sales Chat</router-link></li>
+            <li><router-link to="/sales-chat" @click="isMenuOpen = false"><MessageSquareIcon class="icon-sm" /> Origin Customer Care</router-link></li>
             <li><router-link to="/load-audit" @click="isMenuOpen = false"><CalculatorIcon class="icon-sm" /> Load Audit</router-link></li>
             <li><router-link to="/blog" @click="isMenuOpen = false"><BookOpenIcon class="icon-sm" /> Blog</router-link></li>
             <li><router-link to="/contact" @click="isMenuOpen = false"><MailIcon class="icon-sm" /> Contact</router-link></li>
@@ -123,10 +123,12 @@ const isMenuOpen = ref(false);
 const isScrolled = ref(false);
 const isDark = ref(false);
 const isAuthenticated = ref(false);
+const scrollY = ref(0);
 
 const accountPath = computed(() => isAuthenticated.value ? '/account' : '/login');
 
 const handleScroll = () => {
+  scrollY.value = window.scrollY;
   isScrolled.value = window.scrollY > 20;
 };
 
@@ -177,9 +179,24 @@ onUnmounted(() => {
 .top-bar {
   background: var(--bg-secondary);
   color: var(--text-primary);
-  padding: 10px 0;
-  font-size: 0.85rem;
-  font-weight: 400;
+  padding: 8px 0;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  border-bottom: 1px solid var(--border-color);
+  /* Slide-up hide on scroll — driven by max-height transition */
+  overflow: hidden;
+  max-height: 44px;
+  transition: max-height 0.35s var(--transition-bounce), opacity 0.3s ease, padding 0.35s ease;
+  opacity: 1;
+}
+
+/* When header is scrolled, top bar collapses */
+.header-wrapper.is-scrolled .top-bar {
+  max-height: 0;
+  padding: 0;
+  opacity: 0;
+  border-bottom-color: transparent;
 }
 
 .top-bar-content {
@@ -209,15 +226,17 @@ onUnmounted(() => {
 .top-cart {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   cursor: pointer;
-  padding: 6px 16px;
-  border-radius: 20px;
+  padding: 5px 14px;
+  border-radius: var(--radius-full);
   background: var(--color-blue-primary);
   color: white;
   font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.01em;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 10px rgba(0, 102, 204, 0.3);
+  box-shadow: 0 4px 10px rgba(0, 102, 204, 0.25);
   text-decoration: none;
 }
 
@@ -241,16 +260,54 @@ onUnmounted(() => {
   position: relative;
   width: 100%;
   padding: var(--space-sm) 0;
-  transition: all var(--transition-speed);
+  /* Smooth transition for all scroll-driven changes */
+  transition:
+    padding 0.35s var(--transition-bounce),
+    background 0.3s ease,
+    box-shadow 0.3s ease,
+    border-color 0.3s ease,
+    backdrop-filter 0.3s ease;
   background: var(--bg-primary);
   border-bottom: 1px solid var(--border-color);
+  will-change: padding, box-shadow;
 }
 
+/* Scroll state: deep blur + shadow — screenshot pattern */
 .header-scrolled {
-  background: var(--glass-bg);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--glass-border);
-  box-shadow: var(--shadow-md);
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+  box-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.04),
+    0 4px 20px -4px rgba(0, 0, 0, 0.06);
+}
+
+.dark-mode .header-scrolled {
+  background: rgba(2, 4, 8, 0.85);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border-bottom: 1px solid rgba(22, 27, 34, 0.8);
+  box-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.3),
+    0 4px 20px -4px rgba(0, 0, 0, 0.4);
+}
+
+/* Shrunk state: tighter vertical padding when scrolled */
+.header-shrunk {
+  padding: 0.5rem 0;
+}
+
+.header-shrunk .logo-img {
+  height: 34px;
+}
+
+.header-shrunk .brand-name {
+  font-size: 0.95rem;
+}
+
+.header-shrunk .brand-tagline {
+  display: none;
 }
 
 .header-content {
@@ -275,19 +332,21 @@ onUnmounted(() => {
 }
 
 .brand-name {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 800;
   color: var(--text-primary);
-  letter-spacing: -0.02em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .brand-tagline {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--text-secondary);
   font-weight: 500;
+  letter-spacing: 0.02em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -296,7 +355,7 @@ onUnmounted(() => {
 .logo-img {
   height: 40px;
   width: auto;
-  transition: transform var(--transition-speed);
+  transition: height 0.35s var(--transition-bounce), transform 0.3s var(--transition-bounce);
 }
 
 .logo-img:hover {
@@ -309,24 +368,57 @@ onUnmounted(() => {
 
 .nav-links {
   display: flex;
-  gap: var(--space-md);
+  gap: 0.25rem;
   align-items: center;
 }
 
 .nav-links a {
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 0.875rem;
+  font-weight: 500;
   color: var(--text-secondary);
   position: relative;
-  padding: 8px 16px;
+  padding: 0.5rem 0.875rem;
   border-radius: var(--radius-full);
-  transition: all var(--transition-speed);
+  letter-spacing: 0.01em;
+  transition:
+    color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s var(--transition-bounce);
 }
 
-.nav-links a:hover,
+.nav-links a:hover {
+  color: var(--text-primary);
+  background: rgba(0, 0, 0, 0.04);
+  transform: translateY(-1px);
+}
+
+.dark-mode .nav-links a:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* Active state — filled pill */
 .nav-links a.router-link-active {
   color: var(--color-blue-primary);
-  background: rgba(0, 102, 204, 0.05);
+  background: rgba(0, 102, 204, 0.08);
+  font-weight: 700;
+}
+
+/* Active indicator: bottom dot */
+.nav-links a.router-link-active::after {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 2px;
+  background: var(--color-blue-primary);
+  border-radius: var(--radius-full);
+  transition: width 0.3s var(--transition-bounce);
+}
+
+.nav-links a:hover.router-link-active::after {
+  width: 24px;
 }
 
 .header-actions {
@@ -337,24 +429,27 @@ onUnmounted(() => {
 }
 
 .theme-toggle {
-  background: var(--bg-secondary);
-  border: none;
+  background: transparent;
+  border: 1px solid var(--border-color);
   cursor: pointer;
-  padding: 10px;
-  color: var(--text-primary);
+  padding: 9px;
+  color: var(--text-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  transition: all var(--transition-speed);
-  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  transition:
+    background 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease,
+    transform 0.4s var(--transition-bounce);
 }
 
 .theme-toggle:hover {
-  background: var(--color-blue-primary);
-  color: white;
-  transform: rotate(15deg);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
   border-color: var(--color-blue-primary);
+  transform: rotate(20deg) scale(1.05);
 }
 
 .account-pill {
@@ -363,17 +458,28 @@ onUnmounted(() => {
   gap: 8px;
   background: var(--color-blue-primary);
   color: white;
-  padding: 0.75rem 1.5rem;
+  padding: 0.5rem 1.125rem;
   border-radius: var(--radius-full);
-  font-weight: 700;
-  font-size: 0.95rem;
-  transition: all var(--transition-speed);
-  box-shadow: 0 10px 20px -5px rgba(0, 102, 204, 0.3);
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.01em;
+  transition:
+    background 0.25s ease,
+    transform 0.3s var(--transition-bounce),
+    box-shadow 0.3s ease;
+  box-shadow: 0 4px 14px -3px rgba(0, 102, 204, 0.45);
 }
 
 .account-pill:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 15px 30px -10px rgba(0, 102, 204, 0.4);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 24px -6px rgba(0, 102, 204, 0.55);
+  background: var(--color-blue-dark);
+}
+
+/* Shrunk state: tighter pill */
+.header-shrunk .account-pill {
+  padding: 0.4375rem 1rem;
+  font-size: 0.8rem;
 }
 
 .icon { width: 22px; height: 22px; }
@@ -442,9 +548,11 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.1);
+  box-shadow: -12px 0 48px rgba(0, 0, 0, 0.12);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  /* Subtle inner border */
+  border-left: 1px solid var(--border-color);
 }
 
 .mobile-menu-header {
@@ -472,31 +580,57 @@ onUnmounted(() => {
 .mobile-links a {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 0.85rem 1.25rem;
+  gap: 14px;
+  padding: 0.75rem 1rem;
   border-radius: var(--radius-md);
-  font-weight: 700;
+  font-weight: 500;
+  font-size: 0.9rem;
+  letter-spacing: 0.01em;
   color: var(--text-primary);
-  background: var(--bg-secondary);
-  transition: all var(--transition-speed);
+  background: transparent;
+  border: 1px solid transparent;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.25s var(--transition-bounce);
 }
 
-.mobile-links a:hover,
+.mobile-links a:hover {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+  transform: translateX(4px);
+}
+
 .mobile-links a.router-link-active {
-  background: var(--color-blue-primary);
-  color: white;
+  background: rgba(0, 102, 204, 0.08);
+  color: var(--color-blue-primary);
+  border-color: rgba(0, 102, 204, 0.15);
+  font-weight: 700;
 }
 
 /* Transitions */
-.fade-slide-enter-active,
+.fade-slide-enter-active {
+  transition: all 0.4s var(--transition-bounce);
+}
+
 .fade-slide-leave-active {
-  transition: all 0.5s var(--transition-bounce);
+  transition: all 0.3s ease-in;
 }
 
 .fade-slide-enter-from,
 .fade-slide-leave-to {
   opacity: 0;
   transform: translateX(100%);
+}
+
+/* Overlay fade only (not the panel) */
+.mobile-nav-overlay.fade-slide-enter-from {
+  background: transparent;
+}
+
+.mobile-nav-overlay.fade-slide-leave-to {
+  background: transparent;
 }
 
 /* Responsive */
@@ -510,7 +644,7 @@ onUnmounted(() => {
   }
 
   .brand-name {
-    font-size: 0.95rem;
+    font-size: 0.85rem;
   }
   
   .brand-tagline {

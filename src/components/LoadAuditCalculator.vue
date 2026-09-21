@@ -857,7 +857,7 @@ input:focus, select:focus {
 .calc-card {
   padding: var(--space-md);
   background: var(--bg-secondary);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -903,7 +903,7 @@ input:focus, select:focus {
 .option-card {
   background: var(--bg-secondary);
   border: 2px solid transparent;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   padding: var(--space-md);
   cursor: pointer;
   display: flex;

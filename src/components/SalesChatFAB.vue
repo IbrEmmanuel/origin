@@ -7,7 +7,7 @@
       @click="open"
     >
       <MessageCircle class="fab-icon" />
-      <span class="fab-label">Sales Chat</span>
+      <span class="fab-label">Origin Customer Care</span>
     </button>
   </div>
 </template>
