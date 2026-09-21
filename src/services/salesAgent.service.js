@@ -2,14 +2,14 @@
  * Origin Sales Agent — AgentOS native client.
  * POST /agents/{id}/runs (SSE) + GET /sessions/{id}/runs for resume.
  *
- * On Vercel: calls /api/agent/* (local proxy) to avoid CORS.
- * In dev: calls VITE_SALES_AGENT_URL directly.
+ * Always routes through /api/agent (Vercel edge proxy) so CORS is never
+ * an issue regardless of whether we are on Vercel, localhost, or any other domain.
+ * The proxy spoofs Origin: https://originelectricltd.com which is the only
+ * origin the agent backend (Cloudflare) accepts.
  */
 
-// Use proxy on production (Vercel), direct URL in dev
-const isProduction = import.meta.env.PROD;
-const DIRECT_URL = (import.meta.env.VITE_SALES_AGENT_URL || 'http://localhost:7777').replace(/\/$/, '');
-const BASE = isProduction ? '/api/agent' : DIRECT_URL;
+// Always use the local proxy path — works on Vercel AND localhost (Vite proxies it too)
+const BASE = '/api/agent';
 const AGENT_ID = import.meta.env.VITE_SALES_AGENT_ID || 'sales-agent';
 const STORAGE_KEY = 'origin_sales_chat_v1';
 
