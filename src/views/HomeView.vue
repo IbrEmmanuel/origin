@@ -903,30 +903,48 @@ onMounted(() => {
 /* --- Radar glow decorative --- */
 .hero-radar {
   position: absolute;
-  top: 50%;
-  left: 50%;
+  top: 48%;
+  left: 38%;
   transform: translate(-50%, -50%);
-  width: 600px;
-  height: 600px;
+  width: 680px;
+  height: 680px;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.18;
+  opacity: 0.55;
 }
 
 .hero-radar-core {
   position: absolute;
-  inset: 30%;
-  border-radius: var(--radius-full);
-  background: radial-gradient(circle, rgba(255, 153, 0, 0.6) 0%, rgba(0, 102, 204, 0.3) 50%, transparent 70%);
+  inset: 25%;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    rgba(255, 153, 0, 0.55) 0%,
+    rgba(0, 102, 204, 0.25) 45%,
+    transparent 70%
+  );
   animation: radarPulse 4s ease-in-out infinite;
+  filter: blur(2px);
 }
 
 .hero-radar-ring {
   position: absolute;
   inset: 0;
-  border-radius: var(--radius-full);
-  border: 1.5px solid rgba(255, 153, 0, 0.5);
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 153, 0, 0.45);
   animation: radarRing 2.8s ease-out infinite;
+}
+
+.hero-radar-ring:nth-child(3) { animation-delay: 0.9s; }
+.hero-radar-ring:nth-child(4) { animation-delay: 1.8s; }
+
+@keyframes radarPulse {
+  0%, 100% { transform: scale(1);    opacity: 0.7; }
+  50%       { transform: scale(1.12); opacity: 1;   }
+}
+
+@keyframes radarRing {
+  0%   { transform: scale(0.6); opacity: 0.8; }
+  100% { transform: scale(1.5); opacity: 0;   }
 }
 
 .hero-bg {
