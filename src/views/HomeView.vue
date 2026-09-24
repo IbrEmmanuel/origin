@@ -662,19 +662,19 @@
 
     <!-- CTA -->
     <section class="cta-section section-clipped section-divider" id="contact" :style="{ backgroundImage: `url(${ctaSolarDuskBg})` }">
-      <div class="cta-glow"></div>
-      <div class="container text-center">
-        <span class="section-eyebrow">Ready to Start?</span>
-        <h2>Your energy independence begins with one conversation.</h2>
-        <p class="cta-desc">Book a free, no-obligation energy audit. Our engineers will visit your site, assess your needs, and deliver a full proposal — at no cost.</p>
+      <div class="cta-overlay" aria-hidden="true"></div>
+      <div class="container cta-inner">
+        <span class="cta-eyebrow">Ready to Start?</span>
+        <h2 class="cta-heading">Your energy independence<br class="cta-br"> begins here.</h2>
+        <p class="cta-desc">Free, no-obligation energy audit — our engineers visit your site, assess your needs, and deliver a full proposal.</p>
         <div class="cta-actions">
-          <router-link to="/load-audit" class="btn btn-primary cta-btn">
-            Book Free Energy Audit
-            <CalculatorIcon class="btn-icon" />
+          <router-link to="/load-audit" class="cta-btn cta-btn--solid">
+            <CalculatorIcon class="cta-btn-icon" />
+            Book Free Audit
           </router-link>
-          <a href="tel:07041880339" class="btn btn-secondary cta-btn">
-            <PhoneIcon class="btn-icon" />
-            Call Us: 0704 188 0339
+          <a href="tel:07041880339" class="cta-btn cta-btn--ghost">
+            <PhoneIcon class="cta-btn-icon" />
+            0704 188 0339
           </a>
         </div>
       </div>
@@ -3750,152 +3750,146 @@ onMounted(() => {
   background-position: center 30%;
   background-repeat: no-repeat;
   background-attachment: fixed;
-  border-top: 1px solid var(--border-color);
-  text-align: center;
-  padding: 110px 0;
   position: relative;
   overflow: hidden;
+  padding: 100px 0;
 }
 
-.cta-section::before {
-  content: '';
+.cta-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0.48) 0%,
-    rgba(5, 2, 0, 0.52) 100%
-  );
+  background: linear-gradient(160deg, rgba(0,0,0,0.6) 0%, rgba(5,10,20,0.72) 100%);
+  pointer-events: none;
   z-index: 0;
-  pointer-events: none;
 }
 
-.cta-section .container {
+.cta-inner {
   position: relative;
   z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0;
 }
 
-.cta-section h2 {
-  color: #fff !important;
+.cta-eyebrow {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--orange);
+  margin-bottom: 14px;
 }
 
-.cta-section .section-eyebrow {
-  color: var(--orange) !important;
-}
-
-.cta-section .cta-desc {
-  color: rgba(255, 255, 255, 0.82) !important;
-}
-
-.cta-section .btn-secondary {
-  color: #fff !important;
-  border-color: rgba(255, 255, 255, 0.45) !important;
-}
-
-.cta-section .btn-secondary:hover {
-  color: var(--orange) !important;
-  border-color: var(--orange) !important;
-}
-
-/* CTA button overrides — clean pill on dark bg */
-.cta-btn {
-  min-width: 180px;
-  font-size: 0.875rem;
-  padding: 0.65rem 1.5rem;
-  border-radius: 999px;
-  gap: 8px;
-  text-decoration: none;
-  letter-spacing: 0em;
-}
-
-.cta-section .btn-primary.cta-btn {
-  background: var(--orange);
-  box-shadow: 0 6px 20px -5px rgba(255, 153, 0, 0.5);
-  border: 1.5px solid rgba(255, 255, 255, 0.12);
+.cta-heading {
+  font-size: clamp(1.6rem, 3.5vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
   color: #fff;
+  margin: 0 0 16px;
+  max-width: 520px;
 }
 
-.cta-section .btn-primary.cta-btn:hover {
-  background: var(--orange2);
-  box-shadow: 0 10px 26px -6px rgba(255, 153, 0, 0.65);
-  transform: translateY(-2px);
-}
-
-.cta-section .btn-secondary.cta-btn {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1.5px solid rgba(255, 255, 255, 0.28);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  color: #fff !important;
-  box-shadow: 0 4px 14px -4px rgba(0,0,0,0.2);
-}
-
-.cta-section .btn-secondary.cta-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.5);
-  transform: translateY(-2px);
-  color: #fff !important;
-}
-
-.cta-glow {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%,-50%);
-  width: 600px;
-  height: 300px;
-  background: radial-gradient(ellipse, rgba(255, 153, 0, 0.06) 0%, transparent 70%);
-  pointer-events: none;
-}
-
-.cta-section h2 {
-  font-size: clamp(1.75rem, 3.5vw, 2.75rem);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
-  max-width: 600px;
-  margin: 0 auto 16px;
-  position: relative;
-  z-index: 1;
-  color: var(--text-primary);
-}
+.cta-br { display: block; }
 
 .cta-desc {
-  font-size: 1rem;
-  color: var(--text-secondary);
-  max-width: 460px;
-  margin: 0 auto 36px;
-  position: relative;
-  z-index: 1;
-  line-height: 1.6;
-  letter-spacing: 0em;
+  font-size: 0.92rem;
+  color: rgba(255,255,255,0.62);
+  max-width: 420px;
+  margin: 0 0 36px;
+  line-height: 1.65;
+  letter-spacing: 0.01em;
 }
 
+/* ── Button row ── */
 .cta-actions {
   display: flex;
+  align-items: center;
   gap: 10px;
-  justify-content: center;
   flex-wrap: wrap;
-  position: relative;
-  z-index: 1;
+  justify-content: center;
 }
 
+/* Shared pill base */
+.cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0.6rem 1.4rem;
+  border-radius: 999px;
+  font-size: 0.83rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    transform 0.25s var(--transition-bounce),
+    box-shadow 0.25s ease,
+    background 0.2s ease,
+    border-color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cta-btn:active { transform: scale(0.96) !important; }
+
+/* Solid — orange */
+.cta-btn--solid {
+  background: var(--orange);
+  color: #fff;
+  border: 1.5px solid transparent;
+  box-shadow: 0 6px 20px -5px rgba(255,153,0,0.5);
+}
+
+.cta-btn--solid:hover {
+  background: var(--orange2);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px -6px rgba(255,153,0,0.65);
+}
+
+/* Ghost — frosted outline */
+.cta-btn--ghost {
+  background: rgba(255,255,255,0.07);
+  color: #fff;
+  border: 1.5px solid rgba(255,255,255,0.25);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.cta-btn--ghost:hover {
+  background: rgba(255,255,255,0.14);
+  border-color: rgba(255,255,255,0.5);
+  transform: translateY(-2px);
+}
+
+.cta-btn-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  stroke-width: 2.2;
+}
+
+/* ── Mobile ── */
 @media (max-width: 480px) {
+  .cta-section { padding: 72px 0; }
+
+  .cta-heading { font-size: 1.6rem; }
+  .cta-br { display: none; }
+
   .cta-actions {
     flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
     width: 100%;
-    max-width: 320px;
-    margin-left: auto;
-    margin-right: auto;
+    max-width: 280px;
+    gap: 8px;
   }
 
-  .cta-actions .btn-primary,
-  .cta-actions .btn-secondary,
-  .cta-actions a {
+  .cta-btn {
     width: 100%;
     justify-content: center;
+    padding: 0.65rem 1.2rem;
   }
 }
 
