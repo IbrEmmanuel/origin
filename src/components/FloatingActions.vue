@@ -26,15 +26,6 @@
           <MessageSquareMore class="fab-item-icon" />
           <span>Ask Origin AI</span>
         </button>
-        <button
-          type="button"
-          class="fab-item fab-item-install"
-          role="menuitem"
-          @click="openInstaller"
-        >
-          <Wrench class="fab-item-icon" />
-          <span>Request Installer</span>
-        </button>
       </div>
     </transition>
 
@@ -42,7 +33,7 @@
       type="button"
       class="fab-main"
       :aria-expanded="expanded"
-      :aria-label="expanded ? 'Close actions' : 'Open Origin AI and installer'"
+      :aria-label="expanded ? 'Close actions' : 'Open Origin AI'"
       @click="expanded = !expanded"
     >
       <span class="fab-pulse" aria-hidden="true" />
@@ -56,7 +47,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { MessageSquareMore, Wrench, X } from 'lucide-vue-next';
+import { MessageSquareMore, X } from 'lucide-vue-next';
 
 const router = useRouter();
 const expanded = ref(false);
@@ -101,11 +92,6 @@ function tickType() {
 function openChat() {
   expanded.value = false;
   router.push({ name: 'SalesChat' });
-}
-
-function openInstaller() {
-  expanded.value = false;
-  window.dispatchEvent(new CustomEvent('open-installer-modal'));
 }
 
 function onKey(e) {
@@ -328,10 +314,6 @@ onUnmounted(() => {
 
 .fab-item-chat {
   background: linear-gradient(135deg, #143456, var(--fab-navy));
-}
-
-.fab-item-install {
-  background: #128c7e;
 }
 
 .fab-fade-enter-active,

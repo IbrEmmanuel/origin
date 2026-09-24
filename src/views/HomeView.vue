@@ -47,6 +47,28 @@
               <ArrowRightIcon class="hero-cta-arrow" />
             </router-link>
 
+            <router-link to="/load-audit" class="hero-cta-card hero-cta-card--outline">
+              <div class="hero-cta-icon">
+                <CalculatorIcon />
+              </div>
+              <div class="hero-cta-text">
+                <span class="hero-cta-label">Power Sizing Tool</span>
+                <span class="hero-cta-title">Load Audit</span>
+              </div>
+              <ArrowRightIcon class="hero-cta-arrow" />
+            </router-link>
+
+            <router-link to="/sales-chat" class="hero-cta-card hero-cta-card--outline">
+              <div class="hero-cta-icon">
+                <MessageSquareIcon />
+              </div>
+              <div class="hero-cta-text">
+                <span class="hero-cta-label">24/7 Support</span>
+                <span class="hero-cta-title">Origin Customer Care</span>
+              </div>
+              <ArrowRightIcon class="hero-cta-arrow" />
+            </router-link>
+
             <router-link to="/origin-talk" class="hero-cta-card hero-cta-card--ai">
               <div class="hero-cta-icon">
                 <SparklesIcon class="ai-icon" />
@@ -57,6 +79,17 @@
               </div>
               <ArrowRightIcon class="hero-cta-arrow" />
             </router-link>
+
+            <button type="button" class="hero-cta-card hero-cta-card--install" @click="openInstallerModal">
+              <div class="hero-cta-icon">
+                <WrenchIcon />
+              </div>
+              <div class="hero-cta-text">
+                <span class="hero-cta-label">On-site Service</span>
+                <span class="hero-cta-title">Request Installation</span>
+              </div>
+              <ArrowRightIcon class="hero-cta-arrow" />
+            </button>
 
           </div>
         </div>
@@ -654,6 +687,7 @@ import {
   Calculator as CalculatorIcon, 
   Calendar as CalendarIcon, 
   Sparkles as SparklesIcon, 
+  MessageSquare as MessageSquareIcon,
   Sun as SunIcon, 
   Zap as ZapIcon, 
   Cctv as CctvIcon,
@@ -679,7 +713,8 @@ import {
   Clock as ClockIcon,
   Award as AwardIcon,
   Users as UsersIcon,
-  Activity as ActivityIcon
+  Activity as ActivityIcon,
+  Wrench as WrenchIcon
 } from 'lucide-vue-next';
 
 import marketplaceService from '@/services/marketplace.service';
@@ -792,6 +827,11 @@ const stopHeroScroll = () => {
 onUnmounted(() => {
   stopHeroScroll();
 });
+
+// ----------------- INSTALLER MODAL -----------------
+function openInstallerModal() {
+  window.dispatchEvent(new CustomEvent('open-installer-modal'));
+}
 
 // ----------------- LIFECYCLE -----------------
 onMounted(() => {
@@ -1032,22 +1072,32 @@ onMounted(() => {
    HERO CTA CARDS — unique button cards
    ═══════════════════════════════════ */
 .hero-cta-cards {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 10px;
-  max-width: 420px;
+  max-width: 480px;
+}
+
+/* 5th card spans full width */
+.hero-cta-cards .hero-cta-card:last-child {
+  grid-column: 1 / -1;
 }
 
 @media (max-width: 992px) {
   .hero-cta-cards {
-    max-width: 480px;
+    max-width: 520px;
     margin: 0 auto;
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 400px) {
   .hero-cta-cards {
+    grid-template-columns: 1fr;
     max-width: 100%;
+  }
+  /* reset span on single-col layout */
+  .hero-cta-cards .hero-cta-card:last-child {
+    grid-column: auto;
   }
 }
 
@@ -1162,6 +1212,34 @@ onMounted(() => {
   box-shadow: 0 10px 28px -6px rgba(0,102,204,0.5);
 }
 
+/* Card 5 — Install (teal) */
+.hero-cta-card--install {
+  background: linear-gradient(135deg, rgba(18,140,126,0.55), rgba(10,100,90,0.4));
+  border: 1.5px solid rgba(0,210,180,0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px -4px rgba(18,140,126,0.35);
+  /* reset button styles */
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+
+.hero-cta-card--install .hero-cta-icon {
+  background: rgba(0,210,180,0.2);
+  color: #4dffd8;
+}
+
+.hero-cta-card--install .hero-cta-label { color: rgba(160,255,230,0.7); }
+.hero-cta-card--install .hero-cta-title { color: #fff; }
+.hero-cta-card--install .hero-cta-arrow { color: rgba(130,240,210,0.7); }
+
+.hero-cta-card--install:hover {
+  background: linear-gradient(135deg, rgba(18,140,126,0.75), rgba(10,100,90,0.6));
+  border-color: rgba(0,210,180,0.5);
+  box-shadow: 0 10px 28px -6px rgba(18,140,126,0.5);
+}
+
 /* AI sparkle animation */
 .hero-cta-card--ai .ai-icon {
   animation: aiPulse 2s ease-in-out infinite;
@@ -1207,11 +1285,11 @@ onMounted(() => {
 }
 
 .hero-cta-title {
-  font-size: 0.925rem;
+  font-size: 0.85rem;
   font-weight: 700;
   letter-spacing: -0.01em;
   line-height: 1.2;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 /* Arrow */
