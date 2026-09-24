@@ -668,11 +668,11 @@
         <h2>Your energy independence begins with one conversation.</h2>
         <p class="cta-desc">Book a free, no-obligation energy audit. Our engineers will visit your site, assess your needs, and deliver a full proposal — at no cost.</p>
         <div class="cta-actions">
-          <router-link to="/load-audit" class="btn-primary">
+          <router-link to="/load-audit" class="btn btn-primary cta-btn">
             Book Free Energy Audit
             <CalculatorIcon class="btn-icon" />
           </router-link>
-          <a href="tel:07041880339" class="btn-secondary">
+          <a href="tel:07041880339" class="btn btn-secondary cta-btn">
             <PhoneIcon class="btn-icon" />
             Call Us: 0704 188 0339
           </a>
@@ -3795,6 +3795,46 @@ onMounted(() => {
 .cta-section .btn-secondary:hover {
   color: var(--orange) !important;
   border-color: var(--orange) !important;
+}
+
+/* CTA button overrides — clean pill on dark bg */
+.cta-btn {
+  min-width: 180px;
+  font-size: 0.875rem;
+  padding: 0.65rem 1.5rem;
+  border-radius: 999px;
+  gap: 8px;
+  text-decoration: none;
+  letter-spacing: 0em;
+}
+
+.cta-section .btn-primary.cta-btn {
+  background: var(--orange);
+  box-shadow: 0 6px 20px -5px rgba(255, 153, 0, 0.5);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.cta-section .btn-primary.cta-btn:hover {
+  background: var(--orange2);
+  box-shadow: 0 10px 26px -6px rgba(255, 153, 0, 0.65);
+  transform: translateY(-2px);
+}
+
+.cta-section .btn-secondary.cta-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1.5px solid rgba(255, 255, 255, 0.28);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #fff !important;
+  box-shadow: 0 4px 14px -4px rgba(0,0,0,0.2);
+}
+
+.cta-section .btn-secondary.cta-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+  color: #fff !important;
 }
 
 .cta-glow {
