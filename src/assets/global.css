@@ -142,55 +142,71 @@ img {
   padding-top: 0 !important;
 }
 
-/* Buttons — pill shape per design spec */
+/* Buttons — pill shape, compact modern */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.75rem;
+  gap: 0.45rem;
+  padding: 0.6rem 1.35rem;
   border-radius: var(--radius-full);
   font-family: var(--font-main);
   font-weight: 600;
-  font-size: 1rem;
-  letter-spacing: -0.01em;
+  font-size: 0.875rem;
+  letter-spacing: 0em;
   cursor: pointer;
-  transition: all var(--transition-bounce);
+  transition:
+    transform 0.25s var(--transition-bounce),
+    box-shadow 0.25s ease,
+    background 0.2s ease;
   border: none;
   line-height: 1;
   white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Desktop size variant */
 .btn-lg {
-  padding: 0.9375rem 2rem;
-  font-size: 1.125rem;
+  padding: 0.75rem 1.75rem;
+  font-size: 0.95rem;
 }
 
 .btn:active {
-  transform: scale(0.95);
+  transform: scale(0.96) !important;
 }
 
 .btn-primary {
   background: linear-gradient(135deg, var(--color-blue-primary), var(--color-blue-dark));
   color: white;
-  box-shadow: 0 10px 20px -5px rgba(0, 102, 204, 0.4);
+  box-shadow: 0 6px 16px -4px rgba(0, 102, 204, 0.38);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 15px 30px -10px rgba(0, 102, 204, 0.6);
+  box-shadow: 0 10px 24px -6px rgba(0, 102, 204, 0.55);
 }
 
 .btn-secondary {
   background: linear-gradient(135deg, var(--color-orange-primary), var(--color-orange-dark));
   color: white;
-  box-shadow: 0 10px 20px -5px rgba(255, 153, 0, 0.4);
+  box-shadow: 0 6px 16px -4px rgba(255, 153, 0, 0.38);
 }
 
 .btn-secondary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 15px 30px -10px rgba(255, 153, 0, 0.6);
+  box-shadow: 0 10px 24px -6px rgba(255, 153, 0, 0.55);
+}
+
+/* Mobile — slightly smaller tap targets */
+@media (max-width: 600px) {
+  .btn {
+    padding: 0.55rem 1.15rem;
+    font-size: 0.82rem;
+  }
+  .btn-lg {
+    padding: 0.65rem 1.4rem;
+    font-size: 0.875rem;
+  }
 }
 
 /* Outlined / inactive variant per design spec */

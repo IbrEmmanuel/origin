@@ -1298,8 +1298,8 @@ onMounted(() => {
 }
 
 .btn-icon {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   flex-shrink: 0;
 }
 
@@ -2808,33 +2808,36 @@ onMounted(() => {
 .fw-cta-btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   background: var(--color-blue-primary);
   color: #fff;
-  font-size: 0.875rem;
+  font-size: 0.82rem;
   font-weight: 600;
-  padding: 10px 20px;
+  padding: 9px 18px;
   border-radius: var(--radius-full);
   text-decoration: none;
   transition:
-    background 0.25s ease,
-    transform 0.3s var(--transition-bounce),
-    box-shadow 0.3s ease;
-  box-shadow: 0 6px 18px -4px rgba(0,102,204,0.4);
+    background 0.22s ease,
+    transform 0.28s var(--transition-bounce),
+    box-shadow 0.28s ease;
+  box-shadow: 0 5px 14px -4px rgba(0,102,204,0.38);
   white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .fw-cta-btn:hover {
   background: var(--color-blue-dark);
-  transform: translateX(4px);
-  box-shadow: 0 10px 24px -6px rgba(0,102,204,0.5);
+  transform: translateX(3px);
+  box-shadow: 0 8px 20px -5px rgba(0,102,204,0.48);
 }
 
+.fw-cta-btn:active { transform: scale(0.96); }
+
 .fw-cta-icon {
-  width: 15px;
-  height: 15px;
+  width: 14px;
+  height: 14px;
   flex-shrink: 0;
-  transition: transform 0.25s ease;
+  transition: transform 0.22s ease;
 }
 
 .fw-cta-btn:hover .fw-cta-icon {
@@ -3830,11 +3833,30 @@ onMounted(() => {
 
 .cta-actions {
   display: flex;
-  gap: 14px;
+  gap: 10px;
   justify-content: center;
   flex-wrap: wrap;
   position: relative;
   z-index: 1;
+}
+
+@media (max-width: 480px) {
+  .cta-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    width: 100%;
+    max-width: 320px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .cta-actions .btn-primary,
+  .cta-actions .btn-secondary,
+  .cta-actions a {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 /* Dynamic CSS Loader */
