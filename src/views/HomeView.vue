@@ -24,23 +24,40 @@
 
       <div class="container hero-container-layout">
         <div class="hero-content">
-          <div class="hero-eyebrow reveal-fade" style="--reveal-delay:0ms">Nigeria's Energy Engineering Authority</div>
+          <!-- Eyebrow badge -->
+          <div class="hero-eyebrow reveal-fade" style="--reveal-delay:0ms">
+            <span class="hero-eyebrow-dot"></span>
+            Nigeria's Energy Engineering Authority
+          </div>
+
           <h1 class="reveal" style="--reveal-delay:100ms">Engineering <span class="highlight">Energy Independence</span> for Nigeria.</h1>
           <p class="hero-sub reveal" style="--reveal-delay:200ms">We design, install, and maintain solar, BESS, security, and EV charging systems for businesses, institutions, and government — built to last, backed by engineering.</p>
-          
-          <div class="hero-actions reveal" style="--reveal-delay:320ms">
-            <router-link to="/load-audit" class="btn-primary">
-              <CalculatorIcon class="btn-icon" />
-              Get Free Energy Audit
+
+          <!-- Unique CTA cards -->
+          <div class="hero-cta-cards reveal" style="--reveal-delay:320ms">
+
+            <router-link to="/account/consultations" class="hero-cta-card hero-cta-card--primary">
+              <div class="hero-cta-icon">
+                <CalendarIcon />
+              </div>
+              <div class="hero-cta-text">
+                <span class="hero-cta-label">Talk to an Engineer</span>
+                <span class="hero-cta-title">Book Consultation</span>
+              </div>
+              <ArrowRightIcon class="hero-cta-arrow" />
             </router-link>
-            <router-link to="/account/consultations" class="btn-secondary">
-              <CalendarIcon class="btn-icon" />
-              Book Consultation
+
+            <router-link to="/origin-talk" class="hero-cta-card hero-cta-card--ai">
+              <div class="hero-cta-icon">
+                <SparklesIcon class="ai-icon" />
+              </div>
+              <div class="hero-cta-text">
+                <span class="hero-cta-label">AI-Powered Agent</span>
+                <span class="hero-cta-title">Talk to Origin</span>
+              </div>
+              <ArrowRightIcon class="hero-cta-arrow" />
             </router-link>
-            <router-link to="/origin-talk" class="btn-ai-glow">
-              <SparklesIcon class="btn-icon ai-icon" />
-              Talk to Origin
-            </router-link>
+
           </div>
         </div>
 
@@ -316,6 +333,109 @@
             </div>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- FIELD WORK -->
+    <section class="fieldwork section-clipped section-divider" id="fieldwork">
+      <div class="container">
+
+        <!-- Header -->
+        <div class="fw-header reveal">
+          <div class="fw-header-left">
+            <span class="section-eyebrow">On The Ground</span>
+            <h2 class="section-title text-left">Field Work</h2>
+            <p class="section-sub text-left">Every installation is a commitment. Here's what our team looks like in action — on rooftops, in server rooms, and across Nigeria.</p>
+          </div>
+          <div class="fw-header-stats reveal-right">
+            <div class="fw-stat">
+              <span class="fw-stat-val">42+</span>
+              <span class="fw-stat-lbl">Sites Installed</span>
+            </div>
+            <div class="fw-stat">
+              <span class="fw-stat-val">1.2 MW</span>
+              <span class="fw-stat-lbl">Solar Deployed</span>
+            </div>
+            <div class="fw-stat">
+              <span class="fw-stat-val">100%</span>
+              <span class="fw-stat-lbl">On-spec Delivery</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Masonry photo grid -->
+        <div class="fw-grid reveal-stagger">
+
+          <!-- Large featured photo -->
+          <div class="fw-photo fw-photo--tall">
+            <img src="../assets/pdf-assets/solar-main.jpg" alt="Solar installation in progress" class="fw-img" />
+            <div class="fw-photo-overlay"></div>
+            <div class="fw-photo-label">
+              <SunIcon class="fw-label-icon" />
+              <span>Solar Commissioning — Ondo State</span>
+            </div>
+          </div>
+
+          <!-- Top right -->
+          <div class="fw-photo">
+            <img src="../assets/pdf-assets/project-ondo.jpg" alt="Ondo solar project" class="fw-img" />
+            <div class="fw-photo-overlay"></div>
+            <div class="fw-photo-label">
+              <ZapIcon class="fw-label-icon" />
+              <span>85 kWh System — Ondo</span>
+            </div>
+          </div>
+
+          <!-- Middle right -->
+          <div class="fw-photo">
+            <img src="../assets/pdf-assets/project-gofamint.jpg" alt="CCTV installation" class="fw-img" />
+            <div class="fw-photo-overlay"></div>
+            <div class="fw-photo-label">
+              <CctvIcon class="fw-label-icon" />
+              <span>40-Camera Setup — Ibadan</span>
+            </div>
+          </div>
+
+          <!-- Bottom left -->
+          <div class="fw-photo">
+            <img src="../assets/pdf-assets/project-fcda.jpg" alt="FCDA project" class="fw-img" />
+            <div class="fw-photo-overlay"></div>
+            <div class="fw-photo-label">
+              <ShieldCheckIcon class="fw-label-icon" />
+              <span>Government Install — Abuja</span>
+            </div>
+          </div>
+
+          <!-- Bottom middle -->
+          <div class="fw-photo">
+            <img src="../assets/pdf-assets/project-ife.jpg" alt="Ife residential" class="fw-img" />
+            <div class="fw-photo-overlay"></div>
+            <div class="fw-photo-label">
+              <HomeIcon class="fw-label-icon" />
+              <span>5 kW Residential — Ife</span>
+            </div>
+          </div>
+
+          <!-- Bottom right -->
+          <div class="fw-photo">
+            <img src="../assets/pdf-assets/project-judge.jpg" alt="Ibadan residential" class="fw-img" />
+            <div class="fw-photo-overlay"></div>
+            <div class="fw-photo-label">
+              <BatteryIcon class="fw-label-icon" />
+              <span>Hybrid Solar — Ibadan</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- CTA strip -->
+        <div class="fw-cta reveal">
+          <span>See the full project portfolio</span>
+          <router-link to="/projects" class="fw-cta-btn">
+            View All Projects <ArrowRightIcon class="fw-cta-icon" />
+          </router-link>
+        </div>
+
       </div>
     </section>
 
@@ -841,41 +961,44 @@ onMounted(() => {
   z-index: 2;
 }
 
+/* ── Hero eyebrow badge ── */
 .hero-eyebrow {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  background: rgba(255, 153, 0, 0.15);
-  border: 1px solid rgba(255, 153, 0, 0.35);
+  gap: 10px;
+  background: rgba(255, 153, 0, 0.12);
+  border: 1px solid rgba(255, 153, 0, 0.3);
   border-radius: var(--radius-full);
-  padding: 6px 16px;
-  font-size: 0.72rem;
+  padding: 7px 18px;
+  font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   color: var(--orange);
   text-transform: uppercase;
-  margin-bottom: 24px;
+  margin-bottom: 22px;
+  backdrop-filter: blur(8px);
 }
 
-.hero-eyebrow::before {
-  content: '';
-  width: 6px;
-  height: 6px;
+.hero-eyebrow-dot {
+  width: 7px;
+  height: 7px;
   background: var(--orange);
   border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 8px var(--orange);
   animation: pulse-dot 2s infinite;
 }
 
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.7); }
+  50%       { opacity: 0.4; transform: scale(0.65); }
 }
 
 .hero h1 {
-  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  font-size: clamp(2.4rem, 5vw, 4.2rem);
   font-weight: 700;
   line-height: 1.1;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
   letter-spacing: -0.03em;
   color: #fff;
 }
@@ -890,12 +1013,12 @@ onMounted(() => {
 }
 
 .hero-sub {
-  font-size: 1rem;
-  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.975rem;
+  color: rgba(255, 255, 255, 0.80);
   max-width: 520px;
   line-height: 1.65;
   letter-spacing: 0em;
-  margin-bottom: 36px;
+  margin-bottom: 32px;
 }
 
 @media (max-width: 992px) {
@@ -905,114 +1028,219 @@ onMounted(() => {
   }
 }
 
-.hero-actions {
+/* ═══════════════════════════════════
+   HERO CTA CARDS — unique button cards
+   ═══════════════════════════════════ */
+.hero-cta-cards {
   display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 420px;
 }
 
 @media (max-width: 992px) {
-  .hero-actions {
-    justify-content: center;
+  .hero-cta-cards {
+    max-width: 480px;
+    margin: 0 auto;
   }
 }
 
-.btn-primary, .btn-secondary, .btn-ai-glow {
-  padding: 0.8125rem 1.625rem;
-  border-radius: var(--radius-full);
-  font-family: var(--font-main);
-  font-weight: 600;
-  font-size: 0.9375rem;
-  display: inline-flex;
+@media (max-width: 480px) {
+  .hero-cta-cards {
+    max-width: 100%;
+  }
+}
+
+/* Base card */
+.hero-cta-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.35s var(--transition-bounce),
+    box-shadow 0.35s var(--transition-bounce),
+    background 0.25s ease;
+}
+
+/* Shimmer sweep on hover */
+.hero-cta-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    rgba(255,255,255,0.1) 50%,
+    transparent 65%
+  );
+  background-size: 200% 100%;
+  background-position: -100% 0;
+  transition: background-position 0.6s ease;
+  pointer-events: none;
+}
+
+.hero-cta-card:hover::before {
+  background-position: 200% 0;
+}
+
+.hero-cta-card:hover {
+  transform: translateX(6px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Card 1 — Primary (orange) */
+.hero-cta-card--primary {
+  background: var(--orange);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 24px -6px rgba(255, 153, 0, 0.5);
+}
+
+.hero-cta-card--primary .hero-cta-icon {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.hero-cta-card--primary .hero-cta-label { color: rgba(255,255,255,0.75); }
+.hero-cta-card--primary .hero-cta-title { color: #fff; }
+.hero-cta-card--primary .hero-cta-arrow { color: rgba(255,255,255,0.8); }
+
+.hero-cta-card--primary:hover {
+  background: var(--orange2);
+  box-shadow: 0 14px 32px -8px rgba(255, 153, 0, 0.65);
+}
+
+/* Card 2 — Outline (glass) */
+.hero-cta-card--outline {
+  background: rgba(255,255,255,0.08);
+  border: 1.5px solid rgba(255,255,255,0.22);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 16px -4px rgba(0,0,0,0.2);
+}
+
+.hero-cta-card--outline .hero-cta-icon {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+}
+
+.hero-cta-card--outline .hero-cta-label { color: rgba(255,255,255,0.6); }
+.hero-cta-card--outline .hero-cta-title { color: #fff; }
+.hero-cta-card--outline .hero-cta-arrow { color: rgba(255,255,255,0.6); }
+
+.hero-cta-card--outline:hover {
+  background: rgba(255,255,255,0.14);
+  border-color: rgba(255,255,255,0.4);
+}
+
+/* Card 3 — AI glow */
+.hero-cta-card--ai {
+  background: linear-gradient(135deg, rgba(0,102,204,0.55), rgba(0,77,153,0.4));
+  border: 1.5px solid rgba(0,180,255,0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px -4px rgba(0,102,204,0.35);
+}
+
+.hero-cta-card--ai .hero-cta-icon {
+  background: rgba(0,180,255,0.2);
+  color: #60d5ff;
+}
+
+.hero-cta-card--ai .hero-cta-label { color: rgba(180,230,255,0.7); }
+.hero-cta-card--ai .hero-cta-title { color: #fff; }
+.hero-cta-card--ai .hero-cta-arrow { color: rgba(130,210,255,0.7); }
+
+.hero-cta-card--ai:hover {
+  background: linear-gradient(135deg, rgba(0,102,204,0.75), rgba(0,77,153,0.6));
+  border-color: rgba(0,180,255,0.5);
+  box-shadow: 0 10px 28px -6px rgba(0,102,204,0.5);
+}
+
+/* AI sparkle animation */
+.hero-cta-card--ai .ai-icon {
+  animation: aiPulse 2s ease-in-out infinite;
+}
+
+/* Icon box */
+.hero-cta-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  transition: all var(--transition-speed) var(--transition-bounce);
-  cursor: pointer;
-  border: none;
-  letter-spacing: 0em;
+  flex-shrink: 0;
+  transition: transform 0.3s var(--transition-bounce);
+}
+
+.hero-cta-card:hover .hero-cta-icon {
+  transform: scale(1.1) rotate(-5deg);
+}
+
+.hero-cta-icon svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2;
+}
+
+/* Text group */
+.hero-cta-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.hero-cta-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   line-height: 1;
 }
 
-.btn-primary {
-  background: var(--orange);
-  color: white;
-  box-shadow: 0 8px 20px -6px rgba(255, 153, 0, 0.45);
+.hero-cta-title {
+  font-size: 0.925rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
-.btn-primary:hover {
-  background: var(--orange2);
-  transform: translateY(-2px);
-  box-shadow: 0 14px 28px -6px rgba(255, 153, 0, 0.6);
-  color: white;
+/* Arrow */
+.hero-cta-arrow {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  transition: transform 0.3s var(--transition-bounce);
 }
 
-.btn-secondary {
-  background: transparent;
-  color: var(--text-primary);
-  border: 1.5px solid var(--border-color);
+.hero-cta-card:hover .hero-cta-arrow {
+  transform: translateX(4px);
 }
 
-.btn-secondary:hover {
-  border-color: var(--orange);
-  color: var(--orange2);
-  transform: translateY(-2px);
-}
+/* Mobile — stack tighter */
+@media (max-width: 480px) {
+  .hero-cta-card {
+    padding: 12px 14px;
+    gap: 12px;
+  }
 
-/* Hero & any dark-bg section: force secondary btn to white */
-.hero .btn-secondary {
-  color: #fff !important;
-  border-color: rgba(255, 255, 255, 0.45) !important;
-}
+  .hero-cta-icon {
+    width: 36px;
+    height: 36px;
+  }
 
-.hero .btn-secondary:hover {
-  color: var(--orange) !important;
-  border-color: var(--orange) !important;
-}
-
-.btn-ai-glow {
-  position: relative;
-  background: var(--glass-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1.5px solid var(--glass-border);
-  color: var(--text-primary);
-  overflow: hidden;
-  box-shadow: var(--shadow-sm);
-  z-index: 1;
-}
-
-.btn-ai-glow::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
-  transition: 0.6s var(--transition-bounce);
-  z-index: 2;
-}
-
-.btn-ai-glow:hover::before {
-  left: 100%;
-}
-
-.btn-ai-glow::after {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  background: linear-gradient(90deg, var(--color-blue-primary), var(--orange), var(--color-blue-primary));
-  background-size: 200% 100%;
-  z-index: -1;
-  border-radius: var(--radius-full);
-  opacity: 0.3;
-  animation: borderGlow 3s linear infinite;
-}
-
-.btn-ai-glow:hover {
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: var(--shadow-md);
+  .hero-cta-title {
+    font-size: 0.875rem;
+  }
 }
 
 .btn-icon {
@@ -2316,6 +2544,260 @@ onMounted(() => {
 }
 
 /* (old case-card-body/metrics removed — replaced by .case-drawer system above) */
+
+/* ═══════════════════════════════════════════
+   FIELD WORK SECTION
+   ═══════════════════════════════════════════ */
+
+.fieldwork {
+  background: var(--bg-primary);
+}
+
+/* Header row */
+.fw-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 40px;
+  margin-bottom: 36px;
+  flex-wrap: wrap;
+}
+
+.fw-header-left {
+  flex: 1;
+  min-width: 260px;
+}
+
+/* Stats cluster */
+.fw-header-stats {
+  display: flex;
+  gap: 32px;
+  flex-shrink: 0;
+}
+
+.fw-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.fw-stat-val {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--color-blue-primary);
+  line-height: 1;
+}
+
+.fw-stat-lbl {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 768px) {
+  .fw-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
+  }
+  .fw-header-stats {
+    gap: 20px;
+  }
+  .fw-stat {
+    align-items: flex-start;
+  }
+  .fw-stat-val {
+    font-size: 1.4rem;
+  }
+}
+
+/* ── Masonry photo grid ── */
+.fw-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: 220px 220px;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+/* Tall card spans 2 rows */
+.fw-photo--tall {
+  grid-row: span 2;
+}
+
+@media (max-width: 900px) {
+  .fw-grid {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: 180px 180px 180px;
+  }
+  .fw-photo--tall {
+    grid-row: span 2;
+  }
+}
+
+@media (max-width: 560px) {
+  .fw-grid {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: repeat(4, 150px);
+    gap: 8px;
+  }
+  .fw-photo--tall {
+    grid-row: span 2;
+    grid-column: span 1;
+  }
+}
+
+/* Individual photo */
+.fw-photo {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 0.4s var(--transition-bounce),
+    box-shadow 0.4s var(--transition-bounce);
+}
+
+.fw-photo:hover {
+  transform: scale(1.02);
+  box-shadow: var(--shadow-lg);
+  z-index: 2;
+}
+
+.fw-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transition: transform 0.7s var(--transition-bounce);
+}
+
+.fw-photo:hover .fw-img {
+  transform: scale(1.07);
+}
+
+/* Dark gradient overlay */
+.fw-photo-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(5, 10, 20, 0.82) 0%,
+    rgba(5, 10, 20, 0.2) 55%,
+    transparent 100%
+  );
+  transition: opacity 0.3s ease;
+}
+
+.fw-photo:hover .fw-photo-overlay {
+  opacity: 0.9;
+}
+
+/* Label at bottom of each photo */
+.fw-photo-label {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.9);
+  letter-spacing: 0.02em;
+  transform: translateY(4px);
+  opacity: 0.85;
+  transition:
+    transform 0.35s var(--transition-bounce),
+    opacity 0.3s ease;
+}
+
+.fw-photo:hover .fw-photo-label {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.fw-label-icon {
+  width: 14px;
+  height: 14px;
+  color: var(--color-orange-primary);
+  flex-shrink: 0;
+}
+
+/* CTA strip */
+.fw-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 28px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.fw-cta span {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.fw-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--color-blue-primary);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  transition:
+    background 0.25s ease,
+    transform 0.3s var(--transition-bounce),
+    box-shadow 0.3s ease;
+  box-shadow: 0 6px 18px -4px rgba(0,102,204,0.4);
+  white-space: nowrap;
+}
+
+.fw-cta-btn:hover {
+  background: var(--color-blue-dark);
+  transform: translateX(4px);
+  box-shadow: 0 10px 24px -6px rgba(0,102,204,0.5);
+}
+
+.fw-cta-icon {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  transition: transform 0.25s ease;
+}
+
+.fw-cta-btn:hover .fw-cta-icon {
+  transform: translateX(3px);
+}
+
+@media (max-width: 560px) {
+  .fw-cta {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 16px 18px;
+  }
+  .fw-cta-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
 
 /* ----------------- TRUST BAR ----------------- */
 .trust-bar {

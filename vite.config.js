@@ -12,12 +12,12 @@ export default defineConfig({
     },
     server: {
         proxy: {
-            // /api/agent/* → agent server (dev only — Vercel edge fn handles prod)
             '/api/agent': {
                 target: 'https://agent.originelectricltd.com',
-                changeOrigin: true,           // sets Origin: https://agent.originelectricltd.com
+                changeOrigin: true,
+                secure: false,
                 headers: {
-                    origin: 'https://originelectricltd.com',  // spoof origin the server trusts
+                    origin: 'https://originelectricltd.com',
                     referer: 'https://originelectricltd.com/',
                 },
                 rewrite: (p) => p.replace(/^\/api\/agent/, ''),
