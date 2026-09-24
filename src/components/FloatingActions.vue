@@ -1,56 +1,37 @@
 <template>
-  <div class="fab-dock" :class="{ open: expanded }">
-    <!-- Typing teaser — only when menu closed -->
-    <transition name="hint">
-      <button
-        v-if="!expanded"
-        type="button"
-        class="fab-hint"
-        aria-label="Open Origin AI chat"
-        @click="openChat"
-      >
-        <span class="fab-hint-bubble">
-          <span class="fab-hint-typed">{{ typed }}</span><span class="fab-hint-caret" aria-hidden="true" />
-        </span>
-      </button>
-    </transition>
+  <div class="fab-dock">
+    <!-- Typing teaser bubble -->
+    <button
+      type="button"
+      class="fab-hint"
+      aria-label="Chat with Origin Customer Care"
+      @click="goToChat"
+    >
+      <span class="fab-hint-bubble">
+        <span class="fab-hint-typed">{{ typed }}</span><span class="fab-hint-caret" aria-hidden="true" />
+      </span>
+    </button>
 
-    <transition name="fab-fade">
-      <div v-if="expanded" class="fab-menu" role="menu">
-        <button
-          type="button"
-          class="fab-item fab-item-chat"
-          role="menuitem"
-          @click="openChat"
-        >
-          <MessageSquareMore class="fab-item-icon" />
-          <span>Ask Origin AI</span>
-        </button>
-      </div>
-    </transition>
-
+    <!-- Main FAB — single click goes straight to Customer Care -->
     <button
       type="button"
       class="fab-main"
-      :aria-expanded="expanded"
-      :aria-label="expanded ? 'Close actions' : 'Open Origin AI'"
-      @click="expanded = !expanded"
+      aria-label="Origin Customer Care"
+      @click="goToChat"
     >
       <span class="fab-pulse" aria-hidden="true" />
       <span class="fab-pulse fab-pulse-delay" aria-hidden="true" />
-      <X v-if="expanded" class="fab-main-icon" />
-      <MessageSquareMore v-else class="fab-main-icon" />
+      <MessageSquareMore class="fab-main-icon" />
     </button>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { MessageSquareMore, X } from 'lucide-vue-next';
+import { MessageSquareMore } from 'lucide-vue-next';
 
 const router = useRouter();
-const expanded = ref(false);
 
 const phrases = [
   'Need solar help?',
@@ -89,22 +70,15 @@ function tickType() {
   timer = window.setTimeout(tickType, 28);
 }
 
-function openChat() {
-  expanded.value = false;
+function goToChat() {
   router.push({ name: 'SalesChat' });
 }
 
-function onKey(e) {
-  if (e.key === 'Escape') expanded.value = false;
-}
-
 onMounted(() => {
-  window.addEventListener('keydown', onKey);
   timer = window.setTimeout(tickType, 600);
 });
 
 onUnmounted(() => {
-  window.removeEventListener('keydown', onKey);
   if (timer) window.clearTimeout(timer);
 });
 </script>
@@ -117,11 +91,11 @@ onUnmounted(() => {
   position: fixed;
   right: 1.25rem;
   bottom: 1.5rem;
-  z-index: 95;
+  z-index: 950;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 0.85rem;
+  gap: 0.75rem;
   pointer-events: none;
 }
 
@@ -129,7 +103,7 @@ onUnmounted(() => {
   pointer-events: auto;
 }
 
-/* —— Typing hint —— */
+/* ── Typing hint bubble ── */
 .fab-hint {
   border: 0;
   background: transparent;
@@ -141,7 +115,6 @@ onUnmounted(() => {
 .fab-hint-bubble {
   display: inline-flex;
   align-items: center;
-  gap: 0;
   min-height: 2.25rem;
   padding: 0.5rem 0.875rem;
   border-radius: 1rem 1rem 0.3rem 1rem;
@@ -160,10 +133,14 @@ onUnmounted(() => {
   text-overflow: ellipsis;
   max-width: 100%;
   animation: hint-float 3.2s ease-in-out infinite;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
-.fab-hint-typed {
-  min-width: 0;
+.fab-hint:hover .fab-hint-bubble {
+  box-shadow:
+    0 3px 0 rgba(196, 90, 18, 0.22),
+    0 14px 30px rgba(11, 31, 58, 0.22);
+  transform: translateY(-2px);
 }
 
 .fab-hint-caret {
@@ -186,17 +163,7 @@ onUnmounted(() => {
   50% { transform: translateY(-4px); }
 }
 
-.hint-enter-active,
-.hint-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
-}
-.hint-enter-from,
-.hint-leave-to {
-  opacity: 0;
-  transform: translateY(6px);
-}
-
-/* —— Main FAB —— */
+/* ── Main FAB button ── */
 .fab-main {
   position: relative;
   width: 3.75rem;
@@ -212,28 +179,20 @@ onUnmounted(() => {
   box-shadow:
     0 0 0 3px rgba(196, 90, 18, 0.35),
     0 12px 32px rgba(11, 31, 58, 0.4);
-  transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
   animation: fab-bob 2.8s ease-in-out infinite;
 }
 
-.fab-dock.open .fab-main {
-  animation: none;
-  background: linear-gradient(145deg, #e07a2a 0%, var(--fab-orange) 50%, #8a3d0a 100%);
-  box-shadow:
-    0 0 0 3px rgba(11, 31, 58, 0.2),
-    0 12px 28px rgba(154, 70, 0, 0.35);
-  transform: rotate(90deg);
-}
-
 .fab-main:hover {
-  transform: translateY(-3px) scale(1.04);
+  transform: translateY(-3px) scale(1.06);
   box-shadow:
-    0 0 0 4px rgba(196, 90, 18, 0.45),
+    0 0 0 4px rgba(196, 90, 18, 0.5),
     0 16px 36px rgba(11, 31, 58, 0.45);
+  animation: none;
 }
 
-.fab-dock.open .fab-main:hover {
-  transform: rotate(90deg) translateY(-2px) scale(1.04);
+.fab-main:active {
+  transform: scale(0.96);
 }
 
 .fab-main-icon {
@@ -256,94 +215,50 @@ onUnmounted(() => {
   animation-delay: 1.2s;
 }
 
-.fab-dock.open .fab-pulse {
-  display: none;
-}
-
 @keyframes pulse-ring {
-  0% {
-    transform: scale(1);
-    opacity: 0.7;
-  }
-  100% {
-    transform: scale(1.55);
-    opacity: 0;
-  }
+  0%   { transform: scale(1);    opacity: 0.7; }
+  100% { transform: scale(1.55); opacity: 0;   }
 }
 
 @keyframes fab-bob {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
+  50%       { transform: translateY(-5px); }
 }
 
-/* —— Menu —— */
-.fab-menu {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.5rem;
-}
-
-.fab-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  border: 0;
-  cursor: pointer;
-  padding: 0.65rem 1.125rem;
-  border-radius: 999px;
-  font-weight: 600;
-  font-size: 0.825rem;
-  letter-spacing: 0.01em;
-  color: #fff;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.16);
-  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
-}
-
-.fab-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
-  filter: brightness(1.06);
-}
-
-.fab-item-icon {
-  width: 1.05rem;
-  height: 1.05rem;
-  flex-shrink: 0;
-}
-
-.fab-item-chat {
-  background: linear-gradient(135deg, #143456, var(--fab-navy));
-}
-
-.fab-fade-enter-active,
-.fab-fade-leave-active {
-  transition: opacity 0.18s ease, transform 0.18s ease;
-}
-
-.fab-fade-enter-from,
-.fab-fade-leave-to {
-  opacity: 0;
-  transform: translateY(8px);
-}
-
-@media (max-width: 640px) {
+/* ── Mobile ── */
+@media (max-width: 768px) {
   .fab-dock {
-    right: 1rem;
-    bottom: 4.75rem; /* sits above the 62px mobile bottom nav */
+    right: 0.875rem;
+    bottom: 5rem; /* clears the 62px mobile bottom nav */
+    gap: 0.5rem;
   }
+
+  .fab-main {
+    width: 3.25rem;
+    height: 3.25rem;
+  }
+
+  .fab-main-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
   .fab-hint-bubble {
-    font-size: 0.75rem;
-    padding: 0.45rem 0.75rem;
+    font-size: 0.72rem;
+    padding: 0.4rem 0.7rem;
+    min-height: 2rem;
   }
-  .fab-item span {
+}
+
+@media (max-width: 400px) {
+  .fab-dock {
+    right: 0.75rem;
+    bottom: 4.75rem;
+  }
+
+  /* Hide the hint bubble on very small screens to save space */
+  .fab-hint {
     display: none;
-  }
-  .fab-item {
-    width: 3rem;
-    height: 3rem;
-    padding: 0;
-    justify-content: center;
   }
 }
 
