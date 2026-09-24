@@ -47,27 +47,6 @@
               <ArrowRightIcon class="hero-cta-arrow" />
             </router-link>
 
-            <router-link to="/load-audit" class="hero-cta-card hero-cta-card--outline">
-              <div class="hero-cta-icon">
-                <CalculatorIcon />
-              </div>
-              <div class="hero-cta-text">
-                <span class="hero-cta-label">Power Sizing Tool</span>
-                <span class="hero-cta-title">Load Audit</span>
-              </div>
-              <ArrowRightIcon class="hero-cta-arrow" />
-            </router-link>
-
-            <router-link to="/sales-chat" class="hero-cta-card hero-cta-card--outline">
-              <div class="hero-cta-icon">
-                <MessageSquareIcon />
-              </div>
-              <div class="hero-cta-text">
-                <span class="hero-cta-label">24/7 Support</span>
-                <span class="hero-cta-title">Origin Customer Care</span>
-              </div>
-              <ArrowRightIcon class="hero-cta-arrow" />
-            </router-link>
 
             <router-link to="/origin-talk" class="hero-cta-card hero-cta-card--ai">
               <div class="hero-cta-icon">
