@@ -4,12 +4,34 @@
     <section class="hero" id="home">
       <div class="hero-bg" :style="{ backgroundImage: `url(${heroSolarBg})` }"></div>
 
-      <!-- Radar glow decorative elements -->
+      <!-- Compass / Radar decorative -->
       <div class="hero-radar" aria-hidden="true">
         <div class="hero-radar-core"></div>
         <div class="hero-radar-ring"></div>
-        <div class="hero-radar-ring" style="animation-delay:0.9s"></div>
-        <div class="hero-radar-ring" style="animation-delay:1.8s"></div>
+        <div class="hero-radar-ring" style="animation-delay:1s"></div>
+        <div class="hero-radar-ring" style="animation-delay:2s"></div>
+        <!-- Compass crosshair lines -->
+        <svg class="hero-radar-svg" viewBox="0 0 700 700" xmlns="http://www.w3.org/2000/svg">
+          <!-- Crosshair lines -->
+          <line x1="350" y1="0"   x2="350" y2="700" stroke="rgba(255,153,0,0.18)" stroke-width="1"/>
+          <line x1="0"   y1="350" x2="700" y2="350" stroke="rgba(255,153,0,0.18)" stroke-width="1"/>
+          <!-- Diagonal lines -->
+          <line x1="105" y1="105" x2="595" y2="595" stroke="rgba(255,153,0,0.08)" stroke-width="1"/>
+          <line x1="595" y1="105" x2="105" y2="595" stroke="rgba(255,153,0,0.08)" stroke-width="1"/>
+          <!-- Outer circle -->
+          <circle cx="350" cy="350" r="340" stroke="rgba(255,153,0,0.2)" stroke-width="1" fill="none"/>
+          <!-- Mid circle -->
+          <circle cx="350" cy="350" r="220" stroke="rgba(255,153,0,0.12)" stroke-width="1" fill="none" stroke-dasharray="6 6"/>
+          <!-- Inner circle -->
+          <circle cx="350" cy="350" r="110" stroke="rgba(0,153,255,0.2)" stroke-width="1" fill="none"/>
+          <!-- Center dot -->
+          <circle cx="350" cy="350" r="5" fill="rgba(255,153,0,0.7)"/>
+          <!-- Cardinal tick marks -->
+          <line x1="350" y1="10"  x2="350" y2="40"  stroke="rgba(255,153,0,0.5)" stroke-width="2"/>
+          <line x1="350" y1="660" x2="350" y2="690" stroke="rgba(255,153,0,0.5)" stroke-width="2"/>
+          <line x1="10"  y1="350" x2="40"  y2="350" stroke="rgba(255,153,0,0.5)" stroke-width="2"/>
+          <line x1="660" y1="350" x2="690" y2="350" stroke="rgba(255,153,0,0.5)" stroke-width="2"/>
+        </svg>
       </div>
 
       <svg class="circuit-line" viewBox="0 0 600 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -900,51 +922,84 @@ onMounted(() => {
   background-color: var(--bg-primary);
 }
 
-/* --- Radar glow decorative --- */
+/* --- Radar / Compass decorative --- */
 .hero-radar {
   position: absolute;
-  top: 48%;
-  left: 38%;
+  top: 50%;
+  left: 50%;
   transform: translate(-50%, -50%);
-  width: 680px;
-  height: 680px;
+  width: 700px;
+  height: 700px;
   pointer-events: none;
-  z-index: 0;
-  opacity: 0.55;
+  z-index: 1;
 }
 
-.hero-radar-core {
-  position: absolute;
-  inset: 25%;
-  border-radius: 50%;
-  background: radial-gradient(circle,
-    rgba(255, 153, 0, 0.55) 0%,
-    rgba(0, 102, 204, 0.25) 45%,
-    transparent 70%
-  );
-  animation: radarPulse 4s ease-in-out infinite;
-  filter: blur(2px);
-}
-
-.hero-radar-ring {
+/* Outer rotating ring */
+.hero-radar::before {
+  content: '';
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  border: 1.5px solid rgba(255, 153, 0, 0.45);
-  animation: radarRing 2.8s ease-out infinite;
+  border: 1px solid rgba(255, 153, 0, 0.22);
+  animation: compassSpin 18s linear infinite;
 }
 
-.hero-radar-ring:nth-child(3) { animation-delay: 0.9s; }
-.hero-radar-ring:nth-child(4) { animation-delay: 1.8s; }
+/* Dashed tick ring */
+.hero-radar::after {
+  content: '';
+  position: absolute;
+  inset: 8%;
+  border-radius: 50%;
+  border: 1px dashed rgba(255, 153, 0, 0.14);
+  animation: compassSpin 12s linear infinite reverse;
+}
+
+/* Solid glowing core */
+.hero-radar-core {
+  position: absolute;
+  inset: 32%;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    rgba(255, 153, 0, 0.45) 0%,
+    rgba(0, 102, 204, 0.2) 40%,
+    transparent 70%
+  );
+  animation: radarPulse 4s ease-in-out infinite;
+  filter: blur(18px);
+}
+
+/* Expanding sonar rings */
+.hero-radar-ring {
+  position: absolute;
+  inset: 18%;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 153, 0, 0.5);
+  animation: radarRing 3s ease-out infinite;
+  box-shadow: 0 0 12px rgba(255, 153, 0, 0.15);
+}
+
+/* Compass SVG overlay */
+.hero-radar-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  animation: compassSpin 30s linear infinite;
+}
 
 @keyframes radarPulse {
-  0%, 100% { transform: scale(1);    opacity: 0.7; }
-  50%       { transform: scale(1.12); opacity: 1;   }
+  0%, 100% { transform: scale(1);     opacity: 0.65; }
+  50%       { transform: scale(1.15); opacity: 1;    }
 }
 
 @keyframes radarRing {
-  0%   { transform: scale(0.6); opacity: 0.8; }
-  100% { transform: scale(1.5); opacity: 0;   }
+  0%   { transform: scale(0.5); opacity: 0.9; }
+  100% { transform: scale(1.8); opacity: 0;   }
+}
+
+@keyframes compassSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
 
 .hero-bg {
