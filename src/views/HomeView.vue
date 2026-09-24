@@ -1357,9 +1357,12 @@ onMounted(() => {
   padding: 28px;
   position: relative;
   z-index: 2;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow:
+    0 8px 32px -8px rgba(0, 0, 0, 0.35),
+    0 2px 8px -2px rgba(0, 0, 0, 0.18),
+    0 0 0 1px rgba(255, 153, 0, 0.07);
   overflow: hidden;
 }
 
@@ -1367,13 +1370,19 @@ onMounted(() => {
 .hero-main-card::before {
   content: '';
   position: absolute;
-  top: -30px;
-  right: -30px;
-  width: 140px;
-  height: 140px;
-  background: radial-gradient(circle, rgba(255, 153, 0, 0.15) 0%, transparent 70%);
+  top: -50px;
+  right: -50px;
+  width: 260px;
+  height: 260px;
+  background: radial-gradient(circle,
+    rgba(255, 153, 0, 0.28) 0%,
+    rgba(0, 102, 204, 0.14) 45%,
+    transparent 70%
+  );
   pointer-events: none;
+  border-radius: 50%;
   animation: radarPulse 3.5s ease-in-out infinite;
+  filter: blur(1px);
 }
 
 .hero-card-label {
@@ -1544,7 +1553,9 @@ onMounted(() => {
   padding: 14px 18px;
   z-index: 3;
   min-width: 170px;
-  box-shadow: var(--shadow-md);
+  box-shadow:
+    0 12px 36px -8px rgba(0, 0, 0, 0.28),
+    0 4px 12px -4px rgba(0, 102, 204, 0.12);
   transition: box-shadow 0.3s ease, border-color 0.3s ease;
   overflow: hidden;
 }
