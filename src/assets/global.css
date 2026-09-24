@@ -142,97 +142,96 @@ img {
   padding-top: 0 !important;
 }
 
-/* Buttons — pill shape, compact modern */
+/* ════════════════════════════════════════
+   BUTTON SYSTEM — clean, compact, modern
+   ════════════════════════════════════════ */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.45rem;
-  padding: 0.6rem 1.35rem;
-  border-radius: var(--radius-full);
+  gap: 6px;
+  padding: 9px 20px;
+  border-radius: 999px;
   font-family: var(--font-main);
   font-weight: 600;
-  font-size: 0.875rem;
-  letter-spacing: 0em;
+  font-size: 0.82rem;
+  letter-spacing: 0.01em;
   cursor: pointer;
   transition:
-    transform 0.25s var(--transition-bounce),
-    box-shadow 0.25s ease,
-    background 0.2s ease;
-  border: none;
+    transform 0.22s var(--transition-bounce),
+    box-shadow 0.22s ease,
+    background 0.18s ease,
+    border-color 0.18s ease;
+  border: 1.5px solid transparent;
   line-height: 1;
   white-space: nowrap;
+  text-decoration: none;
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Desktop size variant */
+.btn:active { transform: scale(0.95) !important; }
+
+/* Size variant */
 .btn-lg {
-  padding: 0.75rem 1.75rem;
-  font-size: 0.95rem;
+  padding: 11px 26px;
+  font-size: 0.9rem;
 }
 
-.btn:active {
-  transform: scale(0.96) !important;
-}
-
+/* ── Solid Blue ── */
 .btn-primary {
-  background: linear-gradient(135deg, var(--color-blue-primary), var(--color-blue-dark));
-  color: white;
-  box-shadow: 0 6px 16px -4px rgba(0, 102, 204, 0.38);
+  background: var(--color-blue-primary);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 14px -3px rgba(0,102,204,0.35);
 }
-
 .btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 24px -6px rgba(0, 102, 204, 0.55);
+  background: var(--color-blue-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px -4px rgba(0,102,204,0.5);
 }
 
+/* ── Solid Orange ── */
 .btn-secondary {
-  background: linear-gradient(135deg, var(--color-orange-primary), var(--color-orange-dark));
-  color: white;
-  box-shadow: 0 6px 16px -4px rgba(255, 153, 0, 0.38);
+  background: var(--color-orange-primary);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 14px -3px rgba(255,153,0,0.35);
 }
-
 .btn-secondary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 24px -6px rgba(255, 153, 0, 0.55);
+  background: var(--color-orange-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px -4px rgba(255,153,0,0.5);
 }
 
-/* Mobile — slightly smaller tap targets */
-@media (max-width: 600px) {
-  .btn {
-    padding: 0.55rem 1.15rem;
-    font-size: 0.82rem;
-  }
-  .btn-lg {
-    padding: 0.65rem 1.4rem;
-    font-size: 0.875rem;
-  }
-}
-
-/* Outlined / inactive variant per design spec */
+/* ── Outline Blue ── */
 .btn-outline {
   background: transparent;
   color: var(--color-blue-primary);
-  border: 1.5px solid var(--color-blue-primary);
+  border-color: var(--color-blue-primary);
   box-shadow: none;
 }
-
 .btn-outline:hover {
-  background: rgba(0, 102, 204, 0.06);
-  transform: translateY(-2px);
+  background: rgba(0,102,204,0.06);
+  transform: translateY(-1px);
 }
 
-/* Muted / inactive pill */
+/* ── Muted / ghost ── */
 .btn-muted {
   background: var(--bg-secondary);
   color: var(--text-secondary);
-  border: 1.5px solid var(--border-color);
+  border-color: var(--border-color);
   box-shadow: none;
 }
-
 .btn-muted:hover {
   border-color: var(--color-blue-primary);
   color: var(--color-blue-primary);
+}
+
+/* ── Mobile scale-down ── */
+@media (max-width: 600px) {
+  .btn       { padding: 8px 16px; font-size: 0.78rem; }
+  .btn-lg    { padding: 10px 22px; font-size: 0.85rem; }
+}
   transform: translateY(-2px);
 }
 

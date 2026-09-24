@@ -283,7 +283,7 @@
             <span class="section-eyebrow">Project Portfolio</span>
             <h2 class="section-title text-left">Success <span class="highlight">Stories</span></h2>
           </div>
-          <router-link to="/projects" class="btn-secondary">View All Projects</router-link>
+          <router-link to="/projects" class="btn btn-secondary">View All Projects</router-link>
         </div>
         <div class="cases-grid reveal-stagger">
           <!-- Ondo Installation -->
@@ -1298,8 +1298,8 @@ onMounted(() => {
 }
 
 .btn-icon {
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
   flex-shrink: 0;
 }
 
@@ -2168,24 +2168,25 @@ onMounted(() => {
 .svc-bento-link {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.78rem;
-  font-weight: 700;
+  gap: 5px;
+  font-size: 0.75rem;
+  font-weight: 600;
   color: #fff;
   text-decoration: none;
-  padding: 7px 14px;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: var(--radius-full);
+  padding: 6px 13px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 999px;
   backdrop-filter: blur(8px);
   width: fit-content;
   opacity: 0;
   transform: translateY(8px);
   transition:
-    opacity 0.3s ease 0.12s,
-    transform 0.35s var(--transition-bounce) 0.12s,
-    background 0.25s ease,
-    gap 0.2s ease;
+    opacity 0.28s ease 0.1s,
+    transform 0.32s var(--transition-bounce) 0.1s,
+    background 0.2s ease,
+    border-color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .svc-bento-card:hover .svc-bento-link {
@@ -2531,14 +2532,14 @@ onMounted(() => {
 .case-drawer-link {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  font-size: 0.78rem;
-  font-weight: 700;
+  gap: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
   color: var(--color-blue-primary);
   text-decoration: none;
   opacity: 0;
   transform: translateY(4px);
-  transition: opacity 0.25s ease 0.18s, transform 0.3s var(--transition-bounce) 0.18s;
+  transition: opacity 0.22s ease 0.15s, transform 0.28s var(--transition-bounce) 0.15s;
   letter-spacing: 0.01em;
 }
 
@@ -2808,41 +2809,38 @@ onMounted(() => {
 .fw-cta-btn {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
   background: var(--color-blue-primary);
   color: #fff;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 600;
+  letter-spacing: 0.01em;
   padding: 9px 18px;
-  border-radius: var(--radius-full);
+  border-radius: 999px;
   text-decoration: none;
+  border: 1.5px solid transparent;
+  box-shadow: 0 4px 12px -3px rgba(0,102,204,0.32);
   transition:
-    background 0.22s ease,
-    transform 0.28s var(--transition-bounce),
-    box-shadow 0.28s ease;
-  box-shadow: 0 5px 14px -4px rgba(0,102,204,0.38);
-  white-space: nowrap;
+    background 0.2s ease,
+    transform 0.22s var(--transition-bounce),
+    box-shadow 0.22s ease;
   -webkit-tap-highlight-color: transparent;
+  white-space: nowrap;
 }
-
 .fw-cta-btn:hover {
   background: var(--color-blue-dark);
-  transform: translateX(3px);
-  box-shadow: 0 8px 20px -5px rgba(0,102,204,0.48);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px -4px rgba(0,102,204,0.45);
 }
-
-.fw-cta-btn:active { transform: scale(0.96); }
+.fw-cta-btn:active { transform: scale(0.95); }
 
 .fw-cta-icon {
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
   flex-shrink: 0;
-  transition: transform 0.22s ease;
+  transition: transform 0.2s ease;
 }
-
-.fw-cta-btn:hover .fw-cta-icon {
-  transform: translateX(3px);
-}
+.fw-cta-btn:hover .fw-cta-icon { transform: translateX(2px); }
 
 @media (max-width: 560px) {
   .fw-cta {
@@ -2920,28 +2918,34 @@ onMounted(() => {
 }
 
 .mkt-tab {
-  padding: 8px 18px;
-  border-radius: 100px;
+  padding: 7px 15px;
+  border-radius: 999px;
   font-family: var(--font-main);
-  font-weight: 700;
-  font-size: 0.8rem;
+  font-weight: 600;
+  font-size: 0.76rem;
+  letter-spacing: 0.01em;
   cursor: pointer;
-  transition: all 0.25s ease;
-  border: 1px solid var(--border-color);
-  background: var(--bg-primary);
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.2s var(--transition-bounce);
+  border: 1.5px solid var(--border-color);
+  background: transparent;
   color: var(--text-secondary);
+  -webkit-tap-highlight-color: transparent;
 }
-
 .mkt-tab.active {
   background: var(--orange);
-  color: white;
+  color: #fff;
   border-color: var(--orange);
-  box-shadow: 0 4px 12px rgba(255, 153, 0, 0.2);
+  box-shadow: 0 3px 10px -2px rgba(255,153,0,0.3);
 }
-
 .mkt-tab:hover:not(.active) {
   border-color: var(--orange);
   color: var(--orange);
+  transform: translateY(-1px);
 }
 
 .products-grid {
@@ -3077,19 +3081,24 @@ onMounted(() => {
 .product-btn {
   background: var(--text-primary);
   color: var(--bg-primary);
-  padding: 8px 16px;
-  border-radius: 6px;
+  padding: 7px 14px;
+  border-radius: 999px;
   font-family: var(--font-main);
-  font-weight: 700;
-  font-size: 0.78rem;
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.01em;
   border: none;
   cursor: pointer;
-  transition: all 0.2s;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    transform 0.2s var(--transition-bounce);
+  -webkit-tap-highlight-color: transparent;
 }
-
 .product-card:hover .product-btn {
   background: var(--orange);
-  color: white;
+  color: #fff;
+  transform: translateY(-1px);
 }
 
 .empty-state-container {
@@ -3276,24 +3285,28 @@ onMounted(() => {
 
 .tool-btn {
   width: 100%;
-  padding: 12px;
+  padding: 10px 16px;
   background: var(--orange);
-  color: white;
+  color: #fff;
   border: none;
-  border-radius: var(--radius-full);
+  border-radius: 999px;
   font-family: var(--font-main);
   font-weight: 600;
-  font-size: 0.9rem;
-  letter-spacing: 0em;
+  font-size: 0.82rem;
+  letter-spacing: 0.01em;
   cursor: pointer;
-  transition: all var(--transition-bounce);
+  transition:
+    background 0.2s ease,
+    transform 0.22s var(--transition-bounce),
+    box-shadow 0.22s ease;
+  -webkit-tap-highlight-color: transparent;
 }
-
 .tool-btn:hover {
   background: var(--orange2);
   transform: translateY(-1px);
-  box-shadow: 0 8px 20px -6px rgba(255, 153, 0, 0.45);
+  box-shadow: 0 6px 16px -4px rgba(255,153,0,0.42);
 }
+.tool-btn:active { transform: scale(0.96); }
 
 .tool-result {
   max-height: 0;
@@ -3348,11 +3361,13 @@ onMounted(() => {
 }
 
 .btn-sm-fit {
-  padding: 8px 20px;
-  font-size: 0.85rem;
-  border-radius: var(--radius-full);
+  padding: 7px 18px;
+  font-size: 0.8rem;
+  border-radius: 999px;
   display: inline-flex;
+  align-items: center;
   font-weight: 600;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* ----------------- TESTIMONIALS SECTION ----------------- */
