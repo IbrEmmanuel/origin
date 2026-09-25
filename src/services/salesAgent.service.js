@@ -2,14 +2,13 @@
  * Origin Sales Agent — AgentOS native client.
  * POST /agents/{id}/runs (SSE) + GET /sessions/{id}/runs for resume.
  *
- * Always routes through /api/agent (Vercel edge proxy) so CORS is never
- * an issue regardless of whether we are on Vercel, localhost, or any other domain.
- * The proxy spoofs Origin: https://originelectricltd.com which is the only
- * origin the agent backend (Cloudflare) accepts.
+ * Chat hits Fly staging AgentOS directly so those runs show up in Fly logs.
+ * (The old /api/agent Vercel proxy still targeted production when Vercel env
+ * overrode VITE_SALES_AGENT_URL — that is why Fly only showed /app/health.)
  */
-
-// Always use the local proxy path — works on Vercel AND localhost (Vite proxies it too)
-const BASE = '/api/agent';
+const FLY_STAGING = 'https://staging-ai-agent.fly.dev';
+const fromEnv = String(import.meta.env.VITE_SALES_AGENT_URL || '').replace(/\/$/, '');
+const BASE = fromEnv.includes('fly.dev') ? fromEnv : FLY_STAGING;
 const AGENT_ID = import.meta.env.VITE_SALES_AGENT_ID || 'sales-agent';
 const STORAGE_KEY = 'origin_sales_chat_v1';
 

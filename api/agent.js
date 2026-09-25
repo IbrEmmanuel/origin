@@ -9,7 +9,8 @@
  * so Vercel / localhost can receive it.
  */
 
-const AGENT_BASE = (process.env.VITE_SALES_AGENT_URL || 'https://staging-ai-agent.fly.dev').replace(/\/$/, '');
+const fromEnv = String(process.env.VITE_SALES_AGENT_URL || '').replace(/\/$/, '');
+const AGENT_BASE = fromEnv.includes('fly.dev') ? fromEnv : 'https://staging-ai-agent.fly.dev';
 const ALLOWED_ORIGIN = 'https://originelectricltd.com';
 
 export const config = { runtime: 'edge' };
