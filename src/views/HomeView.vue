@@ -2,6 +2,11 @@
   <div class="home-view">
     <!-- HERO SECTION -->
     <section class="hero" id="home">
+      <!-- Background photo -->
+      <div class="hero-bg">
+        <img :src="heroSolarBg" alt="" class="hero-bg-img" aria-hidden="true" />
+        <div class="hero-bg-overlay"></div>
+      </div>
 
       <!-- Circuit decoration -->
       <svg class="circuit-line" viewBox="0 0 600 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -673,7 +678,7 @@ import projectJudgeImg from '../assets/pdf-assets/project-judge.jpg';
 import projectIfeImg from '../assets/pdf-assets/project-ife.jpg';
 
 // Section Background Images
-
+import heroSolarBg from '../assets/hero_solar_new.jpg';
 import processEngineeringBg from '../assets/process_engineering_bg.jpg';
 import ctaSolarDuskBg from '../assets/cta_solar_dusk_bg.jpg';
 
@@ -928,7 +933,32 @@ onMounted(() => {
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
-/* Hero background — no image, pure dark */
+/* Hero background — photo with dark overlay */
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+.hero-bg-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+  display: block;
+}
+.hero-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    160deg,
+    rgba(0,0,0,0.78) 0%,
+    rgba(0,0,0,0.58) 50%,
+    rgba(0,0,0,0.40) 100%
+  );
+}
 
 /* Circuit SVG decoration */
 .circuit-line {
