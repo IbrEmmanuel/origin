@@ -20,10 +20,14 @@
       <div class="hero-body">
 
 
-        <!-- H1 — large display heading -->
+        <!-- H1 — large display heading with animated word-swap -->
         <h1 class="hero-h1 reveal" style="--reveal-delay:80ms">
           Engineering<br class="hero-br-mobile" />
-          <span class="highlight"> Energy Independence</span><br />
+          <span class="hero-swap-wrap">
+            <span class="hero-swap-track" ref="swapTrackRef">
+              <span class="hero-swap-word" v-for="(phrase, i) in swapPhrases" :key="i">{{ phrase }}</span>
+            </span>
+          </span><br />
           for Nigeria.
         </h1>
 
@@ -714,6 +718,34 @@ const calcPayment = () => {
   showResult.value = true;
 };
 
+// ----------------- HERO H1 WORD SWAP -----------------
+const swapPhrases = [
+  ' Energy Independence',
+  ' Solar Power Systems',
+  ' BESS & Storage',
+  ' EV Infrastructure',
+  ' Security Solutions',
+  ' Engineering Excellence',
+];
+const swapTrackRef = ref(null);
+let swapIndex      = 0;
+let swapTimer      = null;
+
+const runSwap = () => {
+  const track = swapTrackRef.value;
+  if (!track) return;
+  swapIndex = (swapIndex + 1) % swapPhrases.length;
+  // Slide up by one word-height using translateY
+  track.style.transform = `translateY(-${swapIndex * 100}%)`;
+};
+
+const startSwap = () => {
+  swapTimer = setInterval(runSwap, 2800);
+};
+const stopSwap = () => {
+  if (swapTimer) clearInterval(swapTimer);
+};
+
 // ----------------- HERO PRODUCT TICKER (rAF horizontal scroll) -----------------
 const heroProducts    = ref([]);
 const tickerRef       = ref(null);
@@ -785,6 +817,7 @@ const stopHeroScroll  = () => {};
 
 onUnmounted(() => {
   if (tickerRaf) cancelAnimationFrame(tickerRaf);
+  stopSwap();
 });
 
 // ----------------- INSTALLER MODAL -----------------
@@ -794,6 +827,9 @@ function openInstallerModal() {
 
 // ----------------- LIFECYCLE -----------------
 onMounted(() => {
+  // Start H1 word swap
+  startSwap();
+
   // Start ticker immediately (skeleton chips give it content to scroll)
   startTicker();
 
@@ -973,6 +1009,31 @@ onMounted(() => {
 /* hide the mobile-only <br> on desktop */
 .hero-br-mobile { display: none; }
 @media (max-width: 520px) { .hero-br-mobile { display: block; } }
+
+/* ── H1 word-swap ── */
+.hero-swap-wrap {
+  display: inline-block;
+  overflow: hidden;
+  height: 1.12em;
+  vertical-align: bottom;
+  position: relative;
+}
+.hero-swap-track {
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+.hero-swap-word {
+  display: block;
+  line-height: 1.12;
+  white-space: nowrap;
+  background: linear-gradient(135deg, var(--orange), var(--orange2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  padding-right: 4px;
+}
 
 /* Sub-copy */
 .hero-sub {
