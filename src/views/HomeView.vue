@@ -83,18 +83,18 @@
         </div>
 
         <!-- ── AUTO-SCROLL TICKER ── -->
-        <div class="hero-ticker-wrap reveal-fade" style="--reveal-delay:460ms" aria-hidden="true">
+        <div class="hero-ticker-wrap">
           <div class="hero-ticker-fade hero-ticker-fade--left"></div>
           <div class="hero-ticker-fade hero-ticker-fade--right"></div>
           <div class="hero-ticker" ref="tickerRef"
                @mouseenter="pauseTicker" @mouseleave="resumeTicker">
-            <!-- Render twice for seamless infinite loop -->
             <div class="hero-ticker-track" ref="tickerTrackRef">
+              <!-- Render products twice for seamless infinite loop -->
               <template v-for="pass in 2" :key="pass">
                 <!-- Skeleton chips while loading -->
                 <template v-if="heroProducts.length === 0">
                   <div v-for="n in 10" :key="`sk-${pass}-${n}`" class="hero-chip hero-chip--skeleton">
-                    <div class="hero-chip-img skeleton-box"></div>
+                    <div class="hero-chip-img-wrap skeleton-box"></div>
                     <div class="hero-chip-skeleton-text">
                       <div class="skeleton-box" style="height:9px;width:80px;border-radius:3px"></div>
                       <div class="skeleton-box" style="height:8px;width:50px;border-radius:3px;margin-top:3px"></div>
@@ -742,18 +742,42 @@ const calcPayment = () => {
   showResult.value = true;
 };
 
-// ----------------- HERO PRODUCT TICKER (horizontal CSS marquee) -----------------
-const heroProducts = ref([]);
+// ----------------- HERO PRODUCT TICKER (rAF horizontal scroll) -----------------
+const heroProducts    = ref([]);
 const tickerRef       = ref(null);
 const tickerTrackRef  = ref(null);
+let   tickerRaf       = null;
+let   tickerPos       = 0;
 let   tickerPaused    = false;
+let   tickerHalfWidth = 0;
 
-const pauseTicker  = () => {
-  if (tickerTrackRef.value) tickerTrackRef.value.style.animationPlayState = 'paused';
+const runTicker = () => {
+  const track = tickerTrackRef.value;
+  if (!track) return;
+
+  // Measure half-width once (one full copy of items)
+  if (!tickerHalfWidth) {
+    tickerHalfWidth = track.scrollWidth / 2;
+  }
+
+  if (!tickerPaused) {
+    tickerPos += 0.6;                             // px per frame ≈ ~36px/s at 60fps
+    if (tickerPos >= tickerHalfWidth) tickerPos = 0; // seamless reset
+    track.style.transform = `translateX(-${tickerPos}px)`;
+  }
+
+  tickerRaf = requestAnimationFrame(runTicker);
 };
-const resumeTicker = () => {
-  if (tickerTrackRef.value) tickerTrackRef.value.style.animationPlayState = 'running';
+
+const startTicker = () => {
+  if (tickerRaf) cancelAnimationFrame(tickerRaf);
+  tickerHalfWidth = 0;   // re-measure after products load
+  tickerPos = 0;
+  tickerRaf = requestAnimationFrame(runTicker);
 };
+
+const pauseTicker  = () => { tickerPaused = true; };
+const resumeTicker = () => { tickerPaused = false; };
 
 const getHeroImageUrl = (path) => {
   if (!path) return '';
@@ -784,10 +808,12 @@ const fetchHeroProducts = async () => {
   }
 };
 
-const startHeroScroll = () => {};   /* no-op — replaced by CSS marquee */
+const startHeroScroll = () => {};   /* no-op — replaced by rAF ticker */
 const stopHeroScroll  = () => {};
 
-onUnmounted(() => { /* nothing to cancel */ });
+onUnmounted(() => {
+  if (tickerRaf) cancelAnimationFrame(tickerRaf);
+});
 
 // ----------------- INSTALLER MODAL -----------------
 function openInstallerModal() {
@@ -796,10 +822,16 @@ function openInstallerModal() {
 
 // ----------------- LIFECYCLE -----------------
 onMounted(() => {
-  // Fetch hero products for the ticker
-  fetchHeroProducts();
+  // Start ticker immediately (skeleton chips give it content to scroll)
+  startTicker();
 
-  // Scroll Reveal Observer — handles .reveal, .reveal-left, .reveal-right, .reveal-fade, .reveal-stagger
+  // Fetch products, then restart ticker so it re-measures the real item width
+  fetchHeroProducts().then(() => {
+    // nextTick lets Vue render the real chips before we re-measure
+    setTimeout(startTicker, 100);
+  });
+
+  // Scroll Reveal Observer
   const revealObserver = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
@@ -1188,12 +1220,7 @@ onMounted(() => {
   align-items: center;
   gap: 10px;
   width: max-content;
-  animation: ticker-scroll 40s linear infinite;
   will-change: transform;
-}
-@keyframes ticker-scroll {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
 }
 
 /* Product chip */
@@ -1292,9 +1319,9 @@ onMounted(() => {
 }
 .hero-ticker-shoplink:hover { color: var(--orange2); }
 
-/* Respect reduced-motion */
+/* Respect reduced-motion — stop the rAF ticker via pauseTicker on mount */
 @media (prefers-reduced-motion: reduce) {
-  .hero-ticker-track { animation: none; }
+  .hero-ticker-track { transition: none; }
 }
 
 /* ══════════════════════════════════════
