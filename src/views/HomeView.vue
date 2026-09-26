@@ -675,7 +675,7 @@ import projectJudgeImg from '../assets/pdf-assets/project-judge.jpg';
 import projectIfeImg from '../assets/pdf-assets/project-ife.jpg';
 
 // Section Background Images
-import heroSolarBg from '../assets/hero_solar_bg.jpg';
+import heroSolarBg from '../assets/hero_engineer_bg.jpg';
 import processEngineeringBg from '../assets/process_engineering_bg.jpg';
 import ctaSolarDuskBg from '../assets/cta_solar_dusk_bg.jpg';
 
@@ -936,7 +936,7 @@ onMounted(() => {
   inset: 0;
   z-index: 0;
   background-size: cover;
-  background-position: center top;
+  background-position: center 15%;
   background-repeat: no-repeat;
 }
 .hero-bg::after {
