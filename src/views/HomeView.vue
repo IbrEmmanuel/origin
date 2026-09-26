@@ -53,29 +53,6 @@
           </button>
         </div>
 
-        <!-- ── CTA CARDS ROW — quick-action tiles ── -->
-        <div class="hero-cta-tiles reveal" style="--reveal-delay:360ms">
-          <router-link to="/origin-talk" class="hero-tile hero-tile--ai">
-            <SparklesIcon class="hero-tile-icon ai-icon" />
-            <span class="hero-tile-label">AI Agent</span>
-            <span class="hero-tile-title">Talk to Origin</span>
-          </router-link>
-          <router-link to="/marketplace" class="hero-tile hero-tile--muted">
-            <ZapIcon class="hero-tile-icon" />
-            <span class="hero-tile-label">Live Store</span>
-            <span class="hero-tile-title">Shop Products</span>
-          </router-link>
-          <router-link to="/projects" class="hero-tile hero-tile--muted">
-            <AwardIcon class="hero-tile-icon" />
-            <span class="hero-tile-label">Portfolio</span>
-            <span class="hero-tile-title">Our Projects</span>
-          </router-link>
-          <router-link to="/contact" class="hero-tile hero-tile--muted">
-            <MapPinIcon class="hero-tile-icon" />
-            <span class="hero-tile-label">Get in Touch</span>
-            <span class="hero-tile-title">Contact Us</span>
-          </router-link>
-        </div>
 
         <!-- ── AUTO-SCROLL TICKER ── -->
         <div class="hero-ticker-wrap">
