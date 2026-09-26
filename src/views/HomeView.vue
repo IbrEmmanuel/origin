@@ -692,29 +692,15 @@ import projectIfeImg from '../assets/pdf-assets/project-ife.jpg';
 import processEngineeringBg from '../assets/process_engineering_bg.jpg';
 import ctaSolarDuskBg from '../assets/cta_solar_dusk_bg.jpg';
 
-// oooooo Hero Slideshow Images
-import heroSlide0 from '../assets/oooooo/IMG_0011.jpeg';
-import heroSlide1 from '../assets/oooooo/IMG_0020.JPG';
-import heroSlide2 from '../assets/oooooo/IMG_0032.jpeg';
-import heroSlide3 from '../assets/oooooo/IMG_0036.JPG';
-import heroSlide4 from '../assets/oooooo/IMG_0058.JPG';
-import heroSlide5 from '../assets/oooooo/IMG_0200.jpeg';
-import heroSlide6 from '../assets/oooooo/IMG_0201.jpeg';
-import heroSlide7 from '../assets/oooooo/IMG_0520.jpeg';
-import heroSlide8 from '../assets/oooooo/IMG_1980.jpeg';
-import heroSlide9 from '../assets/oooooo/IMG_1984.jpeg';
-import heroSlide10 from '../assets/oooooo/IMG_3335.jpg';
+// oooooo Hero Slideshow Images — web-optimised versions (compressed, portrait-cropped to 16:9)
+import heroSlide0 from '../assets/oooooo/web/IMG_0020.jpg';
+import heroSlide1 from '../assets/oooooo/web/IMG_0036.jpg';
+import heroSlide2 from '../assets/oooooo/web/IMG_0058.jpg';
+import heroSlide3 from '../assets/oooooo/web/IMG_3335.jpg';
 
 // ----------------- HERO SLIDESHOW -----------------
-// All 11 real-world project photos from the oooooo folder
-const heroSlides = [
-  heroSlide0, heroSlide1, heroSlide2, heroSlide3, heroSlide4,
-  heroSlide5, heroSlide6, heroSlide7, heroSlide8, heroSlide9,
-  heroSlide10,
-];
+const heroSlides = [heroSlide0, heroSlide1, heroSlide2, heroSlide3];
 
-// Ken Burns direction variants — 4 flavours, assigned once per slide so they
-// never jump between frames (zoom-in-left, zoom-in-right, zoom-out-left, zoom-out-right)
 const KB_DIRS = ['zil', 'zir', 'zol', 'zor'];
 const heroSlideKbDir = heroSlides.map((_, i) => KB_DIRS[i % KB_DIRS.length]);
 
