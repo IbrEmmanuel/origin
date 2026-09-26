@@ -945,9 +945,9 @@ onMounted(() => {
   inset: 0;
   background: linear-gradient(
     160deg,
-    rgba(0,0,0,0.88) 0%,
-    rgba(0,0,0,0.72) 50%,
-    rgba(0,0,0,0.55) 100%
+    rgba(0,0,0,0.62) 0%,
+    rgba(0,0,0,0.45) 50%,
+    rgba(0,0,0,0.28) 100%
   );
 }
 
