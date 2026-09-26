@@ -2,160 +2,139 @@
   <div class="home-view">
     <!-- HERO SECTION -->
     <section class="hero" id="home">
+      <!-- Background photo + dark overlay -->
       <div class="hero-bg" :style="{ backgroundImage: `url(${heroSolarBg})` }"></div>
 
-
-
+      <!-- Circuit decoration -->
       <svg class="circuit-line" viewBox="0 0 600 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <path class="circuit-path" d="M580 0 L580 80 L500 80 L500 160 L420 160 L420 120 L340 120 L340 200 L260 200 L260 140 L180 140 L180 260 L300 260 L300 340 L220 340 L220 420 L380 420 L380 360 L460 360 L460 480 L340 480 L340 560 L500 560 L500 640 L400 640 L400 720 L580 720 L580 800" style="animation-delay:0.3s"/>
         <path class="circuit-path" d="M480 0 L480 60 L560 60" style="animation-delay:0.6s"/>
         <path class="circuit-path" d="M220 260 L140 260 L140 360 L220 360" style="animation-delay:0.9s"/>
-        <circle class="circuit-dot" cx="500" cy="80" r="4" style="animation-delay:0.8s"/>
+        <circle class="circuit-dot" cx="500" cy="80"  r="4" style="animation-delay:0.8s"/>
         <circle class="circuit-dot" cx="340" cy="200" r="4" style="animation-delay:1.1s"/>
         <circle class="circuit-dot" cx="380" cy="420" r="4" style="animation-delay:1.4s"/>
         <circle class="circuit-dot" cx="500" cy="560" r="4" style="animation-delay:1.7s"/>
       </svg>
 
-      <div class="container hero-container-layout">
-        <div class="hero-content">
-          <!-- Eyebrow badge -->
-          <div class="hero-eyebrow reveal-fade" style="--reveal-delay:0ms">
-            <span class="hero-eyebrow-dot"></span>
-            Nigeria's Energy Engineering Authority
-          </div>
+      <!-- ── HERO BODY — centered column ── -->
+      <div class="hero-body">
 
-          <h1 class="reveal" style="--reveal-delay:100ms">Engineering <span class="highlight">Energy Independence</span> for Nigeria.</h1>
-          <p class="hero-sub reveal" style="--reveal-delay:200ms">We design, install, and maintain solar, BESS, security, and EV charging systems for businesses, institutions, and government — built to last, backed by engineering.</p>
-
-          <!-- Unique CTA cards -->
-          <div class="hero-cta-cards reveal" style="--reveal-delay:320ms">
-
-            <router-link to="/account/consultations" class="hero-cta-card hero-cta-card--primary">
-              <div class="hero-cta-icon">
-                <CalendarIcon />
-              </div>
-              <div class="hero-cta-text">
-                <span class="hero-cta-label">Talk to an Engineer</span>
-                <span class="hero-cta-title">Book Consultation</span>
-              </div>
-              <ArrowRightIcon class="hero-cta-arrow" />
-            </router-link>
-
-
-            <router-link to="/load-audit" class="hero-cta-card hero-cta-card--outline">
-              <div class="hero-cta-icon">
-                <CalculatorIcon />
-              </div>
-              <div class="hero-cta-text">
-                <span class="hero-cta-label">Power Sizing Tool</span>
-                <span class="hero-cta-title">Load Audit</span>
-              </div>
-              <ArrowRightIcon class="hero-cta-arrow" />
-            </router-link>
-
-            <router-link to="/sales-chat" class="hero-cta-card hero-cta-card--outline">
-              <div class="hero-cta-icon">
-                <MessageSquareIcon />
-              </div>
-              <div class="hero-cta-text">
-                <span class="hero-cta-label">24/7 Support</span>
-                <span class="hero-cta-title">Origin Customer Care</span>
-              </div>
-              <ArrowRightIcon class="hero-cta-arrow" />
-            </router-link>
-
-            <router-link to="/origin-talk" class="hero-cta-card hero-cta-card--ai">
-              <div class="hero-cta-icon">
-                <SparklesIcon class="ai-icon" />
-              </div>
-              <div class="hero-cta-text">
-                <span class="hero-cta-label">AI-Powered Agent</span>
-                <span class="hero-cta-title">Talk to Origin</span>
-              </div>
-              <ArrowRightIcon class="hero-cta-arrow" />
-            </router-link>
-
-            <button type="button" class="hero-cta-card hero-cta-card--install" @click="openInstallerModal">
-              <div class="hero-cta-icon">
-                <WrenchIcon />
-              </div>
-              <div class="hero-cta-text">
-                <span class="hero-cta-label">On-site Service</span>
-                <span class="hero-cta-title">Request Installation</span>
-              </div>
-              <ArrowRightIcon class="hero-cta-arrow" />
-            </button>
-
-          </div>
+        <!-- Eyebrow badge -->
+        <div class="hero-eyebrow reveal-fade" style="--reveal-delay:0ms">
+          <span class="hero-eyebrow-dot"></span>
+          Nigeria's Energy Engineering Authority
         </div>
 
-        <div class="hero-visual reveal-right" style="--reveal-delay:150ms">
-          <div class="hero-card-stack">
-            <div class="hero-main-card">
-              <div class="hero-card-label">Live Marketplace — All Products</div>
+        <!-- H1 — large display heading -->
+        <h1 class="hero-h1 reveal" style="--reveal-delay:80ms">
+          Engineering<br class="hero-br-mobile" />
+          <span class="highlight"> Energy Independence</span><br />
+          for Nigeria.
+        </h1>
 
-              <!-- Scrolling product list -->
-              <div
-                class="hero-product-scroll"
-                ref="heroScrollRef"
-                @mouseenter="stopHeroScroll"
-                @mouseleave="startHeroScroll"
-              >
-                <!-- Render list twice for seamless infinite loop -->
-                <template v-for="pass in 2" :key="pass">
-                  <router-link
-                    v-for="product in heroProducts"
-                    :key="`${pass}-${product.id}`"
-                    :to="`/product/${product.id}`"
-                    class="hero-product-row"
-                  >
-                    <div class="hero-product-img-wrap">
-                      <img
-                        v-if="product.image"
-                        :src="product.image"
-                        :alt="product.name"
-                        class="hero-product-img"
-                        loading="lazy"
-                      />
-                      <div v-else class="hero-product-img-placeholder">
-                        <ZapIcon style="width:16px;height:16px;opacity:0.4" />
-                      </div>
-                    </div>
-                    <div class="hero-product-info">
-                      <span class="hero-product-name">{{ product.name }}</span>
-                      <span class="hero-product-cat">{{ product.category }}</span>
-                    </div>
-                    <span class="hero-product-price">₦{{ product.price }}</span>
-                  </router-link>
-                </template>
+        <!-- Sub-copy -->
+        <p class="hero-sub reveal" style="--reveal-delay:180ms">
+          We design, install, and maintain solar, BESS, security, and EV charging systems
+          for businesses, institutions, and government — built to last, backed by engineering.
+        </p>
 
-                <!-- Skeleton rows while loading -->
+        <!-- ── BUTTON ROW — min-h-[4.4em] feel ── -->
+        <div class="hero-btn-row reveal" style="--reveal-delay:280ms">
+          <router-link to="/account/consultations" class="hero-btn hero-btn--primary">
+            <CalendarIcon class="hero-btn-icon" />
+            Book Consultation
+          </router-link>
+          <router-link to="/load-audit" class="hero-btn hero-btn--glass">
+            <CalculatorIcon class="hero-btn-icon" />
+            Load Audit
+          </router-link>
+          <router-link to="/sales-chat" class="hero-btn hero-btn--ghost">
+            <MessageSquareIcon class="hero-btn-icon" />
+            Talk to Us
+          </router-link>
+          <button type="button" class="hero-btn hero-btn--ghost" @click="openInstallerModal">
+            <WrenchIcon class="hero-btn-icon" />
+            Request Install
+          </button>
+        </div>
+
+        <!-- ── CTA CARDS ROW — quick-action tiles ── -->
+        <div class="hero-cta-tiles reveal" style="--reveal-delay:360ms">
+          <router-link to="/origin-talk" class="hero-tile hero-tile--ai">
+            <SparklesIcon class="hero-tile-icon ai-icon" />
+            <span class="hero-tile-label">AI Agent</span>
+            <span class="hero-tile-title">Talk to Origin</span>
+          </router-link>
+          <router-link to="/marketplace" class="hero-tile hero-tile--muted">
+            <ZapIcon class="hero-tile-icon" />
+            <span class="hero-tile-label">Live Store</span>
+            <span class="hero-tile-title">Shop Products</span>
+          </router-link>
+          <router-link to="/projects" class="hero-tile hero-tile--muted">
+            <AwardIcon class="hero-tile-icon" />
+            <span class="hero-tile-label">Portfolio</span>
+            <span class="hero-tile-title">Our Projects</span>
+          </router-link>
+          <router-link to="/contact" class="hero-tile hero-tile--muted">
+            <MapPinIcon class="hero-tile-icon" />
+            <span class="hero-tile-label">Get in Touch</span>
+            <span class="hero-tile-title">Contact Us</span>
+          </router-link>
+        </div>
+
+        <!-- ── AUTO-SCROLL TICKER ── -->
+        <div class="hero-ticker-wrap reveal-fade" style="--reveal-delay:460ms" aria-hidden="true">
+          <div class="hero-ticker-fade hero-ticker-fade--left"></div>
+          <div class="hero-ticker-fade hero-ticker-fade--right"></div>
+          <div class="hero-ticker" ref="tickerRef"
+               @mouseenter="pauseTicker" @mouseleave="resumeTicker">
+            <!-- Render twice for seamless infinite loop -->
+            <div class="hero-ticker-track" ref="tickerTrackRef">
+              <template v-for="pass in 2" :key="pass">
+                <!-- Skeleton chips while loading -->
                 <template v-if="heroProducts.length === 0">
-                  <div v-for="n in 8" :key="n" class="hero-product-row hero-product-skeleton">
-                    <div class="hero-product-img-wrap skeleton-box"></div>
-                    <div class="hero-product-info">
-                      <div class="skeleton-box" style="height:10px;width:70%;border-radius:4px"></div>
-                      <div class="skeleton-box" style="height:8px;width:40%;border-radius:4px;margin-top:4px"></div>
+                  <div v-for="n in 10" :key="`sk-${pass}-${n}`" class="hero-chip hero-chip--skeleton">
+                    <div class="hero-chip-img skeleton-box"></div>
+                    <div class="hero-chip-skeleton-text">
+                      <div class="skeleton-box" style="height:9px;width:80px;border-radius:3px"></div>
+                      <div class="skeleton-box" style="height:8px;width:50px;border-radius:3px;margin-top:3px"></div>
                     </div>
-                    <div class="skeleton-box" style="height:10px;width:55px;border-radius:4px"></div>
                   </div>
                 </template>
-              </div>
-
-              <div class="hero-card-divider"></div>
-              <div class="hero-status-row">
-                <span class="status-dot"></span>
-                <span>{{ heroProducts.length > 0 ? `${heroProducts.length} products live` : 'Loading products…' }}</span>
-                <router-link to="/marketplace" class="hero-shop-link">Shop all →</router-link>
-              </div>
-            </div>
-            <div class="hero-floating-card">
-              <div class="float-card-num">{{ heroProducts.length > 0 ? `${heroProducts.length}+` : '…' }}</div>
-              <div class="float-card-label">Products Available</div>
+                <!-- Live product chips -->
+                <router-link
+                  v-for="product in heroProducts"
+                  :key="`${pass}-${product.id}`"
+                  :to="`/product/${product.id}`"
+                  class="hero-chip"
+                >
+                  <div class="hero-chip-img-wrap">
+                    <img v-if="product.image" :src="product.image" :alt="product.name"
+                         class="hero-chip-img" loading="lazy" />
+                    <div v-else class="hero-chip-img-placeholder">
+                      <ZapIcon style="width:12px;height:12px;opacity:0.4" />
+                    </div>
+                  </div>
+                  <div class="hero-chip-info">
+                    <span class="hero-chip-name">{{ product.name }}</span>
+                    <span class="hero-chip-price">₦{{ product.price }}</span>
+                  </div>
+                </router-link>
+              </template>
             </div>
           </div>
+          <div class="hero-ticker-meta">
+            <span class="hero-ticker-dot"></span>
+            <span class="hero-ticker-count">
+              {{ heroProducts.length > 0 ? `${heroProducts.length} products live` : 'Loading products…' }}
+            </span>
+            <router-link to="/marketplace" class="hero-ticker-shoplink">
+              Shop all <ArrowRightIcon style="width:11px;height:11px;display:inline-block;vertical-align:-1px" />
+            </router-link>
+          </div>
         </div>
-      </div>
+
+      </div><!-- /hero-body -->
     </section>
 
 
@@ -763,10 +742,18 @@ const calcPayment = () => {
   showResult.value = true;
 };
 
-// ----------------- HERO PRODUCT SCROLL -----------------
+// ----------------- HERO PRODUCT TICKER (horizontal CSS marquee) -----------------
 const heroProducts = ref([]);
-const heroScrollRef = ref(null);
-let heroScrollTimer = null;
+const tickerRef       = ref(null);
+const tickerTrackRef  = ref(null);
+let   tickerPaused    = false;
+
+const pauseTicker  = () => {
+  if (tickerTrackRef.value) tickerTrackRef.value.style.animationPlayState = 'paused';
+};
+const resumeTicker = () => {
+  if (tickerTrackRef.value) tickerTrackRef.value.style.animationPlayState = 'running';
+};
 
 const getHeroImageUrl = (path) => {
   if (!path) return '';
@@ -783,7 +770,6 @@ const parseHeroImages = (images) => {
 
 const fetchHeroProducts = async () => {
   try {
-    // Fetch all products in one call (limit 51 covers everything currently in DB)
     const res = await marketplaceService.getProducts({ page: 1, limit: 60 });
     const raw = res.products || res || [];
     heroProducts.value = raw.map(p => ({
@@ -798,30 +784,10 @@ const fetchHeroProducts = async () => {
   }
 };
 
-const startHeroScroll = () => {
-  const el = heroScrollRef.value;
-  if (!el) return;
-  let pos = 0;
-  const step = () => {
-    pos += 0.7;
-    // Seamless loop: when we've scrolled through one full copy, reset silently
-    if (pos >= el.scrollHeight / 2) pos = 0;
-    el.scrollTop = pos;
-    heroScrollTimer = requestAnimationFrame(step);
-  };
-  heroScrollTimer = requestAnimationFrame(step);
-};
+const startHeroScroll = () => {};   /* no-op — replaced by CSS marquee */
+const stopHeroScroll  = () => {};
 
-const stopHeroScroll = () => {
-  if (heroScrollTimer) {
-    cancelAnimationFrame(heroScrollTimer);
-    heroScrollTimer = null;
-  }
-};
-
-onUnmounted(() => {
-  stopHeroScroll();
-});
+onUnmounted(() => { /* nothing to cancel */ });
 
 // ----------------- INSTALLER MODAL -----------------
 function openInstallerModal() {
@@ -830,11 +796,8 @@ function openInstallerModal() {
 
 // ----------------- LIFECYCLE -----------------
 onMounted(() => {
-  // Load hero products, then start scroll animation
-  fetchHeroProducts().then(() => {
-    // Small delay to let DOM render the duplicated list
-    setTimeout(startHeroScroll, 400);
-  });
+  // Fetch hero products for the ticker
+  fetchHeroProducts();
 
   // Scroll Reveal Observer — handles .reveal, .reveal-left, .reveal-right, .reveal-fade, .reveal-stagger
   const revealObserver = new IntersectionObserver((entries) => {
@@ -876,22 +839,24 @@ onMounted(() => {
 .mt-md  { margin-top: 1.5rem; }
 
 /* ══════════════════════════════════════════
-   HERO  —  min-h-screen, 2-col grid
-   matches reference: relative overflow-hidden
-   border-b border-border/40 pt-28 pb-14
+   HERO — full-screen centered column
+   Matches reference: min-h-screen, flex-col,
+   items-center, text-center, dark bg photo
    ══════════════════════════════════════════ */
 .hero {
   position: relative;
   min-height: 100svh;
   padding-top: calc(5.5rem + env(safe-area-inset-top, 0px));
-  padding-bottom: 3.5rem;
+  padding-bottom: 0;              /* ticker bleeds to edge */
   display: flex;
   align-items: center;
+  justify-content: center;
   overflow: hidden;
-  background-color: var(--bg-primary);
-  border-bottom: 1px solid var(--border-color);
+  background-color: #0a0a0a;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
+/* Background photo */
 .hero-bg {
   position: absolute;
   inset: 0;
@@ -900,48 +865,24 @@ onMounted(() => {
   background-position: center 20%;
   background-repeat: no-repeat;
 }
-
 .hero-bg::after {
   content: '';
   position: absolute;
   inset: 0;
   background: linear-gradient(
-    to right,
-    rgba(0,0,0,0.82) 0%,
-    rgba(0,0,0,0.58) 45%,
-    rgba(0,0,0,0.20) 100%
+    160deg,
+    rgba(0,0,0,0.88) 0%,
+    rgba(0,0,0,0.72) 50%,
+    rgba(0,0,0,0.55) 100%
   );
 }
 
-/* 2-column grid — matches lg:grid-cols-2 lg:gap-14 */
-.hero-container-layout {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  align-items: center;
-  gap: 56px;
-  position: relative;
-  z-index: 1;
-  width: 100%;
-}
-
-@media (max-width: 1024px) {
-  .hero-container-layout {
-    grid-template-columns: 1fr;
-    gap: 40px;
-  }
-  .hero {
-    padding-top: calc(6.5rem + env(safe-area-inset-top, 0px));
-    padding-bottom: 3rem;
-    min-height: unset;
-  }
-}
-
-/* Circuit SVG */
+/* Circuit SVG decoration */
 .circuit-line {
   position: absolute;
   right: 0; top: 0;
   width: 55%; height: 100%;
-  opacity: 0.1;
+  opacity: 0.08;
   z-index: 0;
   pointer-events: none;
 }
@@ -961,24 +902,37 @@ onMounted(() => {
 @keyframes draw-circuit { to { stroke-dashoffset: 0; } }
 @keyframes dot-appear    { to { opacity: 1; } }
 
-.hero-content { position: relative; z-index: 2; }
+/* ── Hero body — centered column ── */
+.hero-body {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 1.5rem 3.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0;
+}
 
-/* Eyebrow */
+/* Eyebrow badge */
 .hero-eyebrow {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   background: rgba(255,118,0,0.1);
-  border: 1px solid rgba(255,118,0,0.25);
+  border: 1px solid rgba(255,118,0,0.28);
   border-radius: var(--radius-xs);
   padding: 5px 14px;
   font-family: var(--font-main);
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.1em;
   color: var(--color-primary);
   text-transform: uppercase;
-  margin-bottom: 20px;
+  margin-bottom: 1.4rem;
 }
 .hero-eyebrow-dot {
   width: 6px; height: 6px;
@@ -989,344 +943,392 @@ onMounted(() => {
   animation: pulse-dot 2s infinite;
 }
 @keyframes pulse-dot {
-  0%, 100% { opacity: 1; transform: scale(1); }
+  0%, 100% { opacity: 1;   transform: scale(1);   }
   50%       { opacity: 0.4; transform: scale(0.6); }
 }
 
-.hero h1 {
+/* ── H1 — large display type ── */
+.hero-h1 {
   font-family: var(--font-display);
-  font-size: clamp(2.2rem, 4.5vw, 3.8rem);
-  font-weight: 500;
-  line-height: 1.1;
-  margin-bottom: 16px;
-  letter-spacing: -0.025em;
+  /* matches reference text-4xl → text-7xl clamp */
+  font-size: clamp(2.6rem, 6.5vw, 5rem);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
   color: #fff;
+  margin-bottom: 1.25rem;
+  max-width: 820px;
 }
-.hero h1 .highlight {
+.hero-h1 .highlight {
   background: linear-gradient(135deg, var(--orange), var(--orange2));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  display: inline-block;
+  display: inline;
 }
+/* hide the mobile-only <br> on desktop */
+.hero-br-mobile { display: none; }
+@media (max-width: 520px) { .hero-br-mobile { display: block; } }
+
+/* Sub-copy */
 .hero-sub {
-  font-size: 0.95rem;
-  color: rgba(255,255,255,0.76);
-  max-width: 500px;
-  line-height: 1.65;
-  margin-bottom: 32px;
+  font-size: 1rem;
+  color: rgba(255,255,255,0.7);
+  max-width: 600px;
+  line-height: 1.7;
+  margin-bottom: 2.25rem;
 }
-@media (max-width: 1024px) {
-  .hero-sub { margin-left: auto; margin-right: auto; }
+
+/* ══════════════════════════════════════
+   BUTTON ROW — min-h-[4.4em] reference
+   ══════════════════════════════════════ */
+.hero-btn-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+/* Base hero button */
+.hero-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  /* matches reference min-h-[3.25em] on md, grows to [4.4em] feel */
+  min-height: 52px;
+  padding: 0 26px;
+  border-radius: var(--radius-sm);   /* 4px — sharp editorial */
+  font-family: var(--font-main);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+  position: relative;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background  0.18s ease,
+    border-color 0.18s ease,
+    box-shadow  0.22s ease,
+    transform   0.22s var(--transition-bounce);
+}
+/* Shimmer sweep */
+.hero-btn::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.09) 50%, transparent 65%);
+  background-size: 200% 100%;
+  background-position: -100% 0;
+  transition: background-position 0.5s ease;
+  pointer-events: none;
+}
+.hero-btn:hover::after { background-position: 200% 0; }
+.hero-btn:hover        { transform: translateY(-2px); }
+.hero-btn:active       { transform: scale(0.97); }
+
+.hero-btn-icon { width: 17px; height: 17px; flex-shrink: 0; stroke-width: 2; }
+
+/* Solid orange — primary CTA */
+.hero-btn--primary {
+  background: var(--orange);
+  color: #fff;
+  border-color: var(--orange);
+  box-shadow: 0 4px 18px -4px rgba(255,118,0,0.55);
+}
+.hero-btn--primary:hover {
+  background: var(--orange2);
+  border-color: var(--orange2);
+  box-shadow: 0 8px 24px -6px rgba(255,118,0,0.6);
+}
+
+/* Glass — secondary actions */
+.hero-btn--glass {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  border-color: rgba(255,255,255,0.22);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.hero-btn--glass:hover {
+  background: rgba(255,255,255,0.16);
+  border-color: rgba(255,255,255,0.36);
+}
+
+/* Ghost — tertiary actions */
+.hero-btn--ghost {
+  background: transparent;
+  color: rgba(255,255,255,0.78);
+  border-color: rgba(255,255,255,0.18);
+}
+.hero-btn--ghost:hover {
+  background: rgba(255,255,255,0.07);
+  color: #fff;
+  border-color: rgba(255,255,255,0.32);
+}
+
+/* ══════════════════════════════════════
+   CTA QUICK-ACTION TILES (4 tiles row)
+   ══════════════════════════════════════ */
+.hero-cta-tiles {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 680px;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+}
+
+.hero-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex: 1 1 120px;
+  min-width: 110px;
+  padding: 14px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255,255,255,0.12);
+  text-decoration: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition:
+    background  0.2s ease,
+    border-color 0.2s ease,
+    transform   0.22s var(--transition-bounce);
+  -webkit-tap-highlight-color: transparent;
+}
+.hero-tile:hover { transform: translateY(-3px); }
+
+.hero-tile--ai {
+  background: linear-gradient(135deg, rgba(255,118,0,0.18), rgba(30,30,30,0.5));
+  border-color: rgba(255,118,0,0.28);
+}
+.hero-tile--ai:hover { background: linear-gradient(135deg, rgba(255,118,0,0.28), rgba(30,30,30,0.62)); border-color: rgba(255,118,0,0.45); }
+
+.hero-tile--muted {
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.hero-tile--muted:hover { background: rgba(255,255,255,0.11); border-color: rgba(255,255,255,0.26); }
+
+.hero-tile-icon {
+  width: 20px; height: 20px;
+  color: rgba(255,255,255,0.8);
+  stroke-width: 1.8;
+  margin-bottom: 2px;
+}
+.hero-tile--ai .hero-tile-icon { color: var(--orange); }
+
+.hero-tile-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+  line-height: 1;
+}
+.hero-tile-title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.2;
+}
+
+/* ══════════════════════════════════════
+   HORIZONTAL AUTO-SCROLL TICKER
+   Pure CSS @keyframes marquee — no JS.
+   ══════════════════════════════════════ */
+.hero-ticker-wrap {
+  width: 100vw;          /* bleed beyond container */
+  margin-left: calc(-50vw + 50%);
+  position: relative;
+  padding-bottom: 2.75rem;
+}
+
+/* Fade edges */
+.hero-ticker-fade {
+  position: absolute;
+  top: 0; bottom: 20px;
+  width: 80px;
+  z-index: 3;
+  pointer-events: none;
+}
+.hero-ticker-fade--left  {
+  left: 0;
+  background: linear-gradient(to right, rgba(0,0,0,0.88) 0%, transparent 100%);
+}
+.hero-ticker-fade--right {
+  right: 0;
+  background: linear-gradient(to left, rgba(0,0,0,0.88) 0%, transparent 100%);
+}
+
+/* Scrolling container — overflow hidden */
+.hero-ticker {
+  overflow: hidden;
+  width: 100%;
+  cursor: default;
+}
+
+/* The moving track — rendered twice for seamless loop */
+.hero-ticker-track {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: max-content;
+  animation: ticker-scroll 40s linear infinite;
+  will-change: transform;
+}
+@keyframes ticker-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Product chip */
+.hero-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px 7px 7px;
+  border-radius: var(--radius-md);
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+.hero-chip:hover {
+  background: rgba(255,255,255,0.13);
+  border-color: rgba(255,118,0,0.4);
+}
+
+.hero-chip-img-wrap {
+  width: 32px; height: 32px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.06);
+  display: flex; align-items: center; justify-content: center;
+}
+.hero-chip-img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+.hero-chip-img-placeholder {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(255,255,255,0.4);
+}
+
+.hero-chip-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.hero-chip-name {
+  font-family: var(--font-main);
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.9);
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.hero-chip-price {
+  font-family: var(--font-main);
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: var(--orange);
+}
+
+/* Skeleton chip */
+.hero-chip--skeleton {
+  pointer-events: none;
+  opacity: 0.6;
+}
+.hero-chip-skeleton-text {
+  display: flex; flex-direction: column; gap: 3px;
+}
+
+/* Ticker metadata bar */
+.hero-ticker-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 8px;
+  font-family: var(--font-main);
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.45);
+}
+.hero-ticker-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--color-success);
+  box-shadow: 0 0 6px var(--color-success);
+  animation: pulse-dot 2s infinite;
+  flex-shrink: 0;
+}
+.hero-ticker-count { color: rgba(255,255,255,0.45); }
+.hero-ticker-shoplink {
+  color: var(--orange);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.hero-ticker-shoplink:hover { color: var(--orange2); }
+
+/* Respect reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .hero-ticker-track { animation: none; }
+}
+
+/* ══════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════ */
+@media (max-width: 768px) {
+  .hero-h1 { font-size: clamp(2.2rem, 8vw, 3.2rem); }
+  .hero-sub { font-size: 0.92rem; }
+  .hero-btn { min-height: 48px; padding: 0 20px; font-size: 0.85rem; }
+  .hero-cta-tiles { gap: 6px; }
+  .hero-tile { min-width: 90px; padding: 12px 8px; }
+  .hero-tile-title { font-size: 0.72rem; }
+}
+@media (max-width: 520px) {
+  .hero-body { padding: 0 1rem 2.5rem; }
+  .hero-btn-row { gap: 8px; }
+  .hero-btn { min-height: 44px; padding: 0 16px; font-size: 0.82rem; flex: 1 1 calc(50% - 4px); }
+  .hero-cta-tiles { display: grid; grid-template-columns: 1fr 1fr; }
+  .hero-tile { flex: unset; }
+  .hero-ticker-fade { width: 48px; }
 }
 
 /* ─────────────────────────────────────
-   HERO CTA CARDS
-   Tall editorial buttons — 4-column grid
-   matching reference h-[4.4em] pattern.
-   Dark-background context (photo hero).
-   ───────────────────────────────────── */
-.hero-cta-cards {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  max-width: 500px;
-  width: 100%;
-}
-/* Last card (Install) spans full width */
-.hero-cta-cards .hero-cta-card:last-child { grid-column: 1 / -1; }
-
-/* ── Base card ── */
-.hero-cta-card {
-  display: flex;
-  align-items: center;
-  gap: 13px;
-  /* matches reference min-h-[3.25em] at base → ~52px */
-  min-height: 60px;
-  padding: 13px 16px;
-  border-radius: var(--radius-md);   /* 6px — sharp editorial */
-  text-decoration: none;
-  cursor: pointer;
-  font-family: var(--font-main);
-  position: relative;
-  overflow: hidden;
-  border: 1px solid transparent;
-  transition:
-    transform 0.25s var(--transition-bounce),
-    box-shadow  0.25s ease,
-    background  0.2s ease,
-    border-color 0.2s ease;
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* Shimmer sweep */
-.hero-cta-card::before {
-  content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(
-    105deg,
-    transparent 35%,
-    rgba(255,255,255,0.08) 50%,
-    transparent 65%
-  );
-  background-size: 200% 100%;
-  background-position: -100% 0;
-  transition: background-position 0.55s ease;
-  pointer-events: none;
-}
-.hero-cta-card:hover::before  { background-position: 200% 0; }
-.hero-cta-card:hover          { transform: translateY(-2px); box-shadow: 0 10px 28px -6px rgba(0,0,0,0.38); }
-.hero-cta-card:active         { transform: scale(0.97); }
-
-/* ── Primary — solid orange, high-contrast CTA ── */
-.hero-cta-card--primary {
-  background: var(--orange);
-  border-color: rgba(255,255,255,0.18);
-  box-shadow: 0 4px 18px -4px rgba(255,118,0,0.5);
-}
-.hero-cta-card--primary .hero-cta-icon {
-  background: rgba(255,255,255,0.2);
-  color: #fff;
-}
-.hero-cta-card--primary .hero-cta-label,
-.hero-cta-card--primary .hero-cta-arrow { color: rgba(255,255,255,0.75); }
-.hero-cta-card--primary .hero-cta-title  { color: #fff; }
-.hero-cta-card--primary:hover            { background: var(--orange2); border-color: rgba(255,255,255,0.28); }
-
-/* ── Outline — glass on dark hero bg ── */
-.hero-cta-card--outline {
-  background: rgba(255,255,255,0.06);
-  border-color: rgba(255,255,255,0.16);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-}
-.hero-cta-card--outline .hero-cta-icon {
-  background: rgba(255,255,255,0.1);
-  color: rgba(255,255,255,0.85);
-}
-.hero-cta-card--outline .hero-cta-label,
-.hero-cta-card--outline .hero-cta-arrow { color: rgba(255,255,255,0.52); }
-.hero-cta-card--outline .hero-cta-title  { color: #fff; }
-.hero-cta-card--outline:hover {
-  background: rgba(255,255,255,0.11);
-  border-color: rgba(255,255,255,0.3);
-}
-
-/* ── AI — orange-tinted glass ── */
-.hero-cta-card--ai {
-  background: linear-gradient(135deg, rgba(255,118,0,0.18), rgba(47,47,47,0.4));
-  border-color: rgba(255,118,0,0.25);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-}
-.hero-cta-card--ai .hero-cta-icon {
-  background: rgba(255,118,0,0.18);
-  color: var(--color-primary);
-}
-.hero-cta-card--ai .hero-cta-label,
-.hero-cta-card--ai .hero-cta-arrow { color: rgba(255,255,255,0.52); }
-.hero-cta-card--ai .hero-cta-title  { color: #fff; }
-.hero-cta-card--ai:hover {
-  background: linear-gradient(135deg, rgba(255,118,0,0.28), rgba(47,47,47,0.55));
-  border-color: rgba(255,118,0,0.42);
-}
-
-/* ── Install — teal-tinted, full-width bottom row ── */
-.hero-cta-card--install {
-  background: linear-gradient(135deg, rgba(18,140,126,0.44), rgba(10,100,90,0.32));
-  border-color: rgba(0,210,180,0.24);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  cursor: pointer; text-align: left; width: 100%;
-}
-.hero-cta-card--install .hero-cta-icon {
-  background: rgba(0,210,180,0.16);
-  color: #4dffd8;
-}
-.hero-cta-card--install .hero-cta-label,
-.hero-cta-card--install .hero-cta-arrow { color: rgba(160,255,230,0.6); }
-.hero-cta-card--install .hero-cta-title  { color: #fff; }
-.hero-cta-card--install:hover {
-  background: linear-gradient(135deg, rgba(18,140,126,0.62), rgba(10,100,90,0.5));
-  border-color: rgba(0,210,180,0.4);
-}
-
-/* ── AI icon pulse ── */
+   HERO CTA CARDS (kept for reference —
+   no longer used in template)
+/* ── ai-icon pulse (used by hero-tile--ai) ── */
 .ai-icon { color: var(--orange); animation: aiPulse 2s ease-in-out infinite; }
 @keyframes aiPulse {
-  0%, 100% { transform: scale(1) rotate(0);    opacity: 1;   }
+  0%, 100% { transform: scale(1) rotate(0); opacity: 1; }
   50%       { transform: scale(1.15) rotate(12deg); opacity: 0.8; }
 }
 
-/* ── Icon container ── */
-.hero-cta-icon {
-  width: 38px; height: 38px;
-  border-radius: var(--radius-sm);   /* 4px — sharp */
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-  transition: transform 0.22s var(--transition-bounce);
-}
-.hero-cta-card:hover .hero-cta-icon { transform: scale(1.1) rotate(-5deg); }
-.hero-cta-icon svg { width: 17px; height: 17px; stroke-width: 2; }
-
-/* ── Text stack ── */
-.hero-cta-text {
-  display: flex; flex-direction: column;
-  gap: 2px; flex: 1; min-width: 0;
-}
-.hero-cta-label {
-  font-size: 10px; font-weight: 700;
-  letter-spacing: 0.1em; text-transform: uppercase; line-height: 1;
-}
-.hero-cta-title {
-  font-size: 0.83rem; font-weight: 600;
-  letter-spacing: -0.01em; line-height: 1.2;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  color: inherit;
-}
-
-/* ── Arrow ── */
-.hero-cta-arrow {
-  width: 15px; height: 15px; flex-shrink: 0;
-  transition: transform 0.22s var(--transition-bounce);
-}
-.hero-cta-card:hover .hero-cta-arrow { transform: translateX(4px); }
-
-/* Legacy alias used elsewhere */
+/* Legacy btn-icon alias */
 .btn-icon { width: 15px; height: 15px; flex-shrink: 0; }
-
-/* ── Responsive ── */
-@media (max-width: 1024px) {
-  .hero-cta-cards { max-width: 100%; margin: 0 auto; }
-}
-@media (max-width: 600px) {
-  .hero-cta-cards  { gap: 8px; }
-  .hero-cta-card   { min-height: 54px; padding: 11px 13px; gap: 10px; }
-  .hero-cta-icon   { width: 34px; height: 34px; }
-  .hero-cta-icon svg { width: 15px; height: 15px; }
-  .hero-cta-title  { font-size: 0.77rem; }
-  .hero-cta-arrow  { width: 13px; height: 13px; }
-}
-@media (max-width: 400px) {
-  .hero-cta-cards { grid-template-columns: 1fr; }
-  .hero-cta-cards .hero-cta-card:last-child { grid-column: auto; }
-  .hero-cta-title { white-space: normal; }
-}
-
-/* Hero visual */
-.hero-visual {
-  display: flex; justify-content: center;
-  position: relative; z-index: 2;
-}
-@media (max-width: 1024px) { .hero-visual { display: none; } }
-
-.hero-card-stack { width: 100%; max-width: 420px; position: relative; }
-
-.hero-main-card {
-  background: rgba(255,253,250,0.07);
-  border: 1px solid rgba(255,253,250,0.14);
-  border-radius: var(--radius-xl);
-  padding: 24px;
-  position: relative; z-index: 2;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 8px 32px -8px rgba(0,0,0,0.42), 0 2px 8px -2px rgba(0,0,0,0.2);
-  overflow: hidden;
-}
-.hero-main-card::before {
-  content: '';
-  position: absolute;
-  top: -40px; right: -40px;
-  width: 200px; height: 200px;
-  background: radial-gradient(circle, rgba(255,118,0,0.2) 0%, transparent 70%);
-  pointer-events: none; border-radius: 50%;
-  animation: radarPulse 3.5s ease-in-out infinite;
-}
-@keyframes radarPulse {
-  0%, 100% { transform: scale(1); opacity: 0.65; }
-  50%       { transform: scale(1.12); opacity: 1; }
-}
-
-.hero-card-label {
-  font-family: var(--font-main);
-  font-size: 11px; font-weight: 600;
-  letter-spacing: 0.08em; text-transform: uppercase;
-  color: rgba(255,255,255,0.45); margin-bottom: 10px;
-}
-
-.hero-product-scroll {
-  height: 210px; overflow: hidden;
-  position: relative; margin-bottom: 0;
-}
-.hero-product-scroll::before,
-.hero-product-scroll::after {
-  content: ''; position: absolute;
-  left: 0; right: 0; height: 26px; z-index: 2; pointer-events: none;
-}
-.hero-product-scroll::before { top: 0; background: linear-gradient(to bottom, rgba(10,8,6,0.75), transparent); }
-.hero-product-scroll::after  { bottom: 0; background: linear-gradient(to top, rgba(10,8,6,0.75), transparent); }
-
-.hero-product-row {
-  display: flex; align-items: center; gap: 10px;
-  padding: 6px 5px; border-radius: var(--radius-sm);
-  text-decoration: none;
-  transition: background 0.18s ease;
-}
-.hero-product-row:hover { background: rgba(255,255,255,0.06); }
-
-.hero-product-img-wrap {
-  width: 34px; height: 34px;
-  border-radius: var(--radius-sm);
-  background: rgba(255,255,255,0.07);
-  overflow: hidden; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-}
-.hero-product-img { width: 100%; height: 100%; object-fit: cover; }
-.hero-product-img-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-
-.hero-product-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.hero-product-name { font-size: 0.76rem; font-weight: 500; color: rgba(255,255,255,0.88); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.hero-product-cat  { font-size: 0.63rem; font-weight: 500; color: rgba(255,255,255,0.38); text-transform: uppercase; letter-spacing: 0.06em; }
-.hero-product-price { font-size: 0.73rem; font-weight: 700; color: var(--color-primary); white-space: nowrap; flex-shrink: 0; }
-.hero-product-skeleton { pointer-events: none; }
-
-.hero-shop-link { color: var(--color-primary); font-weight: 600; font-size: 0.74rem; text-decoration: none; margin-left: auto; flex-shrink: 0; transition: color 0.18s; }
-.hero-shop-link:hover { color: var(--color-primary-light); }
-
-.hero-card-divider { height: 1px; background: rgba(255,255,255,0.1); margin: 12px 0 8px; }
-
-.hero-status-row { display: flex; align-items: center; gap: 8px; font-size: 0.73rem; font-weight: 500; color: rgba(255,255,255,0.52); }
-
-.status-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: #22c55e; box-shadow: 0 0 6px #22c55e;
-  flex-shrink: 0; animation: pulse-dot 2s infinite;
-}
-
-.hero-floating-card {
-  position: absolute;
-  bottom: -20px; left: -22px;
-  background: var(--bg-primary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-xl);
-  padding: 12px 16px;
-  z-index: 3; min-width: 150px;
-  box-shadow: 0 10px 28px -5px rgba(0,0,0,0.2), 0 3px 10px -2px rgba(255,118,0,0.07);
-  overflow: hidden;
-}
-.hero-floating-card::before {
-  content: ''; position: absolute;
-  top: 0; left: 0; right: 0; height: 2px;
-  background: var(--color-primary);
-}
-.float-card-num {
-  font-family: var(--font-display);
-  font-size: 1.4rem; font-weight: 500;
-  letter-spacing: -0.025em;
-  color: var(--color-primary);
-  line-height: 1; margin-bottom: 3px;
-}
-.float-card-label { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.02em; color: var(--text-secondary); }
 
 /* ══════════════════════════════════════════
    STATS BAR
