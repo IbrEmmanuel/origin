@@ -936,7 +936,7 @@ onMounted(() => {
   inset: 0;
   z-index: 0;
   background-size: cover;
-  background-position: center 15%;
+  background-position: center 0%;
   background-repeat: no-repeat;
 }
 .hero-bg::after {
