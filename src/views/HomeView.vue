@@ -1012,14 +1012,14 @@ onMounted(() => {
 }
 
 /* ══════════════════════════════════════
-   BUTTON ROW — min-h-[4.4em] reference
+   BUTTON ROW — compact modern-tech style
    ══════════════════════════════════════ */
 .hero-btn-row {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
   width: 100%;
   margin-bottom: 1.5rem;
 }
@@ -1029,15 +1029,14 @@ onMounted(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  /* matches reference min-h-[3.25em] on md, grows to [4.4em] feel */
-  min-height: 52px;
-  padding: 0 26px;
-  border-radius: var(--radius-sm);   /* 4px — sharp editorial */
+  gap: 6px;
+  height: 36px;
+  padding: 0 18px;
+  border-radius: var(--radius-full);   /* pill — modern tech */
   font-family: var(--font-main);
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.02em;
   line-height: 1;
   white-space: nowrap;
   text-decoration: none;
@@ -1049,10 +1048,9 @@ onMounted(() => {
   transition:
     background  0.18s ease,
     border-color 0.18s ease,
-    box-shadow  0.22s ease,
-    transform   0.22s var(--transition-bounce);
+    box-shadow  0.2s ease,
+    transform   0.2s var(--transition-bounce);
 }
-/* Shimmer sweep */
 .hero-btn::after {
   content: '';
   position: absolute; inset: 0;
@@ -1061,49 +1059,51 @@ onMounted(() => {
   background-position: -100% 0;
   transition: background-position 0.5s ease;
   pointer-events: none;
+  border-radius: inherit;
 }
 .hero-btn:hover::after { background-position: 200% 0; }
-.hero-btn:hover        { transform: translateY(-2px); }
-.hero-btn:active       { transform: scale(0.97); }
+.hero-btn:hover        { transform: translateY(-1px); }
+.hero-btn:active       { transform: scale(0.96); opacity: 0.88; }
 
-.hero-btn-icon { width: 17px; height: 17px; flex-shrink: 0; stroke-width: 2; }
+.hero-btn-icon { width: 14px; height: 14px; flex-shrink: 0; stroke-width: 2; }
 
 /* Solid orange — primary CTA */
 .hero-btn--primary {
   background: var(--orange);
   color: #fff;
   border-color: var(--orange);
-  box-shadow: 0 4px 18px -4px rgba(255,118,0,0.55);
+  box-shadow: 0 2px 14px -3px rgba(255,118,0,0.55);
 }
 .hero-btn--primary:hover {
   background: var(--orange2);
   border-color: var(--orange2);
-  box-shadow: 0 8px 24px -6px rgba(255,118,0,0.6);
+  box-shadow: 0 4px 20px -4px rgba(255,118,0,0.65);
 }
 
 /* Glass — secondary actions */
 .hero-btn--glass {
-  background: rgba(255,255,255,0.1);
-  color: #fff;
-  border-color: rgba(255,255,255,0.22);
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.9);
+  border-color: rgba(255,255,255,0.18);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
 .hero-btn--glass:hover {
-  background: rgba(255,255,255,0.16);
-  border-color: rgba(255,255,255,0.36);
+  background: rgba(255,255,255,0.14);
+  border-color: rgba(255,255,255,0.3);
+  color: #fff;
 }
 
 /* Ghost — tertiary actions */
 .hero-btn--ghost {
   background: transparent;
-  color: rgba(255,255,255,0.78);
-  border-color: rgba(255,255,255,0.18);
+  color: rgba(255,255,255,0.65);
+  border-color: rgba(255,255,255,0.14);
 }
 .hero-btn--ghost:hover {
-  background: rgba(255,255,255,0.07);
-  color: #fff;
-  border-color: rgba(255,255,255,0.32);
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.9);
+  border-color: rgba(255,255,255,0.26);
 }
 
 /* ══════════════════════════════════════
@@ -1330,15 +1330,16 @@ onMounted(() => {
 @media (max-width: 768px) {
   .hero-h1 { font-size: clamp(2.2rem, 8vw, 3.2rem); }
   .hero-sub { font-size: 0.92rem; }
-  .hero-btn { min-height: 48px; padding: 0 20px; font-size: 0.85rem; }
+  .hero-btn { height: 34px; padding: 0 15px; font-size: 0.77rem; }
+  .hero-btn-icon { width: 13px; height: 13px; }
   .hero-cta-tiles { gap: 6px; }
   .hero-tile { min-width: 90px; padding: 12px 8px; }
   .hero-tile-title { font-size: 0.72rem; }
 }
 @media (max-width: 520px) {
   .hero-body { padding: 0 1rem 2.5rem; }
-  .hero-btn-row { gap: 8px; }
-  .hero-btn { min-height: 44px; padding: 0 16px; font-size: 0.82rem; flex: 1 1 calc(50% - 4px); }
+  .hero-btn-row { gap: 6px; }
+  .hero-btn { height: 33px; padding: 0 13px; font-size: 0.75rem; flex: 1 1 calc(50% - 3px); }
   .hero-cta-tiles { display: grid; grid-template-columns: 1fr 1fr; }
   .hero-tile { flex: unset; }
   .hero-ticker-fade { width: 48px; }
