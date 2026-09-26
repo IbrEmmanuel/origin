@@ -929,7 +929,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background-color: #080808;
+  background-color: #000;
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
@@ -948,15 +948,17 @@ onMounted(() => {
   object-fit: cover;
   object-position: center center;
   display: block;
+  z-index: 0;
 }
 .hero-bg-overlay {
   position: absolute;
   inset: 0;
+  z-index: 1;
   background: linear-gradient(
     160deg,
-    rgba(0,0,0,0.75) 0%,
-    rgba(0,0,0,0.55) 50%,
-    rgba(0,0,0,0.35) 100%
+    rgba(0,0,0,0.72) 0%,
+    rgba(0,0,0,0.50) 50%,
+    rgba(0,0,0,0.30) 100%
   );
 }
 
