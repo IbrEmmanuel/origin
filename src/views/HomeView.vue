@@ -20,13 +20,11 @@
       <div class="hero-body">
 
 
-        <!-- H1 — large display heading with animated word-swap -->
+        <!-- H1 — large display heading with typewriter word-swap -->
         <h1 class="hero-h1 reveal" style="--reveal-delay:80ms">
           Engineering<br class="hero-br-mobile" />
-          <span class="hero-swap-wrap">
-            <span class="hero-swap-track" ref="swapTrackRef">
-              <span class="hero-swap-word" v-for="(phrase, i) in swapPhrases" :key="i">{{ phrase }}</span>
-            </span>
+          <span class="hero-type-wrap">
+            <span class="hero-type-text" ref="typeTextRef"></span><span class="hero-type-cursor" ref="typeCursorRef">|</span>
           </span><br />
           for Nigeria.
         </h1>
@@ -718,32 +716,68 @@ const calcPayment = () => {
   showResult.value = true;
 };
 
-// ----------------- HERO H1 WORD SWAP -----------------
+// ----------------- HERO H1 TYPEWRITER -----------------
 const swapPhrases = [
   ' Energy Independence',
   ' Solar Power Systems',
   ' BESS & Storage',
-  ' EV Infrastructure',
+  ' EV Charging Networks',
   ' Security Solutions',
   ' Engineering Excellence',
 ];
-const swapTrackRef = ref(null);
-let swapIndex      = 0;
-let swapTimer      = null;
 
-const runSwap = () => {
-  const track = swapTrackRef.value;
-  if (!track) return;
-  swapIndex = (swapIndex + 1) % swapPhrases.length;
-  // Slide up by one word-height using translateY
-  track.style.transform = `translateY(-${swapIndex * 100}%)`;
+const typeTextRef   = ref(null);
+const typeCursorRef = ref(null);
+// keep swapTrackRef defined so nothing else breaks
+const swapTrackRef  = ref(null);
+
+let typeIndex    = 0;   // current phrase index
+let typeTimer    = null;
+let typeRunning  = false;
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+const typeWriter = async () => {
+  typeRunning = true;
+  while (typeRunning) {
+    const phrase = swapPhrases[typeIndex % swapPhrases.length];
+    const el     = typeTextRef.value;
+    const cursor = typeCursorRef.value;
+    if (!el || !cursor) break;
+
+    // — Type in —
+    cursor.style.opacity = '1';
+    for (let i = 0; i <= phrase.length; i++) {
+      if (!typeRunning) return;
+      el.textContent = phrase.slice(0, i);
+      await sleep(55 + Math.random() * 35);   // natural typing rhythm
+    }
+
+    // — Pause at full phrase —
+    await sleep(1800);
+
+    // — Delete —
+    cursor.style.opacity = '1';
+    for (let i = phrase.length; i >= 0; i--) {
+      if (!typeRunning) return;
+      el.textContent = phrase.slice(0, i);
+      await sleep(28 + Math.random() * 20);   // delete faster
+    }
+
+    await sleep(300);
+    typeIndex++;
+  }
 };
 
 const startSwap = () => {
-  swapTimer = setInterval(runSwap, 2800);
+  typeRunning = false;
+  clearTimeout(typeTimer);
+  // small delay so DOM is ready
+  typeTimer = setTimeout(typeWriter, 600);
 };
 const stopSwap = () => {
-  if (swapTimer) clearInterval(swapTimer);
+  typeRunning = false;
+  clearTimeout(typeTimer);
 };
 
 // ----------------- HERO PRODUCT TICKER (rAF horizontal scroll) -----------------
@@ -1010,29 +1044,37 @@ onMounted(() => {
 .hero-br-mobile { display: none; }
 @media (max-width: 520px) { .hero-br-mobile { display: block; } }
 
-/* ── H1 word-swap ── */
-.hero-swap-wrap {
-  display: inline-block;
-  overflow: hidden;
-  height: 1.12em;
-  vertical-align: bottom;
+/* ── H1 typewriter ── */
+.hero-type-wrap {
+  display: inline;
   position: relative;
 }
-.hero-swap-track {
-  display: flex;
-  flex-direction: column;
-  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: transform;
-}
-.hero-swap-word {
-  display: block;
-  line-height: 1.12;
-  white-space: nowrap;
-  background: linear-gradient(135deg, var(--orange), var(--orange2));
+.hero-type-text {
+  background: linear-gradient(135deg, var(--orange) 0%, var(--orange2) 50%, #ffb347 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  padding-right: 4px;
+  background-size: 200% auto;
+  animation: type-gradient-shift 4s linear infinite;
+}
+@keyframes type-gradient-shift {
+  0%   { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
+.hero-type-cursor {
+  display: inline-block;
+  width: 3px;
+  background: var(--orange);
+  -webkit-text-fill-color: var(--orange);
+  color: var(--orange);
+  margin-left: 2px;
+  font-weight: 300;
+  animation: cursor-blink 0.75s step-end infinite;
+  vertical-align: baseline;
+}
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
 }
 
 /* Sub-copy */
