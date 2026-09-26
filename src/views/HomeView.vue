@@ -929,7 +929,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background-color: #080808;
+  background-color: transparent;
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
@@ -965,8 +965,8 @@ onMounted(() => {
   position: absolute;
   right: 0; top: 0;
   width: 55%; height: 100%;
-  opacity: 0.08;
-  z-index: 0;
+  opacity: 0.05;
+  z-index: 1;
   pointer-events: none;
 }
 .circuit-path {
