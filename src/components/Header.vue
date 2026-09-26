@@ -272,10 +272,9 @@ onUnmounted(() => {
   box-shadow: 0 1px 0 rgba(0,0,0,0.3), 0 4px 16px -4px rgba(0,0,0,0.4);
 }
 
-.header-shrunk { padding: 6px 0; }
-.header-shrunk .logo-img { height: 32px; }
-.header-shrunk .brand-name { font-size: 0.88rem; }
-.header-shrunk .brand-tagline { display: none; }
+.header-shrunk { padding: 10px 0; }
+.header-shrunk .logo-img { height: 38px; }
+.header-shrunk .brand-name { font-size: 1rem; }
 
 .header-content {
   display: flex;
@@ -430,7 +429,6 @@ onUnmounted(() => {
   box-shadow: 0 6px 16px -4px rgba(47,47,47,0.4);
 }
 
-.header-shrunk .account-pill { padding: 6px 13px; font-size: 0.76rem; }
 
 .icon    { width: 20px; height: 20px; }
 .icon-sm { width: 18px; height: 18px; }
