@@ -19,11 +19,6 @@
       <!-- ── HERO BODY — centered column ── -->
       <div class="hero-body">
 
-        <!-- Eyebrow badge -->
-        <div class="hero-eyebrow reveal-fade" style="--reveal-delay:0ms">
-          <span class="hero-eyebrow-dot"></span>
-          Nigeria's Energy Engineering Authority
-        </div>
 
         <!-- H1 — large display heading -->
         <h1 class="hero-h1 reveal" style="--reveal-delay:80ms">
