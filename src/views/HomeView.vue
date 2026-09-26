@@ -902,7 +902,7 @@ onMounted(() => {
   inset: 0;
   z-index: 0;
   background-size: cover;
-  background-position: center top;
+  background-position: center 20%;
   background-repeat: no-repeat;
 }
 
