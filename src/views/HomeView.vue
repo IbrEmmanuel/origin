@@ -2,9 +2,20 @@
   <div class="home-view">
     <!-- HERO SECTION -->
     <section class="hero" id="home">
-      <!-- Background photo -->
+      <!-- Background slideshow -->
       <div class="hero-bg">
-        <img :src="heroBg" alt="" class="hero-bg-img" aria-hidden="true" />
+        <div
+          v-for="(slide, i) in heroSlides"
+          :key="i"
+          class="hero-slide"
+          :class="{
+            'is-active':   i === heroSlideActive,
+            'is-leaving':  i === heroSlideLeaving,
+            [`kb-${heroSlideKbDir[i]}`]: true
+          }"
+          :style="{ backgroundImage: `url(${slide})` }"
+          aria-hidden="true"
+        ></div>
         <div class="hero-bg-overlay"></div>
       </div>
 
@@ -678,9 +689,61 @@ import projectJudgeImg from '../assets/pdf-assets/project-judge.jpg';
 import projectIfeImg from '../assets/pdf-assets/project-ife.jpg';
 
 // Section Background Images
-import heroBg from '../assets/commer.jpg';
 import processEngineeringBg from '../assets/process_engineering_bg.jpg';
 import ctaSolarDuskBg from '../assets/cta_solar_dusk_bg.jpg';
+
+// oooooo Hero Slideshow Images
+import heroSlide0 from '../assets/oooooo/IMG_0011.jpeg';
+import heroSlide1 from '../assets/oooooo/IMG_0020.JPG';
+import heroSlide2 from '../assets/oooooo/IMG_0032.jpeg';
+import heroSlide3 from '../assets/oooooo/IMG_0036.JPG';
+import heroSlide4 from '../assets/oooooo/IMG_0058.JPG';
+import heroSlide5 from '../assets/oooooo/IMG_0200.jpeg';
+import heroSlide6 from '../assets/oooooo/IMG_0201.jpeg';
+import heroSlide7 from '../assets/oooooo/IMG_0520.jpeg';
+import heroSlide8 from '../assets/oooooo/IMG_1980.jpeg';
+import heroSlide9 from '../assets/oooooo/IMG_1984.jpeg';
+import heroSlide10 from '../assets/oooooo/IMG_3335.jpg';
+
+// ----------------- HERO SLIDESHOW -----------------
+// All 11 real-world project photos from the oooooo folder
+const heroSlides = [
+  heroSlide0, heroSlide1, heroSlide2, heroSlide3, heroSlide4,
+  heroSlide5, heroSlide6, heroSlide7, heroSlide8, heroSlide9,
+  heroSlide10,
+];
+
+// Ken Burns direction variants — 4 flavours, assigned once per slide so they
+// never jump between frames (zoom-in-left, zoom-in-right, zoom-out-left, zoom-out-right)
+const KB_DIRS = ['kb-zil', 'kb-zir', 'kb-zol', 'kb-zor'];
+const heroSlideKbDir = heroSlides.map((_, i) => KB_DIRS[i % KB_DIRS.length]);
+
+const heroSlideActive  = ref(0);
+const heroSlideLeaving = ref(-1);
+
+let heroSlideTimer = null;
+const SLIDE_DURATION = 5500;   // ms between advances
+const LEAVE_CLEAR   = 1200;   // ms — matches the CSS fade-out duration
+
+const advanceHeroSlide = () => {
+  const next = (heroSlideActive.value + 1) % heroSlides.length;
+  heroSlideLeaving.value = heroSlideActive.value;
+  heroSlideActive.value  = next;
+
+  // Clear the leaving flag after the CSS transition finishes
+  setTimeout(() => {
+    heroSlideLeaving.value = -1;
+  }, LEAVE_CLEAR);
+};
+
+const startHeroSlideshow = () => {
+  clearInterval(heroSlideTimer);
+  heroSlideTimer = setInterval(advanceHeroSlide, SLIDE_DURATION);
+};
+
+const stopHeroSlideshow = () => {
+  clearInterval(heroSlideTimer);
+};
 
 // ----------------- FINANCING PLAN CALCULATOR -----------------
 const sysType = ref('');
@@ -855,6 +918,7 @@ const stopHeroScroll  = () => {};
 onUnmounted(() => {
   if (tickerRaf) cancelAnimationFrame(tickerRaf);
   stopSwap();
+  stopHeroSlideshow();
 });
 
 // ----------------- INSTALLER MODAL -----------------
@@ -866,6 +930,9 @@ function openInstallerModal() {
 onMounted(() => {
   // Start H1 word swap
   startSwap();
+
+  // Start hero background slideshow
+  startHeroSlideshow();
 
   // Start ticker immediately (skeleton chips give it content to scroll)
   startTicker();
@@ -940,15 +1007,97 @@ onMounted(() => {
   z-index: 0;
   overflow: hidden;
 }
-.hero-bg-img {
+/* ── Hero Slideshow ── */
+.hero-slide {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center center;
-  display: block;
-  z-index: 0;
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  opacity: 0;
+  will-change: opacity, transform;
+  /* default: hidden & frozen */
+  transform: scale(1);
+  transition: none;
+}
+
+/* Active slide: fade in + Ken Burns starts */
+.hero-slide.is-active {
+  opacity: 1;
+  z-index: 1;
+  animation: kbFadeIn 1.1s ease forwards;
+}
+
+/* Leaving slide: fade out smoothly above the incoming one for a beat */
+.hero-slide.is-leaving {
+  opacity: 0;
+  z-index: 2;
+  animation: kbFadeOut 1.2s ease forwards;
+}
+
+/* ── Ken Burns keyframes — 4 distinct directions ── */
+
+/* zoom-in from left anchor */
+.hero-slide.is-active.kb-kb-zil {
+  animation: kbFadeIn 1.1s ease forwards, kbZoomInLeft 6.5s ease-out forwards;
+}
+/* zoom-in from right anchor */
+.hero-slide.is-active.kb-kb-zir {
+  animation: kbFadeIn 1.1s ease forwards, kbZoomInRight 6.5s ease-out forwards;
+}
+/* zoom-out toward left */
+.hero-slide.is-active.kb-kb-zol {
+  animation: kbFadeIn 1.1s ease forwards, kbZoomOutLeft 6.5s ease-out forwards;
+}
+/* zoom-out toward right */
+.hero-slide.is-active.kb-kb-zor {
+  animation: kbFadeIn 1.1s ease forwards, kbZoomOutRight 6.5s ease-out forwards;
+}
+
+@keyframes kbFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes kbFadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+@keyframes kbZoomInLeft {
+  from { transform: scale(1.08) translateX(1.5%); }
+  to   { transform: scale(1.00) translateX(0%);   }
+}
+@keyframes kbZoomInRight {
+  from { transform: scale(1.08) translateX(-1.5%); }
+  to   { transform: scale(1.00) translateX(0%);    }
+}
+@keyframes kbZoomOutLeft {
+  from { transform: scale(1.00) translateX(0%); }
+  to   { transform: scale(1.08) translateX(1.5%); }
+}
+@keyframes kbZoomOutRight {
+  from { transform: scale(1.00) translateX(0%);    }
+  to   { transform: scale(1.08) translateX(-1.5%); }
+}
+
+/* keep overlay on top of slides */
+.hero-bg-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: linear-gradient(
+    160deg,
+    rgba(0,0,0,0.72) 0%,
+    rgba(0,0,0,0.50) 50%,
+    rgba(0,0,0,0.30) 100%
+  );
+}
+
+/* legacy img rule kept empty so nothing breaks if referenced elsewhere */
+.hero-bg-img {
+  display: none;
 }
 .hero-bg-overlay {
   position: absolute;
@@ -968,7 +1117,7 @@ onMounted(() => {
   right: 0; top: 0;
   width: 55%; height: 100%;
   opacity: 0.05;
-  z-index: 1;
+  z-index: 4;
   pointer-events: none;
 }
 .circuit-path {
@@ -990,7 +1139,7 @@ onMounted(() => {
 /* ── Hero body — centered column ── */
 .hero-body {
   position: relative;
-  z-index: 2;
+  z-index: 5;
   width: 100%;
   max-width: 900px;
   margin: 0 auto;
