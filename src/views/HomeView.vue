@@ -3,7 +3,6 @@
     <!-- HERO SECTION -->
     <section class="hero" id="home">
 
-
       <!-- Circuit decoration -->
       <svg class="circuit-line" viewBox="0 0 600 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <path class="circuit-path" d="M580 0 L580 80 L500 80 L500 160 L420 160 L420 120 L340 120 L340 200 L260 200 L260 140 L180 140 L180 260 L300 260 L300 340 L220 340 L220 420 L380 420 L380 360 L460 360 L460 480 L340 480 L340 560 L500 560 L500 640 L400 640 L400 720 L580 720 L580 800" style="animation-delay:0.3s"/>
@@ -925,7 +924,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background-color: #0a0a0a;
+  background-color: #080808;
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
