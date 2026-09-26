@@ -715,7 +715,7 @@ const heroSlides = [
 
 // Ken Burns direction variants — 4 flavours, assigned once per slide so they
 // never jump between frames (zoom-in-left, zoom-in-right, zoom-out-left, zoom-out-right)
-const KB_DIRS = ['kb-zil', 'kb-zir', 'kb-zol', 'kb-zor'];
+const KB_DIRS = ['zil', 'zir', 'zol', 'zor'];
 const heroSlideKbDir = heroSlides.map((_, i) => KB_DIRS[i % KB_DIRS.length]);
 
 const heroSlideActive  = ref(0);
@@ -1023,37 +1023,31 @@ onMounted(() => {
   transition: none;
 }
 
-/* Active slide: fade in + Ken Burns starts */
+/* Active slide fades in and runs Ken Burns simultaneously */
 .hero-slide.is-active {
   opacity: 1;
   z-index: 1;
-  animation: kbFadeIn 1.1s ease forwards;
+  animation: kbFadeIn 1.2s ease forwards;
 }
 
-/* Leaving slide: fade out smoothly above the incoming one for a beat */
+/* Leaving slide fades out on top of the incoming one */
 .hero-slide.is-leaving {
-  opacity: 0;
   z-index: 2;
-  animation: kbFadeOut 1.2s ease forwards;
+  animation: kbFadeOut 1.4s ease forwards;
 }
 
-/* ── Ken Burns keyframes — 4 distinct directions ── */
-
-/* zoom-in from left anchor */
-.hero-slide.is-active.kb-kb-zil {
-  animation: kbFadeIn 1.1s ease forwards, kbZoomInLeft 6.5s ease-out forwards;
+/* ── Ken Burns — 4 directions, no double-prefix ── */
+.hero-slide.is-active.kb-zil {
+  animation: kbFadeIn 1.2s ease forwards, kbZoomInLeft 7s ease-out forwards;
 }
-/* zoom-in from right anchor */
-.hero-slide.is-active.kb-kb-zir {
-  animation: kbFadeIn 1.1s ease forwards, kbZoomInRight 6.5s ease-out forwards;
+.hero-slide.is-active.kb-zir {
+  animation: kbFadeIn 1.2s ease forwards, kbZoomInRight 7s ease-out forwards;
 }
-/* zoom-out toward left */
-.hero-slide.is-active.kb-kb-zol {
-  animation: kbFadeIn 1.1s ease forwards, kbZoomOutLeft 6.5s ease-out forwards;
+.hero-slide.is-active.kb-zol {
+  animation: kbFadeIn 1.2s ease forwards, kbZoomOutLeft 7s ease-out forwards;
 }
-/* zoom-out toward right */
-.hero-slide.is-active.kb-kb-zor {
-  animation: kbFadeIn 1.1s ease forwards, kbZoomOutRight 6.5s ease-out forwards;
+.hero-slide.is-active.kb-zor {
+  animation: kbFadeIn 1.2s ease forwards, kbZoomOutRight 7s ease-out forwards;
 }
 
 @keyframes kbFadeIn {
@@ -1064,51 +1058,42 @@ onMounted(() => {
   from { opacity: 1; }
   to   { opacity: 0; }
 }
-
 @keyframes kbZoomInLeft {
-  from { transform: scale(1.08) translateX(1.5%); }
-  to   { transform: scale(1.00) translateX(0%);   }
+  from { transform: scale(1.10) translate(2%, 1%); }
+  to   { transform: scale(1.00) translate(0%,  0%); }
 }
 @keyframes kbZoomInRight {
-  from { transform: scale(1.08) translateX(-1.5%); }
-  to   { transform: scale(1.00) translateX(0%);    }
+  from { transform: scale(1.10) translate(-2%, -1%); }
+  to   { transform: scale(1.00) translate(0%,   0%); }
 }
 @keyframes kbZoomOutLeft {
-  from { transform: scale(1.00) translateX(0%); }
-  to   { transform: scale(1.08) translateX(1.5%); }
+  from { transform: scale(1.00) translate(0%,  0%); }
+  to   { transform: scale(1.10) translate(2%, -1%); }
 }
 @keyframes kbZoomOutRight {
-  from { transform: scale(1.00) translateX(0%);    }
-  to   { transform: scale(1.08) translateX(-1.5%); }
+  from { transform: scale(1.00) translate(0%,  0%); }
+  to   { transform: scale(1.10) translate(-2%, 1%); }
 }
 
-/* keep overlay on top of slides */
+/* Overlay sits on top of all slides */
 .hero-bg-overlay {
   position: absolute;
   inset: 0;
   z-index: 3;
   background: linear-gradient(
     160deg,
-    rgba(0,0,0,0.72) 0%,
-    rgba(0,0,0,0.50) 50%,
-    rgba(0,0,0,0.30) 100%
+    rgba(0,0,0,0.70) 0%,
+    rgba(0,0,0,0.45) 55%,
+    rgba(0,0,0,0.25) 100%
   );
 }
 
-/* legacy img rule kept empty so nothing breaks if referenced elsewhere */
 .hero-bg-img {
   display: none;
 }
-.hero-bg-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background: linear-gradient(
-    160deg,
-    rgba(0,0,0,0.72) 0%,
-    rgba(0,0,0,0.50) 50%,
-    rgba(0,0,0,0.30) 100%
-  );
+/* placeholder so the closing brace below stays valid */
+.hero-bg-overlay-placeholder {
+  display: none;
 }
 
 /* Circuit SVG decoration */
