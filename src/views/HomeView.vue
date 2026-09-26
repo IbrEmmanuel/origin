@@ -902,7 +902,7 @@ onMounted(() => {
   inset: 0;
   z-index: 0;
   background-size: cover;
-  background-position: center 40%;
+  background-position: center top;
   background-repeat: no-repeat;
 }
 
@@ -911,7 +911,12 @@ onMounted(() => {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(160deg, rgba(0, 0, 0, 0.70) 0%, rgba(0, 0, 0, 0.40) 60%, rgba(0,0,0,0.15) 100%);
+    linear-gradient(
+      to right,
+      rgba(0, 0, 0, 0.78) 0%,
+      rgba(0, 0, 0, 0.55) 50%,
+      rgba(0, 0, 0, 0.20) 100%
+    );
 }
 
 .hero-container-layout {
