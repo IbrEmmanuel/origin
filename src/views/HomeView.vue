@@ -358,42 +358,77 @@
           </div>
         </div>
 
-        <!-- Masonry photo grid -->
+        <!-- Editorial photo grid — 10 photos, uneven layout -->
         <div class="fw-grid reveal-stagger">
 
-          <!-- Large featured photo -->
-          <div class="fw-photo fw-photo--tall">
-            <img src="../assets/pdf-assets/solar-main.jpg" alt="Solar installation in progress" class="fw-img" />
+          <!-- ROW 1: wide left + tall right stack -->
+          <div class="fw-photo fw-photo--wide">
+            <img src="../assets/oooooo/web/IMG_0020.jpg" alt="Team on site" class="fw-img" />
             <div class="fw-photo-overlay"></div>
-            <div class="fw-photo-label">
-              <SunIcon class="fw-label-icon" />
-              <span>Solar Commissioning — Ondo State</span>
+            <div class="fw-photo-label fw-photo-label--bottom-left">
+              <ZapIcon class="fw-label-icon" />
+              <span>Installation Day — Live</span>
             </div>
           </div>
 
-          <!-- Top right -->
+          <div class="fw-photo fw-photo--tall-right">
+            <img src="../assets/pdf-assets/solar-main.jpg" alt="Solar commissioning" class="fw-img" />
+            <div class="fw-photo-overlay"></div>
+            <div class="fw-photo-label fw-photo-label--top-right">
+              <SunIcon class="fw-label-icon" />
+              <span>Solar Commissioning — Ondo</span>
+            </div>
+          </div>
+
+          <div class="fw-photo fw-photo--tall-right">
+            <img src="../assets/oooooo/web/IMG_0036.jpg" alt="Field engineers at work" class="fw-img" />
+            <div class="fw-photo-overlay"></div>
+            <div class="fw-photo-label fw-photo-label--bottom-left">
+              <WrenchIcon class="fw-label-icon" />
+              <span>Engineers on Ground</span>
+            </div>
+          </div>
+
+          <!-- ROW 2: three equal + one accent -->
           <div class="fw-photo">
-            <img src="../assets/pdf-assets/project-ondo.jpg" alt="Ondo solar project" class="fw-img" />
+            <img src="../assets/pdf-assets/project-ondo.jpg" alt="Ondo 85kWh system" class="fw-img" />
             <div class="fw-photo-overlay"></div>
             <div class="fw-photo-label">
               <ZapIcon class="fw-label-icon" />
-              <span>85 kWh System — Ondo</span>
+              <span>85 kWh — Ondo State</span>
             </div>
           </div>
 
-          <!-- Middle right -->
+          <div class="fw-photo fw-photo--accent">
+            <img src="../assets/oooooo/web/IMG_0058.jpg" alt="Site survey" class="fw-img" />
+            <div class="fw-photo-overlay"></div>
+            <div class="fw-photo-label fw-photo-label--top-right">
+              <ActivityIcon class="fw-label-icon" />
+              <span>Site Survey & Audit</span>
+            </div>
+          </div>
+
           <div class="fw-photo">
-            <img src="../assets/pdf-assets/project-gofamint.jpg" alt="CCTV installation" class="fw-img" />
+            <img src="../assets/pdf-assets/project-gofamint.jpg" alt="CCTV Ibadan" class="fw-img" />
             <div class="fw-photo-overlay"></div>
             <div class="fw-photo-label">
               <CctvIcon class="fw-label-icon" />
-              <span>40-Camera Setup — Ibadan</span>
+              <span>40 Cameras — Ibadan</span>
             </div>
           </div>
 
-          <!-- Bottom left -->
+          <!-- ROW 3: portrait left + two right -->
+          <div class="fw-photo fw-photo--portrait">
+            <img src="../assets/oooooo/web/IMG_3335.jpg" alt="Team portrait" class="fw-img fw-img--top" />
+            <div class="fw-photo-overlay"></div>
+            <div class="fw-photo-label fw-photo-label--bottom-left">
+              <UsersIcon class="fw-label-icon" />
+              <span>Origin Field Team</span>
+            </div>
+          </div>
+
           <div class="fw-photo">
-            <img src="../assets/pdf-assets/project-fcda.jpg" alt="FCDA project" class="fw-img" />
+            <img src="../assets/pdf-assets/project-fcda.jpg" alt="FCDA Abuja" class="fw-img" />
             <div class="fw-photo-overlay"></div>
             <div class="fw-photo-label">
               <ShieldCheckIcon class="fw-label-icon" />
@@ -401,7 +436,6 @@
             </div>
           </div>
 
-          <!-- Bottom middle -->
           <div class="fw-photo">
             <img src="../assets/pdf-assets/project-ife.jpg" alt="Ife residential" class="fw-img" />
             <div class="fw-photo-overlay"></div>
@@ -411,9 +445,8 @@
             </div>
           </div>
 
-          <!-- Bottom right -->
           <div class="fw-photo">
-            <img src="../assets/pdf-assets/project-judge.jpg" alt="Ibadan residential" class="fw-img" />
+            <img src="../assets/pdf-assets/project-judge.jpg" alt="Ibadan hybrid" class="fw-img" />
             <div class="fw-photo-overlay"></div>
             <div class="fw-photo-label">
               <BatteryIcon class="fw-label-icon" />
@@ -2620,41 +2653,64 @@ onMounted(() => {
   }
 }
 
-/* ── Masonry photo grid ── */
+/* ── Editorial photo grid — 10 photos, 3 rows ── */
 .fw-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: 220px 220px;
-  gap: 12px;
+  grid-template-columns: 2fr 1fr 1fr;
+  grid-template-rows: 280px 220px 220px;
+  gap: 10px;
   margin-bottom: 28px;
 }
 
-/* Tall card spans 2 rows */
-.fw-photo--tall {
-  grid-row: span 2;
-}
+/* Row 1 */
+.fw-photo--wide      { grid-column: 1; grid-row: 1; }
+.fw-photo--tall-right:nth-child(2) { grid-column: 2; grid-row: 1; }
+.fw-photo--tall-right:nth-child(3) { grid-column: 3; grid-row: 1; }
+
+/* Row 2 — cols 1,2,3 — accent spans nothing extra */
+.fw-photo:nth-child(4) { grid-column: 1; grid-row: 2; }
+.fw-photo--accent      { grid-column: 2; grid-row: 2; }
+.fw-photo:nth-child(6) { grid-column: 3; grid-row: 2; }
+
+/* Row 3 — portrait left spans 2 rows of height, rest fill right */
+.fw-photo--portrait    { grid-column: 1; grid-row: 3; }
+.fw-photo:nth-child(8) { grid-column: 2; grid-row: 3; }
+.fw-photo:nth-child(9) { grid-column: 3; grid-row: 3; }
+/* 10th card wraps under on a 4th row naturally — keep it simple */
+.fw-photo:nth-child(10){ grid-column: 2 / 4; grid-row: 4; height: 180px; }
 
 @media (max-width: 900px) {
   .fw-grid {
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: 180px 180px 180px;
-  }
-  .fw-photo--tall {
-    grid-row: span 2;
-  }
-}
-
-@media (max-width: 560px) {
-  .fw-grid {
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: repeat(4, 150px);
+    grid-template-rows: none;
     gap: 8px;
   }
-  .fw-photo--tall {
-    grid-row: span 2;
-    grid-column: span 1;
+  /* reset all explicit placements — auto-flow takes over */
+  .fw-photo,
+  .fw-photo--wide,
+  .fw-photo--tall-right,
+  .fw-photo--accent,
+  .fw-photo--portrait {
+    grid-column: auto;
+    grid-row: auto;
+    height: 200px;
   }
+  /* wide shot gets full width on tablet */
+  .fw-photo--wide { grid-column: span 2; height: 240px; }
 }
+
+@media (max-width: 520px) {
+  .fw-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .fw-photo,
+  .fw-photo--wide,
+  .fw-photo--tall-right,
+  .fw-photo--accent,
+  .fw-photo--portrait { height: 150px; }
+  .fw-photo--wide { grid-column: span 2; height: 180px; }
+}
+
+/* Tall card spans 2 rows — legacy kept for any stray reference */
+.fw-photo--tall { grid-row: span 2; }
 
 /* Individual photo */
 .fw-photo {
@@ -2728,6 +2784,28 @@ onMounted(() => {
   transform: translateY(0);
   opacity: 1;
 }
+
+/* Label position variants */
+.fw-photo-label--bottom-left {
+  bottom: 12px; top: auto; left: 12px; right: 12px;
+}
+.fw-photo-label--top-right {
+  bottom: auto; top: 12px; left: auto; right: 12px;
+  left: 12px;
+  /* gradient flips for top labels */
+}
+/* For top labels flip the overlay direction */
+.fw-photo:has(.fw-photo-label--top-right) .fw-photo-overlay {
+  background: linear-gradient(
+    to bottom,
+    rgba(5,10,20,0.75) 0%,
+    rgba(5,10,20,0.15) 50%,
+    transparent 100%
+  );
+}
+
+/* Portrait image — focus on upper portion */
+.fw-img--top { object-position: center 20%; }
 
 .fw-label-icon {
   width: 14px;
