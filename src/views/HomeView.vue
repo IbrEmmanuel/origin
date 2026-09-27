@@ -204,7 +204,7 @@
     </section>
 
     <!-- PROCESS -->
-    <section class="process section-clipped section-divider" id="process" :style="{ backgroundImage: `url(${processEngineeringBg})` }">
+    <section class="process section-clipped section-divider" id="process">
       <div class="container">
         <div class="process-header reveal">
           <span class="section-eyebrow">How We Work</span>
@@ -689,7 +689,6 @@ import projectJudgeImg from '../assets/pdf-assets/project-judge.jpg';
 import projectIfeImg from '../assets/pdf-assets/project-ife.jpg';
 
 // Section Background Images
-import processEngineeringBg from '../assets/process_engineering_bg.jpg';
 import ctaSolarDuskBg from '../assets/cta_solar_dusk_bg.jpg';
 
 // oooooo Hero Slideshow Images — web-optimised versions (compressed, portrait-cropped to 16:9)
@@ -2191,25 +2190,7 @@ onMounted(() => {
 /* ----------------- PROCESS SECTION ----------------- */
 .process {
   background-color: var(--bg-secondary);
-  background-size: cover;
-  background-position: center center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
   position: relative;
-}
-
-.process::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0.48) 0%,
-    rgba(0, 0, 0, 0.40) 50%,
-    rgba(0, 0, 0, 0.52) 100%
-  );
-  z-index: 0;
-  pointer-events: none;
 }
 
 .process .container {
