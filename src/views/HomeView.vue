@@ -135,8 +135,28 @@
           <h2 class="section-title text-left">Engineering solutions that <span class="highlight">actually work</span></h2>
         </div>
 
-        <!-- Bento-style service grid -->
+        <!-- Bento-style service grid — 6 services, 2 rows of 3 -->
         <div class="svc-bento reveal-stagger">
+
+          <!-- Solar PV — wide hero card, spans 2 cols -->
+          <div class="svc-bento-card svc-bento-card--wide svc-bento-card--tall">
+            <img src="../assets/pdf-assets/solar-main.jpg" alt="Solar PV Systems" class="svc-bento-img" />
+            <div class="svc-bento-overlay svc-bento-overlay--solar"></div>
+            <div class="svc-bento-glass">
+              <div class="svc-bento-icon svc-bento-icon--orange"><SunIcon /></div>
+              <div class="svc-bento-content">
+                <span class="svc-bento-tag">Solar Energy</span>
+                <h3>Solar PV Systems</h3>
+                <p>Grid-tied, off-grid and hybrid solar installations from 3 kW homes to 500 kW+ commercial plants — engineered for Nigeria's climate.</p>
+                <div class="svc-bento-stats">
+                  <span><strong>1.2 MW</strong> deployed</span>
+                  <span><strong>42+</strong> sites live</span>
+                  <span><strong>25 yr</strong> panel warranty</span>
+                </div>
+              </div>
+              <router-link to="/services" class="svc-bento-link">Explore <ArrowRightIcon class="svc-bento-arrow" /></router-link>
+            </div>
+          </div>
 
           <!-- CCTV -->
           <div class="svc-bento-card">
@@ -148,6 +168,26 @@
                 <span class="svc-bento-tag">Surveillance</span>
                 <h3>CCTV &amp; Surveillance</h3>
                 <p>4K IP camera networks, NVR/DVR and AI video analytics for zero blind spots.</p>
+              </div>
+              <router-link to="/services" class="svc-bento-link">Explore <ArrowRightIcon class="svc-bento-arrow" /></router-link>
+            </div>
+          </div>
+
+          <!-- Wind & BESS — wide card, spans 2 cols -->
+          <div class="svc-bento-card svc-bento-card--wide svc-bento-card--tall">
+            <img src="../assets/pdf-assets/img-038.jpg" alt="Wind & Battery Energy Storage" class="svc-bento-img svc-bento-img--wind" />
+            <div class="svc-bento-overlay svc-bento-overlay--wind"></div>
+            <div class="svc-bento-glass">
+              <div class="svc-bento-icon"><WindIcon /></div>
+              <div class="svc-bento-content">
+                <span class="svc-bento-tag">Wind &amp; Storage</span>
+                <h3>Wind &amp; BESS Solutions</h3>
+                <p>Small-wind turbines paired with lithium battery storage — the right answer when solar alone isn't enough. Day and night, rain or shine.</p>
+                <div class="svc-bento-stats">
+                  <span><strong>48V – 800V</strong> DC bus</span>
+                  <span><strong>LFP</strong> chemistry</span>
+                  <span><strong>10 yr</strong> cell warranty</span>
+                </div>
               </div>
               <router-link to="/services" class="svc-bento-link">Explore <ArrowRightIcon class="svc-bento-arrow" /></router-link>
             </div>
@@ -1973,7 +2013,7 @@ onMounted(() => {
   -webkit-text-fill-color: transparent;
 }
 
-/* Bento grid — magazine-style asymmetric layout */
+/* Bento grid — 3 cols desktop */
 .svc-bento {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1986,6 +2026,11 @@ onMounted(() => {
   grid-column: span 2;
 }
 
+/* Tall modifier — for featured wide cards */
+.svc-bento-card--tall {
+  height: 200px !important;
+}
+
 @media (max-width: 900px) {
   .svc-bento {
     grid-template-columns: repeat(2, 1fr);
@@ -1993,6 +2038,9 @@ onMounted(() => {
   }
   .svc-bento-card--wide {
     grid-column: span 2;
+  }
+  .svc-bento-card--tall {
+    height: 180px !important;
   }
 }
 
@@ -2005,6 +2053,29 @@ onMounted(() => {
     grid-column: span 1;
   }
 }
+
+/* Solar card — warm amber tint on overlay */
+.svc-bento-overlay--solar {
+  background: linear-gradient(
+    to top,
+    rgba(10, 5, 0, 0.93) 0%,
+    rgba(40, 18, 0, 0.55) 50%,
+    rgba(80, 40, 0, 0.08) 100%
+  );
+}
+
+/* Wind card — cool blue-teal tint */
+.svc-bento-overlay--wind {
+  background: linear-gradient(
+    to top,
+    rgba(0, 8, 20, 0.93) 0%,
+    rgba(0, 20, 45, 0.55) 50%,
+    rgba(0, 35, 70, 0.08) 100%
+  );
+}
+
+/* Wind image — focus on interesting part */
+.svc-bento-img--wind { object-position: center 40%; }
 
 /* Individual card */
 .svc-bento-card {
@@ -2150,7 +2221,7 @@ onMounted(() => {
   transform: translateY(0);
 }
 
-/* Stats row — only on wide cards */
+/* Stats row — shown on wide/featured cards on hover */
 .svc-bento-stats {
   display: flex;
   gap: 16px;
