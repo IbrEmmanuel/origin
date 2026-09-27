@@ -728,10 +728,11 @@ import ctaSolarDuskBg from '../assets/cta_solar_dusk_bg.jpg';
 import heroSlide0 from '../assets/oooooo/web/IMG_0020.jpg';
 import heroSlide1 from '../assets/oooooo/web/IMG_0036.jpg';
 import heroSlide2 from '../assets/oooooo/web/IMG_0058.jpg';
-import heroSlide3 from '../assets/oooooo/web/IMG_3335.jpg';
+import heroSlide3 from '../assets/oooooo/web/IMG_3321.jpg';
+import heroSlide4 from '../assets/oooooo/web/IMG_3335.jpg';
 
 // ----------------- HERO SLIDESHOW -----------------
-const heroSlides = [heroSlide0, heroSlide1, heroSlide2, heroSlide3];
+const heroSlides = [heroSlide0, heroSlide1, heroSlide2, heroSlide3, heroSlide4];
 
 const KB_DIRS = ['zil', 'zir', 'zol', 'zor'];
 const heroSlideKbDir = heroSlides.map((_, i) => KB_DIRS[i % KB_DIRS.length]);
