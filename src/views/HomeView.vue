@@ -357,10 +357,10 @@
           </div>
         </div>
 
-        <!-- Editorial photo grid — 10 photos, uneven layout -->
+        <!-- Editorial photo grid — all oooooo images + project shots -->
         <div class="fw-grid reveal-stagger">
 
-          <!-- ROW 1: wide left + tall right stack -->
+          <!-- SLOT 1: Hero wide — IMG_0020 -->
           <div class="fw-photo fw-photo--wide">
             <img src="../assets/oooooo/web/IMG_0020.jpg" alt="Team on site" class="fw-img" />
             <div class="fw-photo-overlay"></div>
@@ -370,15 +370,7 @@
             </div>
           </div>
 
-          <div class="fw-photo fw-photo--tall-right">
-            <img src="../assets/pdf-assets/solar-main.jpg" alt="Solar commissioning" class="fw-img" />
-            <div class="fw-photo-overlay"></div>
-            <div class="fw-photo-label fw-photo-label--top-right">
-              <SunIcon class="fw-label-icon" />
-              <span>Solar Commissioning — Ondo</span>
-            </div>
-          </div>
-
+          <!-- SLOT 2: tall right — IMG_0036 -->
           <div class="fw-photo fw-photo--tall-right">
             <img src="../assets/oooooo/web/IMG_0036.jpg" alt="Field engineers at work" class="fw-img" />
             <div class="fw-photo-overlay"></div>
@@ -388,25 +380,37 @@
             </div>
           </div>
 
-          <!-- ROW 2: three equal + one accent -->
-          <div class="fw-photo">
-            <img src="../assets/pdf-assets/project-ondo.jpg" alt="Ondo 85kWh system" class="fw-img" />
+          <!-- SLOT 3: tall right — IMG_3321 -->
+          <div class="fw-photo fw-photo--tall-right">
+            <img src="../assets/oooooo/web/IMG_3321.jpg" alt="Site work in progress" class="fw-img" />
             <div class="fw-photo-overlay"></div>
-            <div class="fw-photo-label">
-              <ZapIcon class="fw-label-icon" />
-              <span>85 kWh — Ondo State</span>
+            <div class="fw-photo-label fw-photo-label--top-right">
+              <SunIcon class="fw-label-icon" />
+              <span>Active Site — Field Crew</span>
             </div>
           </div>
 
-          <div class="fw-photo fw-photo--accent">
-            <img src="../assets/oooooo/web/IMG_0058.jpg" alt="Site survey" class="fw-img" />
+          <!-- SLOT 4: IMG_0058 -->
+          <div class="fw-photo">
+            <img src="../assets/oooooo/web/IMG_0058.jpg" alt="Site survey and audit" class="fw-img" />
             <div class="fw-photo-overlay"></div>
-            <div class="fw-photo-label fw-photo-label--top-right">
+            <div class="fw-photo-label">
               <ActivityIcon class="fw-label-icon" />
               <span>Site Survey & Audit</span>
             </div>
           </div>
 
+          <!-- SLOT 5: project-ondo -->
+          <div class="fw-photo fw-photo--accent">
+            <img src="../assets/pdf-assets/project-ondo.jpg" alt="Ondo 85kWh system" class="fw-img" />
+            <div class="fw-photo-overlay"></div>
+            <div class="fw-photo-label fw-photo-label--top-right">
+              <ZapIcon class="fw-label-icon" />
+              <span>85 kWh — Ondo State</span>
+            </div>
+          </div>
+
+          <!-- SLOT 6: project-gofamint -->
           <div class="fw-photo">
             <img src="../assets/pdf-assets/project-gofamint.jpg" alt="CCTV Ibadan" class="fw-img" />
             <div class="fw-photo-overlay"></div>
@@ -416,9 +420,9 @@
             </div>
           </div>
 
-          <!-- ROW 3: portrait left + two right -->
+          <!-- SLOT 7: IMG_3335 portrait -->
           <div class="fw-photo fw-photo--portrait">
-            <img src="../assets/oooooo/web/IMG_3335.jpg" alt="Team portrait" class="fw-img fw-img--top" />
+            <img src="../assets/oooooo/web/IMG_3335.jpg" alt="Origin field team" class="fw-img fw-img--top" />
             <div class="fw-photo-overlay"></div>
             <div class="fw-photo-label fw-photo-label--bottom-left">
               <UsersIcon class="fw-label-icon" />
@@ -426,6 +430,17 @@
             </div>
           </div>
 
+          <!-- SLOT 8: solar-main -->
+          <div class="fw-photo">
+            <img src="../assets/pdf-assets/solar-main.jpg" alt="Solar commissioning Ondo" class="fw-img" />
+            <div class="fw-photo-overlay"></div>
+            <div class="fw-photo-label">
+              <SunIcon class="fw-label-icon" />
+              <span>Solar Commissioning — Ondo</span>
+            </div>
+          </div>
+
+          <!-- SLOT 9: project-fcda -->
           <div class="fw-photo">
             <img src="../assets/pdf-assets/project-fcda.jpg" alt="FCDA Abuja" class="fw-img" />
             <div class="fw-photo-overlay"></div>
@@ -435,6 +450,7 @@
             </div>
           </div>
 
+          <!-- SLOT 10: project-ife + project-judge side by side -->
           <div class="fw-photo">
             <img src="../assets/pdf-assets/project-ife.jpg" alt="Ife residential" class="fw-img" />
             <div class="fw-photo-overlay"></div>
@@ -445,7 +461,7 @@
           </div>
 
           <div class="fw-photo">
-            <img src="../assets/pdf-assets/project-judge.jpg" alt="Ibadan hybrid" class="fw-img" />
+            <img src="../assets/pdf-assets/project-judge.jpg" alt="Ibadan hybrid solar" class="fw-img" />
             <div class="fw-photo-overlay"></div>
             <div class="fw-photo-label">
               <BatteryIcon class="fw-label-icon" />
@@ -2648,64 +2664,51 @@ onMounted(() => {
   }
 }
 
-/* ── Editorial photo grid — 10 photos, 3 rows ── */
+/* ── Editorial photo grid — 11 photos, 4 rows ── */
 .fw-grid {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr;
-  grid-template-rows: 280px 220px 220px;
+  grid-auto-rows: 240px;
   gap: 10px;
   margin-bottom: 28px;
 }
 
-/* Row 1 */
-.fw-photo--wide      { grid-column: 1; grid-row: 1; }
-.fw-photo--tall-right:nth-child(2) { grid-column: 2; grid-row: 1; }
-.fw-photo--tall-right:nth-child(3) { grid-column: 3; grid-row: 1; }
+/* Row 1: wide + two tall */
+.fw-photo--wide       { grid-column: 1; grid-row: 1; }
+.fw-photo--tall-right { grid-column: auto; grid-row: 1; }
 
-/* Row 2 — cols 1,2,3 — accent spans nothing extra */
-.fw-photo:nth-child(4) { grid-column: 1; grid-row: 2; }
-.fw-photo--accent      { grid-column: 2; grid-row: 2; }
-.fw-photo:nth-child(6) { grid-column: 3; grid-row: 2; }
+/* Row 2: three equal, middle one is accent (no special sizing) */
+/* Row 3: portrait left stays normal height */
+/* Row 4: last two fill naturally */
 
-/* Row 3 — portrait left spans 2 rows of height, rest fill right */
-.fw-photo--portrait    { grid-column: 1; grid-row: 3; }
-.fw-photo:nth-child(8) { grid-column: 2; grid-row: 3; }
-.fw-photo:nth-child(9) { grid-column: 3; grid-row: 3; }
-/* 10th card wraps under on a 4th row naturally — keep it simple */
-.fw-photo:nth-child(10){ grid-column: 2 / 4; grid-row: 4; height: 180px; }
+/* Wide shot spans col 1 only, taller */
+.fw-photo--wide { grid-row: span 1; }
+
+/* On desktop make row 1 taller than the rest */
+.fw-grid { grid-template-rows: 300px repeat(3, 220px); }
+
+/* Tall card spans 2 rows — keep for legacy */
+.fw-photo--tall { grid-row: span 2; }
 
 @media (max-width: 900px) {
   .fw-grid {
     grid-template-columns: 1fr 1fr;
     grid-template-rows: none;
+    grid-auto-rows: 190px;
     gap: 8px;
   }
-  /* reset all explicit placements — auto-flow takes over */
   .fw-photo,
   .fw-photo--wide,
   .fw-photo--tall-right,
   .fw-photo--accent,
-  .fw-photo--portrait {
-    grid-column: auto;
-    grid-row: auto;
-    height: 200px;
-  }
-  /* wide shot gets full width on tablet */
-  .fw-photo--wide { grid-column: span 2; height: 240px; }
+  .fw-photo--portrait { grid-column: auto; grid-row: auto; }
+  .fw-photo--wide { grid-column: span 2; }
 }
 
 @media (max-width: 520px) {
-  .fw-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
-  .fw-photo,
-  .fw-photo--wide,
-  .fw-photo--tall-right,
-  .fw-photo--accent,
-  .fw-photo--portrait { height: 150px; }
-  .fw-photo--wide { grid-column: span 2; height: 180px; }
+  .fw-grid { grid-template-columns: 1fr 1fr; gap: 6px; grid-auto-rows: 150px; }
+  .fw-photo--wide { grid-column: span 2; }
 }
-
-/* Tall card spans 2 rows — legacy kept for any stray reference */
-.fw-photo--tall { grid-row: span 2; }
 
 /* Individual photo */
 .fw-photo {
