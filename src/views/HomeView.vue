@@ -253,23 +253,31 @@
         <div class="process-steps reveal-stagger">
           <div class="process-step">
             <div class="step-num">01</div>
-            <h3>Audit & Assess</h3>
-            <p>We visit your site, measure your load, study your bills, and map your energy risks. No assumptions — only data.</p>
+            <div class="process-step-card">
+              <h3>Audit &amp; Assess</h3>
+              <p>We visit your site, measure your load, study your bills, and map your energy risks. No assumptions — only data.</p>
+            </div>
           </div>
           <div class="process-step">
             <div class="step-num">02</div>
-            <h3>Engineer & Design</h3>
-            <p>Our engineers produce detailed M&E drawings, sizing calculations, and a cost-benefit model. You approve before we touch a cable.</p>
+            <div class="process-step-card">
+              <h3>Engineer &amp; Design</h3>
+              <p>Our engineers produce detailed M&amp;E drawings, sizing calculations, and a cost-benefit model. You approve before we touch a cable.</p>
+            </div>
           </div>
           <div class="process-step">
             <div class="step-num">03</div>
-            <h3>Install & Commission</h3>
-            <p>Certified technicians execute to spec. We commission every system, test every component, and hand over full documentation.</p>
+            <div class="process-step-card">
+              <h3>Install &amp; Commission</h3>
+              <p>Certified technicians execute to spec. We commission every system, test every component, and hand over full documentation.</p>
+            </div>
           </div>
           <div class="process-step">
             <div class="step-num">04</div>
-            <h3>Monitor & Support</h3>
-            <p>Remote monitoring dashboard keeps you informed 24/7. Maintenance plans ensure your system performs for decades.</p>
+            <div class="process-step-card">
+              <h3>Monitor &amp; Support</h3>
+              <p>Remote monitoring dashboard keeps you informed 24/7. Maintenance plans ensure your system performs for decades.</p>
+            </div>
           </div>
         </div>
       </div>
@@ -2302,10 +2310,28 @@ onMounted(() => {
   }
 }
 
-/* ----------------- PROCESS SECTION ----------------- */
+/* ═══════════════════════════════════════════
+   PROCESS SECTION — light + dark compatible
+   ═══════════════════════════════════════════ */
 .process {
-  background-color: var(--bg-secondary);
+  background-color: var(--bg-primary);
   position: relative;
+  overflow: hidden;
+}
+
+/* Subtle diagonal stripe texture — purely decorative */
+.process::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    -55deg,
+    transparent,
+    transparent 40px,
+    rgba(255,118,0,0.03) 40px,
+    rgba(255,118,0,0.03) 41px
+  );
+  pointer-events: none;
 }
 
 .process .container {
@@ -2313,95 +2339,140 @@ onMounted(() => {
   z-index: 1;
 }
 
-.process .section-title,
-.process .section-sub {
-  color: #fff !important;
-}
-
-.process .process-step h3 {
-  color: #fff !important;
-}
-
-.process .process-step p {
-  color: rgba(255, 255, 255, 0.78) !important;
-}
-
-.process .step-num {
-  background: rgba(0, 0, 0, 0.45);
-  border-color: var(--orange);
-  color: var(--orange);
-}
-
+/* Header — uses theme tokens, no !important */
 .process-header {
   text-align: center;
-  margin-bottom: 56px;
+  margin-bottom: 64px;
 }
 
-.process-header .section-title, .process-header .section-sub {
+.process-header .section-title,
+.process-header .section-sub {
   margin-left: auto;
   margin-right: auto;
 }
 
+/* 4-column grid with connector line */
 .process-steps {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  gap: 0;
   position: relative;
-  align-items: stretch;
+  align-items: start;
 }
 
-@media (max-width: 900px) {
-  .process-steps {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-  }
+/* Horizontal connector line between step circles */
+.process-steps::before {
+  content: '';
+  position: absolute;
+  top: 34px; /* half of 68px circle */
+  left: calc(12.5% + 34px); /* start after first circle */
+  right: calc(12.5% + 34px); /* end before last circle */
+  height: 2px;
+  background: linear-gradient(
+    to right,
+    var(--color-primary),
+    rgba(255,118,0,0.25)
+  );
+  z-index: 0;
 }
 
-@media (max-width: 560px) {
-  .process-steps {
-    grid-template-columns: 1fr;
-    gap: 14px;
-  }
-}
-
+/* Individual step */
 .process-step {
   text-align: center;
-  padding: 0 16px;
+  padding: 0 20px 32px;
   position: relative;
-  z-index: 2;
+  z-index: 1;
 }
 
+/* Step card — visible panel with left accent */
+.process-step-card {
+  margin-top: 28px;
+  text-align: left;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md, 12px);
+  border-left: 3px solid var(--color-primary);
+  padding: 18px 16px 16px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.process-step:hover .process-step-card {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md, 0 8px 24px rgba(0,0,0,0.10));
+}
+
+.process-step-card h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  margin: 0 0 8px;
+}
+
+.process-step-card p {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* Step number circle */
 .step-num {
   width: 68px;
   height: 68px;
   border-radius: 50%;
   background: var(--bg-primary);
-  border: 2px solid var(--orange);
+  border: 2.5px solid var(--color-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 20px;
+  margin: 0 auto;
   font-family: var(--font-main);
-  font-size: 1.25rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--orange);
-  box-shadow: 0 0 0 6px rgba(255, 118, 0, 0.08);
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--color-primary);
+  box-shadow: 0 0 0 6px rgba(255,118,0,0.08);
+  position: relative;
+  z-index: 2;
+  transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
 }
 
+.process-step:hover .step-num {
+  background: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 0 0 8px rgba(255,118,0,0.15);
+}
+
+/* Legacy selectors — keep so nothing else breaks */
 .process-step h3 {
-  font-size: 1rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-size: 0.95rem;
+  font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .process-step p {
-  font-size: 0.875rem;
+  font-size: 0.82rem;
   color: var(--text-secondary);
-  line-height: 1.6;
-  letter-spacing: 0em;
+  line-height: 1.65;
+}
+
+@media (max-width: 900px) {
+  .process-steps {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .process-steps::before { display: none; }
+  .process-step { padding: 0 12px 24px; }
+}
+
+@media (max-width: 560px) {
+  .process-steps {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .process-step { padding: 0 0 20px; }
 }
 
 /* ----------------- CASE STUDIES SECTION ----------------- */
