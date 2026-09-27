@@ -4,18 +4,17 @@
     <section class="hero" id="home">
       <!-- Background slideshow -->
       <div class="hero-bg">
-        <div
-          v-for="(slide, i) in heroSlides"
-          :key="i"
-          class="hero-slide"
-          :class="{
-            'is-active':   i === heroSlideActive,
-            'is-leaving':  i === heroSlideLeaving,
-            [`kb-${heroSlideKbDir[i]}`]: true
-          }"
-          :style="{ backgroundImage: `url(${slide})` }"
-          aria-hidden="true"
-        ></div>
+        <transition-group name="slide-fade" tag="div" class="hero-slides-wrap">
+          <div
+            v-for="(slide, i) in heroSlides"
+            v-show="i === heroSlideActive"
+            :key="slide"
+            class="hero-slide"
+            :class="`kb-${heroSlideKbDir[heroSlideActive]}`"
+            :style="{ backgroundImage: `url(${slide})` }"
+            aria-hidden="true"
+          ></div>
+        </transition-group>
         <div class="hero-bg-overlay"></div>
       </div>
 
@@ -734,30 +733,22 @@ import heroSlide4 from '../assets/oooooo/web/IMG_3335.jpg';
 // ----------------- HERO SLIDESHOW -----------------
 const heroSlides = [heroSlide0, heroSlide1, heroSlide2, heroSlide3, heroSlide4];
 
+// KB direction cycles with every advance — stored as reactive so the
+// active slide div gets a fresh class (which restarts the CSS animation)
 const KB_DIRS = ['zil', 'zir', 'zol', 'zor'];
-const heroSlideKbDir = heroSlides.map((_, i) => KB_DIRS[i % KB_DIRS.length]);
-
-const heroSlideActive  = ref(0);
-const heroSlideLeaving = ref(-1);
-
-let heroSlideTimer = null;
-const SLIDE_DURATION = 5500;   // ms between advances
-const LEAVE_CLEAR   = 1200;   // ms — matches the CSS fade-out duration
+const heroSlideActive = ref(0);
+const heroSlideKbDir  = ref(KB_DIRS[0]);
+let   heroSlideTimer  = null;
 
 const advanceHeroSlide = () => {
   const next = (heroSlideActive.value + 1) % heroSlides.length;
-  heroSlideLeaving.value = heroSlideActive.value;
-  heroSlideActive.value  = next;
-
-  // Clear the leaving flag after the CSS transition finishes
-  setTimeout(() => {
-    heroSlideLeaving.value = -1;
-  }, LEAVE_CLEAR);
+  heroSlideActive.value = next;
+  heroSlideKbDir.value  = KB_DIRS[next % KB_DIRS.length];
 };
 
 const startHeroSlideshow = () => {
   clearInterval(heroSlideTimer);
-  heroSlideTimer = setInterval(advanceHeroSlide, SLIDE_DURATION);
+  heroSlideTimer = setInterval(advanceHeroSlide, 5500);
 };
 
 const stopHeroSlideshow = () => {
@@ -1027,6 +1018,13 @@ onMounted(() => {
   overflow: hidden;
 }
 /* ── Hero Slideshow ── */
+.hero-slides-wrap {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
 .hero-slide {
   position: absolute;
   inset: 0;
@@ -1035,63 +1033,59 @@ onMounted(() => {
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;
-  opacity: 0;
   will-change: opacity, transform;
-  /* default: hidden & frozen */
-  transform: scale(1);
-  transition: none;
 }
 
-/* Active slide fades in and runs Ken Burns simultaneously */
-.hero-slide.is-active {
-  opacity: 1;
-  z-index: 1;
-  animation: kbFadeIn 1.2s ease forwards;
-}
-
-/* Leaving slide fades out on top of the incoming one */
-.hero-slide.is-leaving {
+/* Vue transition-group enter/leave hooks */
+.slide-fade-enter-active {
   z-index: 2;
-  animation: kbFadeOut 1.4s ease forwards;
+  animation: kbSlideIn 5.5s ease-out forwards;
 }
+.slide-fade-leave-active {
+  z-index: 1;
+  animation: kbSlideOut 1.3s ease-in forwards;
+}
+.slide-fade-enter-from { opacity: 0; }
+.slide-fade-leave-to   { opacity: 0; }
 
-/* ── Ken Burns — 4 directions, no double-prefix ── */
-.hero-slide.is-active.kb-zil {
-  animation: kbFadeIn 1.2s ease forwards, kbZoomInLeft 7s ease-out forwards;
-}
-.hero-slide.is-active.kb-zir {
-  animation: kbFadeIn 1.2s ease forwards, kbZoomInRight 7s ease-out forwards;
-}
-.hero-slide.is-active.kb-zol {
-  animation: kbFadeIn 1.2s ease forwards, kbZoomOutLeft 7s ease-out forwards;
-}
-.hero-slide.is-active.kb-zor {
-  animation: kbFadeIn 1.2s ease forwards, kbZoomOutRight 7s ease-out forwards;
-}
+/* Per-direction Ken Burns on enter */
+.slide-fade-enter-active.kb-zil { animation: kbSlideIn_zil 5.5s ease-out forwards; }
+.slide-fade-enter-active.kb-zir { animation: kbSlideIn_zir 5.5s ease-out forwards; }
+.slide-fade-enter-active.kb-zol { animation: kbSlideIn_zol 5.5s ease-out forwards; }
+.slide-fade-enter-active.kb-zor { animation: kbSlideIn_zor 5.5s ease-out forwards; }
 
-@keyframes kbFadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+@keyframes kbSlideIn {
+  0%   { opacity: 0; transform: scale(1.08); }
+  12%  { opacity: 1; }
+  100% { opacity: 1; transform: scale(1.00); }
 }
-@keyframes kbFadeOut {
-  from { opacity: 1; }
-  to   { opacity: 0; }
+@keyframes kbSlideOut {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
 }
-@keyframes kbZoomInLeft {
-  from { transform: scale(1.10) translate(2%, 1%); }
-  to   { transform: scale(1.00) translate(0%,  0%); }
+/* Zoom-in from left */
+@keyframes kbSlideIn_zil {
+  0%   { opacity: 0; transform: scale(1.10) translate(2.5%,  1%); }
+  12%  { opacity: 1; }
+  100% { opacity: 1; transform: scale(1.00) translate(0%,    0%); }
 }
-@keyframes kbZoomInRight {
-  from { transform: scale(1.10) translate(-2%, -1%); }
-  to   { transform: scale(1.00) translate(0%,   0%); }
+/* Zoom-in from right */
+@keyframes kbSlideIn_zir {
+  0%   { opacity: 0; transform: scale(1.10) translate(-2.5%, -1%); }
+  12%  { opacity: 1; }
+  100% { opacity: 1; transform: scale(1.00) translate(0%,    0%);  }
 }
-@keyframes kbZoomOutLeft {
-  from { transform: scale(1.00) translate(0%,  0%); }
-  to   { transform: scale(1.10) translate(2%, -1%); }
+/* Zoom-out to left */
+@keyframes kbSlideIn_zol {
+  0%   { opacity: 0; transform: scale(1.00) translate(0%,    0%); }
+  12%  { opacity: 1; }
+  100% { opacity: 1; transform: scale(1.10) translate(2.5%, -1%); }
 }
-@keyframes kbZoomOutRight {
-  from { transform: scale(1.00) translate(0%,  0%); }
-  to   { transform: scale(1.10) translate(-2%, 1%); }
+/* Zoom-out to right */
+@keyframes kbSlideIn_zor {
+  0%   { opacity: 0; transform: scale(1.00) translate(0%,    0%);  }
+  12%  { opacity: 1; }
+  100% { opacity: 1; transform: scale(1.10) translate(-2.5%, 1%); }
 }
 
 /* Overlay sits on top of all slides */
