@@ -138,9 +138,9 @@
         <!-- Bento-style service grid — 6 services, 2 rows of 3 -->
         <div class="svc-bento reveal-stagger">
 
-          <!-- Solar PV — wide hero card, spans 2 cols -->
+          <!-- Solar PV — wide hero card, real installation photo -->
           <div class="svc-bento-card svc-bento-card--wide svc-bento-card--tall">
-            <img src="../assets/pdf-assets/solar-main.jpg" alt="Solar PV Systems" class="svc-bento-img" />
+            <img src="../assets/pdf-assets/solar-2.jpg" alt="Origin team installing solar panels on rooftop" class="svc-bento-img" style="object-position: center 30%;" />
             <div class="svc-bento-overlay svc-bento-overlay--solar"></div>
             <div class="svc-bento-glass">
               <div class="svc-bento-icon svc-bento-icon--orange"><SunIcon /></div>
@@ -158,9 +158,9 @@
             </div>
           </div>
 
-          <!-- CCTV -->
+          <!-- CCTV — real control room photo -->
           <div class="svc-bento-card">
-            <img src="../assets/pdf-assets/cctv-pole.jpg" alt="CCTV & Surveillance" class="svc-bento-img" />
+            <img src="../assets/pdf-assets/cctv-main.jpg" alt="CCTV surveillance control room" class="svc-bento-img" />
             <div class="svc-bento-overlay"></div>
             <div class="svc-bento-glass">
               <div class="svc-bento-icon svc-bento-icon--orange"><CctvIcon /></div>
@@ -173,16 +173,16 @@
             </div>
           </div>
 
-          <!-- Wind & BESS — wide card, spans 2 cols -->
+          <!-- BESS / Battery Storage — wide, real battery bank photo -->
           <div class="svc-bento-card svc-bento-card--wide svc-bento-card--tall">
-            <img src="../assets/pdf-assets/img-038.jpg" alt="Wind & Battery Energy Storage" class="svc-bento-img svc-bento-img--wind" />
+            <img src="../assets/pdf-assets/img-047.jpg" alt="Battery energy storage system installation" class="svc-bento-img" style="object-position: center 40%;" />
             <div class="svc-bento-overlay svc-bento-overlay--wind"></div>
             <div class="svc-bento-glass">
-              <div class="svc-bento-icon"><WindIcon /></div>
+              <div class="svc-bento-icon"><BatteryIcon /></div>
               <div class="svc-bento-content">
-                <span class="svc-bento-tag">Wind &amp; Storage</span>
-                <h3>Wind &amp; BESS Solutions</h3>
-                <p>Small-wind turbines paired with lithium battery storage — the right answer when solar alone isn't enough. Day and night, rain or shine.</p>
+                <span class="svc-bento-tag">Energy Storage</span>
+                <h3>BESS &amp; Battery Solutions</h3>
+                <p>Lithium and lead-acid battery banks paired with hybrid inverters — backup power that keeps your facility running when the grid fails.</p>
                 <div class="svc-bento-stats">
                   <span><strong>48V – 800V</strong> DC bus</span>
                   <span><strong>LFP</strong> chemistry</span>
@@ -193,9 +193,9 @@
             </div>
           </div>
 
-          <!-- Access Control -->
+          <!-- Access Control — real automated gate photo -->
           <div class="svc-bento-card">
-            <img src="../assets/pdf-assets/access-biometric.jpg" alt="Access Control" class="svc-bento-img" />
+            <img src="../assets/pdf-assets/img-076.jpg" alt="Automated access control gate" class="svc-bento-img" style="object-position: center 60%;" />
             <div class="svc-bento-overlay"></div>
             <div class="svc-bento-glass">
               <div class="svc-bento-icon"><FingerprintIcon /></div>
@@ -208,9 +208,9 @@
             </div>
           </div>
 
-          <!-- Fire -->
+          <!-- Fire Detection -->
           <div class="svc-bento-card">
-            <img src="../assets/pdf-assets/fire-detector.jpg" alt="Fire Detection" class="svc-bento-img" />
+            <img src="../assets/pdf-assets/fire-detector.jpg" alt="Fire detection system" class="svc-bento-img" />
             <div class="svc-bento-overlay"></div>
             <div class="svc-bento-glass">
               <div class="svc-bento-icon svc-bento-icon--orange"><FlameIcon /></div>
@@ -223,9 +223,9 @@
             </div>
           </div>
 
-          <!-- EV Charging -->
+          <!-- EV Charging — real commercial aerial with solar -->
           <div class="svc-bento-card">
-            <img src="../assets/pdf-assets/img-017.jpg" alt="EV Charging" class="svc-bento-img" />
+            <img src="../assets/pdf-assets/img-017.jpg" alt="EV charging infrastructure" class="svc-bento-img" />
             <div class="svc-bento-overlay"></div>
             <div class="svc-bento-glass">
               <div class="svc-bento-icon svc-bento-icon--orange"><ZapIcon /></div>
