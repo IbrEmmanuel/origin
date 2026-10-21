@@ -1,11 +1,15 @@
 import axios from 'axios';
 import router from '@/router';
 
+// Prefer same-origin `/api` (Vite/Vercel proxy) so the browser is not blocked by CORS.
+// Proxy must not spoof User-Agent/Origin or Imunify360 may 403.
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
   headers: {
-    'Content-Type': 'application/json'
-  }
+    'Content-Type': 'application/json',
+    Accept: 'application/json'
+  },
+  timeout: 30000
 });
 
 const isAuthCredentialRequest = (config) => {
@@ -65,7 +69,10 @@ export function getAuthErrorMessage(err, fallback = 'Login failed. Please check 
 
   if (!err.response) {
     if (err.code === 'ERR_NETWORK' || err.message === 'Network Error') {
-      return 'Cannot reach the server. Check your connection and try again.';
+      return 'Cannot reach the API (network/CORS). Use VITE_API_URL=/api with the Vite proxy for local dev, or ask the host to allow CORS from this site on api.originelectricltd.com.';
+    }
+    if (err.code === 'ECONNABORTED') {
+      return 'The server took too long to respond. Please try again.';
     }
     return err.message || fallback;
   }
@@ -82,14 +89,14 @@ export function getAuthErrorMessage(err, fallback = 'Login failed. Please check 
   if (data?.message || data?.error) {
     const msg = data.message || data.error;
     if (/imunify|bot-protection|whitelist/i.test(msg)) {
-      return 'Login blocked by server bot-protection (Imunify360). Ask your host to whitelist your IP or disable bot protection on /api/auth/*.';
+      return 'The API host is still blocking this request (Imunify360). In cPanel/Imunify360: whitelist your IP, or disable bot-protection for api.originelectricltd.com /api/auth/*. Also allow CORS for your site origin.';
     }
     return msg;
   }
 
   // Empty 403 bodies usually mean WAF / origin block, not bad password
   if (err.response.status === 403) {
-    return 'Server blocked the login request (bot-protection). This is not an invalid-password error — the API host is blocking the request.';
+    return 'The API returned 403 (host firewall). Whitelist your IP in Imunify360 or disable bot-protection on /api/auth/* — this is not an invalid password.';
   }
 
   if (err.response.status >= 500) {

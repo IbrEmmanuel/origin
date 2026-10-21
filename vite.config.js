@@ -28,18 +28,12 @@ export default defineConfig(({ mode }) => {
                     },
                     rewrite: (p) => p.replace(/^\/api\/agent/, ''),
                 },
-                // Auth / marketplace / etc — same-origin proxy avoids CORS blocks
+                // Same-origin proxy for local login (avoids browser CORS).
+                // Do not overwrite Origin/User-Agent — that looks like a bot to Imunify360.
                 '/api': {
                     target: 'https://api.originelectricltd.com',
                     changeOrigin: true,
                     secure: true,
-                    headers: {
-                        origin: 'https://www.originelectricltd.com',
-                        referer: 'https://www.originelectricltd.com/',
-                        'user-agent':
-                            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                        accept: 'application/json',
-                    },
                 },
             },
         },

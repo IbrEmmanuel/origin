@@ -78,12 +78,12 @@ Must enforce **vendor ownership** on every batch/product mutation.
 ## Env / payments
 
 ```
-VITE_API_URL=/api
-VITE_API_BASE_URL=
+VITE_API_URL=https://api.originelectricltd.com/api
+VITE_API_BASE_URL=https://api.originelectricltd.com
 VITE_PAYSTACK_PUBLIC_KEY=pk_test_…   # test = not live; pk_live_… for production
 ```
 
-Imunify360 / CORS on the API host must allow app traffic or login/checkout will fail independently of this UI.
+**Imunify360:** Do not proxy the main API through Vite/Vercel — bot-protection blocks datacenter/proxy IPs. The browser must call the API directly. On the host: whitelist client IPs or disable bot-protection for `/api/auth/*`, and enable CORS for `https://www.originelectricltd.com` (and `http://localhost:5173` for local dev).
 
 ## Tested in this pass
 
