@@ -26,7 +26,11 @@ const hideGlobalLayout = computed(() => {
   return (
     p.startsWith('/account') ||
     p === '/origin-talk' ||
-    p === '/sales-chat'
+    p === '/sales-chat' ||
+    p === '/login' ||
+    p === '/signup' ||
+    p === '/forgot-password' ||
+    p === '/verify-email'
   );
 });
 </script>
