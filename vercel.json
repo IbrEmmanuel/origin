@@ -9,6 +9,7 @@
   },
   "rewrites": [
     { "source": "/api/agent/(.*)", "destination": "/api/agent" },
+    { "source": "/api/:path*", "destination": "https://api.originelectricltd.com/api/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [

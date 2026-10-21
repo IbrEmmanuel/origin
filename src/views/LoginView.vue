@@ -1,6 +1,5 @@
 <template>
   <div class="login-page">
-    <!-- Floating orange spheres (brand accent) -->
     <div class="orbits" aria-hidden="true">
       <span class="orb orb-lg"></span>
       <span class="orb orb-md"></span>
@@ -65,22 +64,23 @@
           Forgot your password?
           <router-link to="/forgot-password">Press here</router-link>
         </p>
-
-        <button type="button" class="google-btn" @click="loginWithGoogle" :disabled="isLoading">
-          <svg class="google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-1 .67-2.28 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-          </svg>
-          Google
-        </button>
-
-        <p class="signup-link">
-          No account?
-          <router-link to="/signup">Register</router-link>
-        </p>
       </div>
+    </div>
+
+    <div class="login-extras">
+      <button type="button" class="google-link" @click="loginWithGoogle" :disabled="isLoading">
+        <svg class="google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-1 .67-2.28 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Continue with Google
+      </button>
+      <p class="signup-link">
+        No account?
+        <router-link to="/signup">Register</router-link>
+      </p>
     </div>
 
     <ReferralModal
@@ -95,6 +95,7 @@
 import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import authService from '@/services/auth.service';
+import { getAuthErrorMessage } from '@/services/api';
 import { auth, googleProvider } from '@/firebase/config';
 import { signInWithPopup } from 'firebase/auth';
 import ReferralModal from '@/components/ReferralModal.vue';
@@ -143,13 +144,13 @@ const handleLogin = async () => {
     const redirectPath = route.query.redirect || '/account/dashboard';
     router.push(redirectPath);
   } catch (err) {
-    if (err.response?.status === 403 && err.response.data.is_verified === false) {
+    if (err.response?.status === 403 && err.response?.data?.is_verified === false) {
       router.push({
         path: '/verify-email',
         query: { email: email.value }
       });
     } else {
-      error.value = err.response?.data?.message || 'Login failed. Please check your credentials.';
+      error.value = getAuthErrorMessage(err);
       alert(error.value);
     }
   } finally {
@@ -219,15 +220,17 @@ const finishAuth = (data) => {
   min-height: 100vh;
   min-height: 100dvh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem;
+  gap: 1.5rem;
+  padding: 2rem 1.25rem;
   overflow: hidden;
-  background: #3a3a3a;
+  background: #353535;
   font-family: var(--font-main), 'Segoe UI', system-ui, sans-serif;
 }
 
-/* ── Origin orange gradient orbs ── */
+/* Soft brand orbs — quieter, less busy */
 .orbits {
   position: absolute;
   inset: 0;
@@ -239,82 +242,74 @@ const finishAuth = (data) => {
   position: absolute;
   border-radius: 50%;
   background: radial-gradient(
-    circle at 32% 28%,
-    #ffe08a 0%,
-    var(--color-primary-light) 28%,
-    var(--color-primary) 55%,
-    #e86900 78%,
-    #c45a00 100%
+    circle at 30% 26%,
+    #ffd27a 0%,
+    var(--color-primary-light) 32%,
+    var(--color-primary) 62%,
+    #e86900 100%
   );
   box-shadow:
-    0 18px 40px rgba(0, 0, 0, 0.35),
-    inset -10px -14px 28px rgba(0, 0, 0, 0.18),
-    inset 8px 10px 20px rgba(255, 255, 255, 0.35);
+    0 12px 28px rgba(0, 0, 0, 0.28),
+    inset -8px -10px 20px rgba(0, 0, 0, 0.14),
+    inset 6px 8px 16px rgba(255, 255, 255, 0.28);
+  opacity: 0.92;
 }
 
 .orb-lg {
-  width: clamp(160px, 28vw, 280px);
-  height: clamp(160px, 28vw, 280px);
-  top: 8%;
-  left: 10%;
-  filter: blur(0.5px);
-  animation: floatY 7s ease-in-out infinite;
+  width: clamp(140px, 22vw, 220px);
+  height: clamp(140px, 22vw, 220px);
+  top: 10%;
+  left: 12%;
 }
 
 .orb-md {
-  width: clamp(90px, 14vw, 150px);
-  height: clamp(90px, 14vw, 150px);
-  bottom: 12%;
-  left: 16%;
-  animation: floatY 5.5s ease-in-out infinite reverse;
+  width: clamp(72px, 11vw, 110px);
+  height: clamp(72px, 11vw, 110px);
+  bottom: 14%;
+  left: 18%;
 }
 
 .orb-sm {
-  width: clamp(48px, 8vw, 78px);
-  height: clamp(48px, 8vw, 78px);
-  top: 22%;
-  right: 18%;
-  animation: floatY 6s ease-in-out infinite 0.6s;
+  width: clamp(40px, 6.5vw, 62px);
+  height: clamp(40px, 6.5vw, 62px);
+  top: 24%;
+  right: 20%;
 }
 
 .orb-xs {
-  width: clamp(36px, 6vw, 56px);
-  height: clamp(36px, 6vw, 56px);
-  bottom: 20%;
-  right: 14%;
-  animation: floatY 4.8s ease-in-out infinite 0.3s;
+  width: clamp(28px, 4.5vw, 44px);
+  height: clamp(28px, 4.5vw, 44px);
+  bottom: 22%;
+  right: 16%;
 }
 
-/* ── Circular frosted glass ── */
+/* Circular glass */
 .glass-circle {
   position: relative;
   z-index: 1;
-  width: min(92vw, 420px);
-  height: min(92vw, 420px);
+  width: min(88vw, 400px);
+  height: min(88vw, 400px);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: cardIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: cardIn 0.55s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-rim {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background:
-    linear-gradient(
-      145deg,
-      rgba(255, 255, 255, 0.75) 0%,
-      rgba(200, 200, 205, 0.55) 18%,
-      rgba(120, 120, 125, 0.45) 42%,
-      rgba(220, 220, 225, 0.5) 68%,
-      rgba(90, 90, 95, 0.55) 100%
-    );
-  box-shadow:
-    0 20px 50px rgba(0, 0, 0, 0.45),
-    inset 0 1px 1px rgba(255, 255, 255, 0.7);
-  padding: 7px;
+  background: linear-gradient(
+    150deg,
+    rgba(255, 255, 255, 0.85) 0%,
+    rgba(210, 210, 215, 0.5) 22%,
+    rgba(110, 110, 115, 0.4) 48%,
+    rgba(230, 230, 235, 0.55) 72%,
+    rgba(80, 80, 85, 0.5) 100%
+  );
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+  padding: 5px;
   -webkit-mask:
     linear-gradient(#fff 0 0) content-box,
     linear-gradient(#fff 0 0);
@@ -328,19 +323,19 @@ const finishAuth = (data) => {
 
 .glass-glint {
   position: absolute;
-  top: 4px;
+  top: 5px;
   left: 50%;
   transform: translateX(-50%);
-  width: 42%;
-  height: 10px;
+  width: 38%;
+  height: 8px;
   border-radius: 50%;
   background: linear-gradient(
     180deg,
     rgba(255, 255, 255, 0.95) 0%,
-    rgba(255, 255, 255, 0.25) 55%,
+    rgba(255, 255, 255, 0.2) 60%,
     transparent 100%
   );
-  filter: blur(1px);
+  filter: blur(0.8px);
   z-index: 3;
   pointer-events: none;
 }
@@ -355,48 +350,47 @@ const finishAuth = (data) => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: clamp(1.75rem, 6vw, 3rem) clamp(2rem, 7vw, 3.25rem);
-  background: rgba(255, 253, 250, 0.18);
-  backdrop-filter: blur(22px) saturate(1.35);
-  -webkit-backdrop-filter: blur(22px) saturate(1.35);
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  box-shadow: inset 0 0 40px rgba(255, 255, 255, 0.08);
+  gap: 0;
+  padding: clamp(2.25rem, 7vw, 3.5rem) clamp(2.5rem, 8vw, 3.75rem);
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(28px) saturate(1.4);
+  -webkit-backdrop-filter: blur(28px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: inset 0 1px 20px rgba(255, 255, 255, 0.1);
   overflow: hidden;
 }
 
 .login-header {
   text-align: center;
-  margin-bottom: 1.35rem;
+  margin-bottom: 1.75rem;
 }
 
 .login-header h1 {
   margin: 0;
   font-family: var(--font-main);
-  font-size: clamp(1.35rem, 4vw, 1.75rem);
-  font-weight: 800;
-  letter-spacing: 0.18em;
+  font-size: clamp(1.2rem, 3.5vw, 1.5rem);
+  font-weight: 700;
+  letter-spacing: 0.28em;
   color: #fff;
-  line-height: 1.1;
+  line-height: 1;
   background: none;
   -webkit-text-fill-color: #fff;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.2);
 }
 
 .title-line {
   display: block;
-  width: 72px;
-  height: 2px;
-  margin: 0.55rem auto 0;
+  width: 56px;
+  height: 1.5px;
+  margin: 0.7rem auto 0;
   background: rgba(255, 255, 255, 0.9);
-  border-radius: 2px;
 }
 
 .login-form {
   width: 100%;
-  max-width: 240px;
+  max-width: 210px;
   display: flex;
   flex-direction: column;
-  gap: 1.15rem;
+  gap: 1.35rem;
 }
 
 .field {
@@ -405,19 +399,19 @@ const finishAuth = (data) => {
 
 .field label {
   display: block;
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  color: #1a1a1a;
-  margin-bottom: 0.15rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: rgba(20, 20, 20, 0.78);
+  margin-bottom: 0.35rem;
 }
 
 .field-row {
   position: relative;
   display: flex;
   align-items: center;
-  border-bottom: 1.5px solid rgba(255, 255, 255, 0.85);
-  padding-bottom: 0.2rem;
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.88);
+  padding-bottom: 0.35rem;
 }
 
 .field-row input {
@@ -427,63 +421,61 @@ const finishAuth = (data) => {
   background: transparent;
   outline: none;
   color: #fff;
-  font-size: 1rem;
-  font-weight: 600;
-  letter-spacing: 0.2em;
-  padding: 0.2rem 1.75rem 0.15rem 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  padding: 0.1rem 1.5rem 0 0;
   font-family: inherit;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 
 .field-row input::placeholder {
-  color: rgba(255, 255, 255, 0.85);
-  letter-spacing: 0.35em;
-}
-
-.field-row input:focus {
-  color: #fff;
+  color: rgba(255, 255, 255, 0.8);
+  letter-spacing: 0.4em;
+  font-weight: 600;
 }
 
 .toggle-pw {
   position: absolute;
   right: 0;
-  bottom: 0.15rem;
+  bottom: 0.3rem;
   display: flex;
   align-items: center;
   justify-content: center;
   border: none;
   background: none;
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(255, 255, 255, 0.7);
   cursor: pointer;
-  padding: 0.15rem;
+  padding: 0;
+  opacity: 0.85;
 }
 
 .toggle-pw :deep(svg) {
-  width: 15px;
-  height: 15px;
+  width: 14px;
+  height: 14px;
 }
 
 .toggle-pw:hover {
-  color: var(--color-primary);
+  color: #fff;
+  opacity: 1;
 }
 
 .sign-in-btn {
-  margin-top: 0.65rem;
+  margin-top: 0.85rem;
   align-self: center;
-  min-width: 118px;
-  height: 36px;
-  padding: 0 1.25rem;
+  min-width: 108px;
+  height: 34px;
+  padding: 0 1.1rem;
   border: none;
-  border-radius: 6px;
-  background: #2f2f2f;
+  border-radius: 5px;
+  background: #2a2a2a;
   color: #fff;
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
   cursor: pointer;
   font-family: inherit;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
-  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22);
+  transition: background 0.2s ease, transform 0.2s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -492,79 +484,83 @@ const finishAuth = (data) => {
 .sign-in-btn:hover:not(:disabled) {
   background: var(--color-primary);
   transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgba(255, 118, 0, 0.35);
 }
 
 .sign-in-btn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.forgot {
-  margin: 0.9rem 0 0;
-  text-align: center;
-  font-size: 0.72rem;
-  color: #1a1a1a;
-  font-weight: 500;
-}
-
-.forgot a {
-  color: var(--color-primary);
-  font-weight: 800;
-  text-decoration: none;
-  margin-left: 0.15rem;
-}
-
-.forgot a:hover {
-  text-decoration: underline;
-  color: var(--color-orange-dark);
-}
-
-.google-btn {
-  margin-top: 0.75rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-  height: 30px;
-  padding: 0 0.85rem;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  background: rgba(255, 255, 255, 0.18);
-  color: #fff;
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background 0.2s ease;
-}
-
-.google-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.28);
-}
-
-.google-btn:disabled {
   opacity: 0.65;
   cursor: not-allowed;
 }
 
+.forgot {
+  margin: 1.15rem 0 0;
+  text-align: center;
+  font-size: 0.68rem;
+  color: rgba(20, 20, 20, 0.8);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.forgot a {
+  color: var(--color-primary);
+  font-weight: 700;
+  text-decoration: none;
+  margin-left: 0.2rem;
+}
+
+.forgot a:hover {
+  text-decoration: underline;
+}
+
+/* Secondary actions outside the circle — keeps glass clean */
+.login-extras {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.google-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0.25rem 0.5rem;
+  transition: color 0.2s ease;
+}
+
+.google-link:hover:not(:disabled) {
+  color: #fff;
+}
+
+.google-link:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .google-icon {
-  width: 14px;
-  height: 14px;
+  width: 15px;
+  height: 15px;
 }
 
 .signup-link {
-  margin: 0.55rem 0 0;
-  font-size: 0.7rem;
-  color: rgba(26, 26, 26, 0.85);
-  text-align: center;
+  margin: 0;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.55);
 }
 
 .signup-link a {
   color: var(--color-primary);
-  font-weight: 800;
+  font-weight: 700;
   text-decoration: none;
+  margin-left: 0.2rem;
 }
 
 .signup-link a:hover {
@@ -572,8 +568,8 @@ const finishAuth = (data) => {
 }
 
 .loader {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: 50%;
   border-top-color: #fff;
@@ -584,15 +580,10 @@ const finishAuth = (data) => {
   to { transform: rotate(360deg); }
 }
 
-@keyframes floatY {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-14px); }
-}
-
 @keyframes cardIn {
   from {
     opacity: 0;
-    transform: scale(0.92);
+    transform: scale(0.96);
   }
   to {
     opacity: 1;
@@ -602,22 +593,17 @@ const finishAuth = (data) => {
 
 @media (max-width: 420px) {
   .glass-circle {
-    width: min(96vw, 360px);
-    height: min(96vw, 360px);
+    width: min(92vw, 340px);
+    height: min(92vw, 340px);
   }
 
   .login-form {
-    max-width: 200px;
-    gap: 0.95rem;
+    max-width: 180px;
+    gap: 1.1rem;
   }
 
-  .orb-lg {
-    left: -6%;
-    top: 4%;
-  }
-
-  .orb-md {
-    left: -2%;
+  .login-header {
+    margin-bottom: 1.35rem;
   }
 }
 </style>
