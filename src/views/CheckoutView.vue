@@ -123,6 +123,14 @@ import { useCart } from '@/composables/useCart';
 const router = useRouter();
 const { cartItems, cartTotal, removeFromCart } = useCart();
 
+/** Prefer same-origin /api (Vite/Vercel proxy). Empty VITE_API_BASE_URL is intentional. */
+const apiRoot = () => {
+  const base = import.meta.env.VITE_API_BASE_URL;
+  if (base === '' || base == null) return '';
+  return String(base).replace(/\/$/, '');
+};
+const apiUrl = (path) => `${apiRoot()}${path.startsWith('/') ? path : `/${path}`}`;
+
 const loadingProfile = ref(true);
 const savedAddresses = ref([]);
 const selectedAddressId = ref(null);
@@ -161,7 +169,7 @@ const fetchProfile = async () => {
   }
   
   try {
-    const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/api/user/profile`, {
+    const res = await fetch(apiUrl('/api/user/profile'), {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     if (res.ok) {
@@ -266,7 +274,7 @@ const updateDeliveryFeeAndCoords = async (lat, lng) => {
   
   try {
     const token = localStorage.getItem('token');
-    const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/api/user/calculate-shipping`, {
+    const res = await fetch(apiUrl('/api/user/calculate-shipping'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -332,9 +340,34 @@ const processCheckout = async () => {
     
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+    // Optional server-side stock/price validation (no-op if endpoint missing)
+    try {
+      const { default: marketplaceService } = await import('@/services/marketplace.service');
+      const validation = await marketplaceService.validateCart(cartItems.value);
+      if (validation.available && validation.data?.invalid?.length) {
+        const msg = validation.data.invalid
+          .map((i) => i.message || `${i.id}: unavailable`)
+          .join('; ');
+        throw new Error(msg || 'Some cart items failed stock or price validation.');
+      }
+      if (validation.available && validation.data?.items) {
+        validation.data.items.forEach((line) => {
+          const item = cartItems.value.find((c) => c.id === line.id);
+          if (item && line.price != null) item.price = Number(line.price);
+          if (item && line.stock != null) item.stock = Number(line.stock);
+        });
+      }
+    } catch (valErr) {
+      if (valErr.message && !valErr.response) throw valErr;
+      // Network/404 already handled inside validateCart for missing endpoint
+      if (valErr.response && valErr.response.status !== 404) {
+        throw new Error(valErr.response.data?.message || 'Cart validation failed');
+      }
+    }
     
     // Create pending order
-    const checkoutRes = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/api/user/checkout`, {
+    const checkoutRes = await fetch(apiUrl('/api/user/checkout'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -353,23 +386,26 @@ const processCheckout = async () => {
       })
     });
     
-    if (!checkoutRes.ok) throw new Error('Failed to create order');
+    if (!checkoutRes.ok) {
+      const errBody = await checkoutRes.json().catch(() => ({}));
+      throw new Error(errBody.message || 'Failed to create order');
+    }
     const orderData = await checkoutRes.json();
     
     const paystackKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
+    const isTestMode = !paystackKey || String(paystackKey).includes('test') || paystackKey === 'pk_test_placeholder';
     if (!paystackKey) {
-       console.error("VITE_PAYSTACK_PUBLIC_KEY is not set.");
+      console.warn('VITE_PAYSTACK_PUBLIC_KEY missing — using test-mode placeholder. Payments are not live.');
     }
     
-    // Initialize Paystack
+    // Initialize Paystack (test key = clearly non-live)
     const handler = window.PaystackPop.setup({
       key: paystackKey || 'pk_test_placeholder',
       email: user.email || 'customer@example.com',
       amount: orderData.total * 100, // in kobo
       currency: 'NGN',
+      metadata: { test_mode: isTestMode },
       callback: (response) => {
-        // Handle verification in an async self-invoking function if needed, 
-        // or just call an async method
         verifyPayment(response, orderData.orderId, token);
       },
       onClose: () => {
@@ -385,7 +421,7 @@ const processCheckout = async () => {
 
 const verifyPayment = async (response, orderId, token) => {
   try {
-    const verifyRes = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/api/user/verify-payment`, {
+    const verifyRes = await fetch(apiUrl('/api/user/verify-payment'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

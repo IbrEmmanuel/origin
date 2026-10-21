@@ -34,6 +34,9 @@
       <div class="tab-content mt-6">
         <VendorDashboard v-if="currentTab === 'overview'" @switch-tab="id => currentTab = id" />
         <VendorProducts v-if="currentTab === 'products'" />
+        <VendorBulkUpload v-if="currentTab === 'bulk'" @imported="currentTab = 'batches'" />
+        <VendorBatchDashboard v-if="currentTab === 'batches'" />
+        <VendorAds v-if="currentTab === 'ads'" />
         <VendorSettings v-if="currentTab === 'settings'" />
         <VendorWallet v-if="currentTab === 'wallet'" />
         <div v-if="currentTab === 'orders'">
@@ -56,20 +59,25 @@ import { useRoute } from 'vue-router';
 import vendorService from '@/services/vendor.service';
 import VendorDashboard from './VendorDashboard.vue';
 import VendorProducts from './VendorProducts.vue';
+import VendorBulkUpload from './VendorBulkUpload.vue';
+import VendorBatchDashboard from './VendorBatchDashboard.vue';
+import VendorAds from './VendorAds.vue';
 import VendorOrders from './VendorOrders.vue';
 import VendorOrderDetails from './VendorOrderDetails.vue';
 import VendorSettings from './VendorSettings.vue';
 import VendorWallet from './VendorWallet.vue';
 import { 
-  ArrowLeft as ArrowLeftIcon, 
   Clock as ClockIcon, 
-  CheckCircle as CheckCircleIcon, 
   AlertTriangle as AlertTriangleIcon,
   LayoutDashboard as DashboardIcon,
   Package as ProductIcon,
   ShoppingBag as ShoppingBagIcon,
   Wallet as WalletIcon,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
+  Upload as UploadIcon,
+  Layers as BatchesIcon,
+  Megaphone as AdsIcon,
+  Store as StoreIcon
 } from 'lucide-vue-next';
 
 const route = useRoute();
@@ -81,6 +89,9 @@ const selectedOrderId = ref(null);
 const tabs = [
   { id: 'overview', label: 'Overview', icon: DashboardIcon },
   { id: 'products', label: 'Products', icon: ProductIcon },
+  { id: 'bulk', label: 'Bulk Upload', icon: UploadIcon },
+  { id: 'batches', label: 'Batches', icon: BatchesIcon },
+  { id: 'ads', label: 'Ads', icon: AdsIcon },
   { id: 'orders', label: 'Orders', icon: ShoppingBagIcon },
   { id: 'wallet', label: 'Wallet', icon: WalletIcon },
   { id: 'settings', label: 'Settings', icon: SettingsIcon }

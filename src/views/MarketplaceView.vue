@@ -14,6 +14,14 @@
           <SearchIcon class="search-icon icon-sm" />
           <input type="text" v-model="searchQuery" placeholder="Search for products..." class="search-input" />
         </div>
+
+        <select v-model="sortBy" class="sort-select" aria-label="Sort products">
+          <option value="">Sort: Featured</option>
+          <option value="price_asc">Price: Low to High</option>
+          <option value="price_desc">Price: High to Low</option>
+          <option value="newest">Newest</option>
+          <option value="name_asc">Name: A–Z</option>
+        </select>
         
         <div class="category-pills">
            <button :class="['pill-btn', { active: selectedCategory === '' }]" @click="selectedCategory = ''">All</button>
@@ -78,8 +86,16 @@
                   </button>
                </div>
                
-               <button v-else @click="addToCart(product, 1)" class="primary-btn" :disabled="product.stock <= 0">
+               <button v-else @click="onAddToCart(product)" class="primary-btn" :disabled="product.stock <= 0">
                  {{ product.stock > 0 ? 'Add to Cart' : 'Sold Out' }}
+               </button>
+               <button
+                 v-if="product.stock > 0"
+                 type="button"
+                 class="buy-now-btn"
+                 @click="onBuyNow(product)"
+               >
+                 Buy Now
                </button>
                
                <!-- Secondary Action Buttons -->
@@ -107,21 +123,51 @@
 
 <script setup>
 import { ref, watch, onMounted } from 'vue';
-import { Package as PackageIcon, ShoppingCart as ShoppingCartIcon, Store as StoreIcon, Search as SearchIcon, Heart as HeartIcon, Eye as EyeIcon, Plus as PlusIcon, Minus as MinusIcon, Trash as TrashIcon } from 'lucide-vue-next';
+import { useRouter } from 'vue-router';
+import { Package as PackageIcon, Store as StoreIcon, Search as SearchIcon, Heart as HeartIcon, Eye as EyeIcon, Plus as PlusIcon, Minus as MinusIcon, Trash as TrashIcon } from 'lucide-vue-next';
 import marketplaceService from '@/services/marketplace.service';
 import { useCart } from '@/composables/useCart';
 import ImageSlider from '@/components/ImageSlider.vue';
 
-const { cartItems, addToCart, updateQuantity } = useCart();
+const router = useRouter();
+const { cartItems, addToCart, updateQuantity, buyNow } = useCart();
 
 const products = ref([]);
 const productCategories = ref([]);
 const loading = ref(true);
 const searchQuery = ref('');
 const selectedCategory = ref('');
+const sortBy = ref('');
 const favorites = ref([]);
 const page = ref(1);
 const totalPages = ref(1);
+
+const onAddToCart = (product) => {
+  addToCart(product, 1);
+  marketplaceService.trackEvent({ type: 'add_to_cart', product_id: product.id });
+};
+
+const onBuyNow = (product) => {
+  const path = buyNow(product, 1);
+  marketplaceService.trackEvent({ type: 'buy_now', product_id: product.id });
+  router.push(path);
+};
+
+const applyClientSort = (list) => {
+  const arr = [...list];
+  switch (sortBy.value) {
+    case 'price_asc':
+      return arr.sort((a, b) => Number(a.price) - Number(b.price));
+    case 'price_desc':
+      return arr.sort((a, b) => Number(b.price) - Number(a.price));
+    case 'name_asc':
+      return arr.sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
+    case 'newest':
+      return arr.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+    default:
+      return arr;
+  }
+};
 
 // Load favorites from local storage
 try {
@@ -155,6 +201,7 @@ const fetchProducts = async (reset = false) => {
       marketplaceService.getProducts({
         category: selectedCategory.value || undefined,
         search: searchQuery.value || undefined,
+        sort: sortBy.value || undefined,
         page: page.value,
         limit: 20
       }),
@@ -164,7 +211,8 @@ const fetchProducts = async (reset = false) => {
     ]);
     
     // Handle products array — API returns { products: [], total, page, limit, totalPages }
-    const newProducts = productsRes.products || productsRes || [];
+    let newProducts = productsRes.products || productsRes || [];
+    newProducts = applyClientSort(newProducts);
     if (reset) {
        products.value = newProducts;
     } else {
@@ -194,7 +242,7 @@ const fetchProducts = async (reset = false) => {
 };
 
 let searchTimeout;
-watch([selectedCategory, searchQuery], () => {
+watch([selectedCategory, searchQuery, sortBy], () => {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
         fetchProducts(true);
@@ -296,6 +344,34 @@ onMounted(() => {
   align-items: center;
   gap: 1.5rem;
   margin-bottom: 4rem;
+}
+
+.sort-select {
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 0.875rem;
+  min-width: 180px;
+}
+
+.buy-now-btn {
+  padding: 0.55rem 0.85rem;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--color-dark);
+  background: var(--color-dark);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.buy-now-btn:hover {
+  background: #1a1a1a;
+  transform: translateY(-1px);
 }
 
 @media (min-width: 768px) {

@@ -82,6 +82,111 @@ const vendorService = {
     async requestWithdrawal(amount) {
         const response = await api.post('/vendor/withdraw', { amount });
         return response.data;
+    },
+
+    // ── Bulk product import / batches ──
+    // Soft 404: UI shows config state when backend routes are not deployed yet.
+
+    async downloadImportTemplate(format = 'csv') {
+        try {
+            const response = await api.get('/vendor/products/import/template', {
+                params: { format },
+                responseType: 'blob'
+            });
+            return { available: true, blob: response.data };
+        } catch (error) {
+            if (error.response?.status === 404 || error.response?.status === 501) {
+                return { available: false, blob: null };
+            }
+            throw error;
+        }
+    },
+
+    async previewImport(file, mode = 'create') {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('mode', mode);
+        try {
+            const response = await api.post('/vendor/products/import/preview', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            return { available: true, data: response.data };
+        } catch (error) {
+            if (error.response?.status === 404 || error.response?.status === 501) {
+                return { available: false, data: null };
+            }
+            throw error;
+        }
+    },
+
+    async startImport(file, mode = 'create', options = {}) {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('mode', mode);
+        if (options.skipDuplicates != null) {
+            formData.append('skip_duplicates', String(options.skipDuplicates));
+        }
+        try {
+            const response = await api.post('/vendor/products/import', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            return { available: true, data: response.data };
+        } catch (error) {
+            if (error.response?.status === 404 || error.response?.status === 501) {
+                return { available: false, data: null };
+            }
+            throw error;
+        }
+    },
+
+    async listBatches(params = {}) {
+        try {
+            const response = await api.get('/vendor/products/import/batches', { params });
+            return { available: true, data: response.data };
+        } catch (error) {
+            if (error.response?.status === 404 || error.response?.status === 501) {
+                return { available: false, data: [] };
+            }
+            throw error;
+        }
+    },
+
+    async getBatch(id) {
+        try {
+            const response = await api.get(`/vendor/products/import/batches/${id}`);
+            return { available: true, data: response.data };
+        } catch (error) {
+            if (error.response?.status === 404 || error.response?.status === 501) {
+                return { available: false, data: null };
+            }
+            throw error;
+        }
+    },
+
+    async downloadBatchErrors(id) {
+        try {
+            const response = await api.get(`/vendor/products/import/batches/${id}/errors`, {
+                responseType: 'blob'
+            });
+            return { available: true, blob: response.data };
+        } catch (error) {
+            if (error.response?.status === 404 || error.response?.status === 501) {
+                return { available: false, blob: null };
+            }
+            throw error;
+        }
+    },
+
+    async retryBatchFailed(id) {
+        try {
+            const response = await api.post(`/vendor/products/import/batches/${id}/retry-failed`);
+            return { available: true, data: response.data };
+        } catch (error) {
+            if (error.response?.status === 404 || error.response?.status === 501) {
+                return { available: false, data: null };
+            }
+            throw error;
+        }
     }
 };
 

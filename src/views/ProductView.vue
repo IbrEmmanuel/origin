@@ -52,8 +52,16 @@
               </button>
             </div>
             
-            <button v-else @click="addToCart(product, 1)" class="primary-btn large-btn" :disabled="product.stock <= 0">
+            <button v-else @click="onAddToCart" class="primary-btn large-btn" :disabled="product.stock <= 0">
               {{ product.stock > 0 ? 'Add to Cart' : 'Sold Out' }}
+            </button>
+            <button
+              v-if="product.stock > 0"
+              type="button"
+              class="buy-now-btn large-btn"
+              @click="onBuyNow"
+            >
+              Buy Now
             </button>
             
             <button class="icon-primary-btn large-icon-btn" @click="toggleFavorite(product.id)" :class="{ 'is-fav': isFavorite(product.id) }" title="Favorite">
@@ -146,7 +154,20 @@ import ImageSlider from '@/components/ImageSlider.vue';
 
 const route = useRoute();
 const router = useRouter();
-const { cartItems, addToCart, updateQuantity } = useCart();
+const { cartItems, addToCart, updateQuantity, buyNow } = useCart();
+
+const onAddToCart = () => {
+  if (!product.value) return;
+  addToCart(product.value, 1);
+  marketplaceService.trackEvent({ type: 'add_to_cart', product_id: product.value.id });
+};
+
+const onBuyNow = () => {
+  if (!product.value) return;
+  const path = buyNow(product.value, 1);
+  marketplaceService.trackEvent({ type: 'buy_now', product_id: product.value.id });
+  router.push(path);
+};
 
 const product = ref(null);
 const loading = ref(true);
@@ -194,6 +215,7 @@ const fetchProduct = async () => {
   loading.value = true;
   try {
     const data = await marketplaceService.getProduct(route.params.id);
+    marketplaceService.trackEvent({ type: 'product_view', product_id: route.params.id });
     product.value = data.product;
     reviews.value = data.reviews || [];
     comments.value = data.comments || [];
@@ -410,6 +432,20 @@ onMounted(() => {
   gap: 1rem;
   align-items: stretch;
 }
+
+.buy-now-btn {
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: var(--color-dark);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+.buy-now-btn.large-btn { min-height: 48px; }
+.buy-now-btn:hover { filter: brightness(1.08); }
 
 .primary-btn {
   background: var(--color-blue-primary);
