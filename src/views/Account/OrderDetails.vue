@@ -173,36 +173,24 @@ import {
   Truck as TruckIcon,
   Star as StarIcon
 } from 'lucide-vue-next';
+import userService from '@/services/user.service';
 
 const route = useRoute();
 const order = ref(null);
 const loading = ref(true);
 
 const fetchOrderDetails = async () => {
-  const token = localStorage.getItem('token');
-  if (!token) return;
-
   try {
-    const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/api/user/orders/${route.params.id}`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (res.ok) {
-      order.value = await res.json();
-    } else {
-      console.error('Failed to fetch order details');
-    }
+    order.value = await userService.getOrder(route.params.id);
   } catch (err) {
     console.error('Error fetching order:', err);
+    order.value = null;
   } finally {
     loading.value = false;
   }
 };
 
-const getImageUrl = (path) => {
-  if (!path) return '';
-  if (path.startsWith('http')) return path;
-  return `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}${path}`;
-};
+const getImageUrl = (path) => userService.getImageUrl(path);
 
 onMounted(() => {
   fetchOrderDetails();

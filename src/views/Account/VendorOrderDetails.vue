@@ -124,6 +124,7 @@ import {
   AlertTriangle as AlertTriangleIcon
 } from 'lucide-vue-next';
 import vendorService from '@/services/vendor.service';
+import { mediaUrl } from '@/utils/mediaUrl';
 
 const props = defineProps(['orderId']);
 const emit = defineEmits(['back']);
@@ -167,11 +168,7 @@ const formatDate = (dateStr) => {
   });
 };
 
-const getImageUrl = (path) => {
-  if (!path) return '';
-  if (path.startsWith('http')) return path;
-  return `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}${path}`;
-};
+const getImageUrl = (path) => mediaUrl(path);
 
 const calculateVendorTotal = () => {
   if (!details.value) return 0;

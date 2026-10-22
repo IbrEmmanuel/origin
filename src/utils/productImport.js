@@ -140,3 +140,53 @@ export function validateImportRows(rows, options = {}) {
     return result;
   });
 }
+
+/** Map a validated import row to the vendor product API payload. */
+export function rowToProductPayload(row) {
+  const images = row.image_url ? [String(row.image_url).trim()].filter(Boolean) : [];
+  const descParts = [];
+  if (row.description) descParts.push(String(row.description));
+  if (row.sku) descParts.push(`SKU: ${row.sku}`);
+
+  return {
+    sku: row.sku,
+    name: row.name,
+    description: descParts.join('\n\n') || row.name,
+    price: Number(row.price),
+    stock: Number(row.stock),
+    category: row.category || '',
+    images
+  };
+}
+
+const LOCAL_BATCH_KEY = 'vendor_import_batches';
+
+export function loadLocalImportBatches() {
+  try {
+    const raw = localStorage.getItem(LOCAL_BATCH_KEY);
+    const list = raw ? JSON.parse(raw) : [];
+    return Array.isArray(list) ? list : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveLocalImportBatch(batch) {
+  const list = loadLocalImportBatches();
+  list.unshift(batch);
+  localStorage.setItem(LOCAL_BATCH_KEY, JSON.stringify(list.slice(0, 40)));
+  return batch;
+}
+
+export function getLocalImportBatch(id) {
+  return loadLocalImportBatches().find((b) => b.id === id || b.batch_id === id) || null;
+}
+
+export function updateLocalImportBatch(id, patch) {
+  const list = loadLocalImportBatches();
+  const idx = list.findIndex((b) => b.id === id || b.batch_id === id);
+  if (idx < 0) return null;
+  list[idx] = { ...list[idx], ...patch };
+  localStorage.setItem(LOCAL_BATCH_KEY, JSON.stringify(list));
+  return list[idx];
+}

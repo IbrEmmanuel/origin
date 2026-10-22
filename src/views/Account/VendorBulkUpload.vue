@@ -3,8 +3,11 @@
     <div class="glass-card section-card">
       <div class="section-head">
         <div>
+          <p class="kicker">Vendor · bulk import</p>
           <h3>Bulk product upload</h3>
-          <p class="text-secondary">Import products via CSV or XLSX. Preview and fix errors before committing.</p>
+          <p class="text-secondary">
+            CSV / XLSX validated locally, then written to your live catalog via the product API (or server import job when available).
+          </p>
         </div>
         <button type="button" class="btn ghost-btn" @click="downloadTemplate" :disabled="busy">
           <DownloadIcon class="icon-sm" /> Download template
@@ -28,13 +31,13 @@
           <input type="file" accept=".csv,.xlsx,.xls" hidden @change="onFileChange" />
           <UploadCloudIcon class="icon-lg" />
           <span v-if="file">{{ file.name }} ({{ formatBytes(file.size) }})</span>
-          <span v-else>Drop CSV / XLSX here or click to browse</span>
+          <span v-else>Drop CSV / XLSX here or tap to browse</span>
         </label>
       </div>
 
       <div class="actions" v-if="file">
         <button type="button" class="btn primary-btn" @click="runPreview" :disabled="busy">
-          {{ busy ? 'Parsing…' : 'Validate & preview' }}
+          {{ busy && !importProgress ? 'Parsing…' : 'Validate & preview' }}
         </button>
         <button type="button" class="btn ghost-btn" @click="resetFile" :disabled="busy">Clear</button>
       </div>
@@ -54,6 +57,7 @@
             type="button"
             class="btn ghost-btn"
             @click="downloadLocalErrors"
+            :disabled="busy"
           >
             Download error report
           </button>
@@ -63,9 +67,22 @@
             :disabled="busy || validCount === 0"
             @click="commitImport"
           >
-            {{ busy ? 'Uploading…' : `Import ${validCount} valid row(s)` }}
+            {{ busy && importProgress ? `Importing ${importProgress.processed}/${importProgress.total}…` : `Import ${validCount} valid row(s)` }}
           </button>
         </div>
+      </div>
+
+      <div v-if="importProgress" class="progress-block">
+        <div class="progress-track">
+          <div
+            class="progress-fill"
+            :style="{ width: Math.round((importProgress.processed / Math.max(importProgress.total, 1)) * 100) + '%' }"
+          />
+        </div>
+        <p class="text-secondary hint">
+          {{ importProgress.success }} saved · {{ importProgress.failed }} failed ·
+          {{ importProgress.processed }}/{{ importProgress.total }} processed
+        </p>
       </div>
 
       <div class="table-wrap">
@@ -99,10 +116,13 @@
     </div>
 
     <div v-if="lastResult" class="glass-card section-card mt-4 success-card">
-      <h3>Import submitted</h3>
+      <h3>Import finished</h3>
       <p class="text-secondary">
         Batch <strong>{{ lastResult.batch_id || lastResult.id || 'queued' }}</strong>
-        — check the Batches tab for progress.
+        —
+        {{ lastResult.success_count ?? 0 }} saved,
+        {{ lastResult.failed_count ?? 0 }} failed.
+        Open the Batches tab for details.
       </p>
     </div>
   </div>
@@ -129,6 +149,7 @@ const previewRows = ref([]);
 const existingSkus = ref(new Set());
 const apiNotice = ref('');
 const lastResult = ref(null);
+const importProgress = ref(null);
 
 const validCount = computed(() => previewRows.value.filter((r) => r.valid).length);
 const invalidCount = computed(() => previewRows.value.filter((r) => !r.valid).length);
@@ -160,9 +181,8 @@ const downloadTemplate = async () => {
       return;
     }
     downloadBlob(buildCsvTemplateBlob(), 'origin-product-import-template.csv');
-    apiNotice.value =
-      'Using local CSV template. Deploy GET /vendor/products/import/template on the API for the official file.';
-  } catch (e) {
+    apiNotice.value = 'Template ready. Valid rows import through your live product API.';
+  } catch {
     downloadBlob(buildCsvTemplateBlob(), 'origin-product-import-template.csv');
   } finally {
     busy.value = false;
@@ -173,6 +193,8 @@ const resetFile = () => {
   file.value = null;
   previewRows.value = [];
   lastResult.value = null;
+  importProgress.value = null;
+  apiNotice.value = '';
 };
 
 const onFileChange = (e) => {
@@ -181,6 +203,7 @@ const onFileChange = (e) => {
     file.value = f;
     previewRows.value = [];
     lastResult.value = null;
+    importProgress.value = null;
   }
 };
 
@@ -191,6 +214,7 @@ const onDrop = (e) => {
     file.value = f;
     previewRows.value = [];
     lastResult.value = null;
+    importProgress.value = null;
   }
 };
 
@@ -198,8 +222,8 @@ const runPreview = async () => {
   if (!file.value) return;
   busy.value = true;
   apiNotice.value = '';
+  importProgress.value = null;
   try {
-    // Prefer server preview when available
     const remote = await vendorService.previewImport(file.value, mode.value);
     if (remote.available && remote.data) {
       const rows = remote.data.rows || remote.data.preview || [];
@@ -207,23 +231,25 @@ const runPreview = async () => {
         rowIndex: r.rowIndex || r.row || i + 1,
         sku: r.sku,
         name: r.name,
+        description: r.description || '',
         price: r.price,
         stock: r.stock,
+        category: r.category || '',
+        image_url: r.image_url || '',
         errors: r.errors || [],
         valid: !(r.errors && r.errors.length)
       }));
       return;
     }
 
-    apiNotice.value =
-      'Server preview API not available — validating locally. Deploy POST /vendor/products/import/preview for server-side checks.';
     const parsed = await parseImportFile(file.value);
     previewRows.value = validateImportRows(parsed, {
       existingSkus: existingSkus.value,
       mode: mode.value
     });
+    apiNotice.value = 'Validated. Import writes each row via live POST/PUT /vendor/products.';
   } catch (err) {
-    alert(err.response?.data?.message || err.message || 'Failed to parse file');
+    apiNotice.value = err.response?.data?.message || err.message || 'Failed to parse file';
   } finally {
     busy.value = false;
   }
@@ -244,21 +270,42 @@ const downloadLocalErrors = () => {
 const commitImport = async () => {
   if (!file.value || validCount.value === 0) return;
   busy.value = true;
+  apiNotice.value = '';
+  lastResult.value = null;
+  importProgress.value = { processed: 0, total: validCount.value, success: 0, failed: 0 };
+
   try {
     const remote = await vendorService.startImport(file.value, mode.value, {
       skipDuplicates: mode.value === 'create'
     });
-    if (!remote.available) {
-      apiNotice.value =
-        'Bulk import API is not deployed yet (POST /vendor/products/import). Local preview still works; ask backend to add vendor-scoped import + batch endpoints.';
-      alert(apiNotice.value);
+
+    if (remote.available) {
+      lastResult.value = remote.data;
+      emit('imported', remote.data);
+      apiNotice.value = 'Server import job started. Track progress in Batches.';
       return;
     }
-    lastResult.value = remote.data;
-    emit('imported', remote.data);
-    alert('Import started. Open the Batches tab to track progress.');
+
+    // Full-stack path: write each valid row through the live product CRUD API
+    const validRows = previewRows.value.filter((r) => r.valid);
+    const result = await vendorService.importProductsDirectly(validRows, mode.value, {
+      filename: file.value.name,
+      onProgress: (p) => {
+        importProgress.value = p;
+      }
+    });
+
+    lastResult.value = result;
+    await loadExistingSkus();
+    emit('imported', result);
+
+    if (result.failed_count > 0) {
+      apiNotice.value = `Imported with ${result.failed_count} failure(s). See Batches for row errors.`;
+    } else {
+      apiNotice.value = `Successfully imported ${result.success_count} product(s) into your catalog.`;
+    }
   } catch (err) {
-    alert(err.response?.data?.message || 'Import failed');
+    apiNotice.value = err.response?.data?.message || err.message || 'Import failed';
   } finally {
     busy.value = false;
   }
@@ -268,7 +315,7 @@ onMounted(loadExistingSkus);
 </script>
 
 <style scoped>
-.section-card { padding: 1.5rem; gap: 1.25rem; }
+.section-card { padding: 1.25rem; gap: 1.25rem; }
 .section-head {
   display: flex;
   justify-content: space-between;
@@ -276,12 +323,28 @@ onMounted(loadExistingSkus);
   gap: 1rem;
   flex-wrap: wrap;
 }
-.section-head h3 { margin: 0 0 0.35rem; font-size: 1.15rem; }
+.kicker {
+  margin: 0 0 0.25rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+}
+.section-head h3 {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-size: clamp(1.1rem, 3vw, 1.25rem);
+}
 .text-secondary { color: var(--text-secondary); margin: 0; font-size: 0.9rem; }
 .controls { display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem; }
 .field { display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.85rem; font-weight: 600; max-width: 360px; }
 .form-input {
   padding: 0.65rem 0.85rem;
+  min-height: 44px;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
   background: var(--bg-secondary);
@@ -302,14 +365,17 @@ onMounted(loadExistingSkus);
   color: var(--text-secondary);
   text-align: center;
   padding: 1.25rem;
+  -webkit-tap-highlight-color: transparent;
 }
 .file-drop.dragging { border-color: var(--color-primary); color: var(--color-primary); }
 .actions, .actions-inline { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; }
 .btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.4rem;
-  padding: 0.65rem 1rem;
+  padding: 0.7rem 1rem;
+  min-height: 44px;
   border-radius: var(--radius-sm);
   font-weight: 600;
   font-size: 0.875rem;
@@ -325,16 +391,34 @@ onMounted(loadExistingSkus);
   border-radius: var(--radius-md);
   font-size: 0.85rem;
   margin-top: 0.75rem;
+  line-height: 1.45;
 }
-.notice-warn { background: #fff4ea; color: #9a4d00; border: 1px solid #ffd2a8; }
-.table-wrap { overflow-x: auto; margin-top: 1rem; }
-.data-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+.notice-warn {
+  background: var(--status-warn-bg);
+  color: var(--status-warn-fg);
+  border: 1px solid var(--status-warn-border);
+}
+.progress-block { margin-top: 1rem; }
+.progress-track {
+  height: 8px;
+  border-radius: 99px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--color-primary);
+  transition: width 0.2s ease;
+}
+.table-wrap { overflow-x: auto; margin-top: 1rem; -webkit-overflow-scrolling: touch; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; min-width: 520px; }
 .data-table th, .data-table td {
   text-align: left;
   padding: 0.65rem 0.5rem;
   border-bottom: 1px solid var(--border-color);
 }
-.data-table tr.bad { background: rgba(235, 0, 0, 0.04); }
+.data-table tr.bad { background: color-mix(in srgb, var(--color-error) 6%, transparent); }
 .badge {
   display: inline-block;
   padding: 0.15rem 0.45rem;
@@ -346,11 +430,18 @@ onMounted(loadExistingSkus);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.badge.ok { background: #e8f5e9; color: #2e7d32; }
-.badge.err { background: #ffebee; color: #c62828; }
+.badge.ok { background: var(--status-ok-bg); color: var(--status-ok-fg); }
+.badge.err { background: var(--status-err-bg); color: var(--status-err-fg); }
 .hint { margin-top: 0.75rem; font-size: 0.8rem; }
-.success-card { border-color: #c8e6c9; }
+.success-card { border-color: color-mix(in srgb, var(--color-success) 45%, var(--border-color)) !important; }
 .icon-sm { width: 16px; height: 16px; }
 .icon-lg { width: 28px; height: 28px; }
 .mt-4 { margin-top: 1.25rem; }
+
+@media (max-width: 640px) {
+  .section-card { padding: 1.1rem; }
+  .field { max-width: none; }
+  .actions-inline, .actions { width: 100%; }
+  .actions-inline .btn, .actions .btn { flex: 1; }
+}
 </style>

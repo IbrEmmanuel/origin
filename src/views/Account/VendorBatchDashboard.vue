@@ -1,29 +1,48 @@
 <template>
   <div class="batches">
-    <div class="glass-card section-card">
-      <div class="section-head">
+    <div class="panel">
+      <div class="panel-head">
         <div>
+          <p class="kicker mono">Vendor · imports</p>
           <h3>Upload batches</h3>
-          <p class="text-secondary">Track bulk imports, failures, and safe retries for your vendor account only.</p>
+          <p class="sub">Track bulk imports, failures, and retries for your catalog.</p>
         </div>
-        <button type="button" class="btn ghost-btn" @click="load" :disabled="loading">
+        <button type="button" class="btn ghost" @click="load" :disabled="loading">
           Refresh
         </button>
       </div>
 
-      <div v-if="!available" class="notice notice-warn">
-        Batch API not deployed yet. Required routes:
-        <code>GET /vendor/products/import/batches</code>,
-        <code>GET …/batches/:id</code>,
-        <code>GET …/errors</code>,
-        <code>POST …/retry-failed</code>.
-        Authorization must scope batches to the authenticated vendor.
+      <div v-if="!available" class="notice">
+        Showing imports from this account. Server batch routes are used when available.
       </div>
 
-      <div v-else-if="loading" class="state">Loading batches…</div>
-      <div v-else-if="!batches.length" class="state">No uploads yet. Use the Bulk Upload tab to start one.</div>
+      <div v-if="loading && !batches.length" class="state">Loading batches…</div>
+      <div v-else-if="!batches.length" class="state">
+        No uploads yet. Use the <strong>Bulk</strong> tab to start one.
+      </div>
 
-      <div v-else class="table-wrap">
+      <!-- Mobile cards -->
+      <div v-else class="card-list mobile-only">
+        <article v-for="b in batches" :key="b.id || b.batch_id" class="batch-card">
+          <header>
+            <code>{{ b.id || b.batch_id }}</code>
+            <span class="badge" :class="statusClass(b.status)">{{ b.status || 'unknown' }}</span>
+          </header>
+          <p class="file">{{ b.filename || b.file_name || 'Import file' }}</p>
+          <p class="muted">{{ formatDate(b.created_at || b.uploaded_at) }}</p>
+          <div class="progress-row">
+            <div class="progress"><div class="bar" :style="{ width: progressPct(b) + '%' }"></div></div>
+            <span class="muted">{{ processed(b) }}/{{ b.total_records || b.total || 0 }}</span>
+          </div>
+          <div class="foot">
+            <span>{{ b.success_count ?? b.successful ?? 0 }} ok · {{ b.failed_count ?? b.failed ?? 0 }} fail</span>
+            <button type="button" class="linkish" @click="openDetail(b)">Details</button>
+          </div>
+        </article>
+      </div>
+
+      <!-- Desktop table -->
+      <div v-if="batches.length" class="table-wrap desktop-only">
         <table class="data-table">
           <thead>
             <tr>
@@ -49,34 +68,32 @@
               </td>
               <td>{{ b.success_count ?? b.successful ?? 0 }} / {{ b.failed_count ?? b.failed ?? 0 }}</td>
               <td><span class="badge" :class="statusClass(b.status)">{{ b.status || 'unknown' }}</span></td>
-              <td class="row-actions">
-                <button type="button" class="linkish" @click="openDetail(b)">Details</button>
-              </td>
+              <td><button type="button" class="linkish" @click="openDetail(b)">Details</button></td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <div v-if="detail" class="glass-card section-card mt-4">
-      <div class="section-head">
+    <div v-if="detail" class="panel detail">
+      <div class="panel-head">
         <div>
           <h3>Batch {{ detail.id || detail.batch_id }}</h3>
-          <p class="text-secondary">{{ detail.filename || detail.file_name }}</p>
+          <p class="sub">{{ detail.filename || detail.file_name }}</p>
         </div>
-        <div class="actions-inline">
-          <button type="button" class="btn ghost-btn" @click="downloadErrors" :disabled="!failedCount">
+        <div class="actions">
+          <button type="button" class="btn ghost" @click="downloadErrors" :disabled="!failedCount">
             Download errors
           </button>
           <button
             type="button"
-            class="btn primary-btn"
+            class="btn primary"
             @click="retryFailed"
             :disabled="!failedCount || retrying"
           >
-            {{ retrying ? 'Retrying…' : 'Retry failed rows' }}
+            {{ retrying ? 'Retrying…' : 'Retry failed' }}
           </button>
-          <button type="button" class="btn ghost-btn" @click="detail = null">Close</button>
+          <button type="button" class="btn ghost" @click="detail = null">Close</button>
         </div>
       </div>
 
@@ -108,7 +125,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import vendorService from '@/services/vendor.service';
-import { downloadBlob } from '@/utils/productImport';
+import { downloadBlob, loadLocalImportBatches, getLocalImportBatch } from '@/utils/productImport';
 
 const loading = ref(false);
 const available = ref(true);
@@ -147,16 +164,32 @@ const statusClass = (s) => {
   return '';
 };
 
+const mergeBatches = (remoteList) => {
+  const local = loadLocalImportBatches();
+  const map = new Map();
+  [...remoteList, ...local].forEach((b) => {
+    const id = String(b.id || b.batch_id || '');
+    if (!id) return;
+    if (!map.has(id)) map.set(id, b);
+  });
+  return Array.from(map.values()).sort((a, b) => {
+    const da = new Date(a.created_at || a.uploaded_at || 0).getTime();
+    const db = new Date(b.created_at || b.uploaded_at || 0).getTime();
+    return db - da;
+  });
+};
+
 const load = async () => {
   loading.value = true;
   try {
     const res = await vendorService.listBatches();
     available.value = res.available;
     const data = res.data;
-    batches.value = Array.isArray(data) ? data : data?.batches || data?.items || [];
+    const remote = Array.isArray(data) ? data : data?.batches || data?.items || [];
+    batches.value = mergeBatches(remote);
   } catch (e) {
     console.error(e);
-    alert(e.response?.data?.message || 'Failed to load batches');
+    batches.value = mergeBatches([]);
   } finally {
     loading.value = false;
   }
@@ -164,11 +197,15 @@ const load = async () => {
 
 const openDetail = async (b) => {
   const id = b.id || b.batch_id;
+  if (String(id).startsWith('local-') || b.source === 'direct_crud') {
+    detail.value = getLocalImportBatch(id) || b;
+    return;
+  }
   try {
     const res = await vendorService.getBatch(id);
     detail.value = res.data || b;
   } catch {
-    detail.value = b;
+    detail.value = getLocalImportBatch(id) || b;
   }
 };
 
@@ -180,7 +217,6 @@ const downloadErrors = async () => {
     downloadBlob(res.blob, `batch-${id}-errors.csv`);
     return;
   }
-  // Fallback from in-memory errors
   const rows = detail.value?.errors || detail.value?.row_errors || [];
   if (!rows.length) {
     alert('No error report available');
@@ -208,7 +244,7 @@ const retryFailed = async () => {
     }
     await openDetail({ id });
     await load();
-    alert('Failed rows queued for retry (successful rows will not be duplicated).');
+    alert('Failed rows queued for retry.');
   } catch (e) {
     alert(e.response?.data?.message || 'Retry failed');
   } finally {
@@ -229,72 +265,167 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.section-card { padding: 1.5rem; }
-.section-head {
+.batches { display: flex; flex-direction: column; gap: 1rem; }
+
+.panel {
+  padding: 1.15rem;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--bg-secondary) 94%, transparent);
+}
+
+.panel-head {
   display: flex;
   justify-content: space-between;
-  gap: 1rem;
+  align-items: flex-start;
+  gap: 0.85rem;
   flex-wrap: wrap;
   margin-bottom: 1rem;
 }
-.section-head h3 { margin: 0 0 0.35rem; }
-.text-secondary { color: var(--text-secondary); margin: 0; font-size: 0.9rem; }
-.notice {
-  padding: 0.85rem 1rem;
-  border-radius: var(--radius-md);
-  font-size: 0.85rem;
-  line-height: 1.5;
+
+.kicker {
+  margin: 0 0 0.25rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-primary);
 }
-.notice-warn { background: #fff4ea; color: #9a4d00; border: 1px solid #ffd2a8; }
-.notice code { font-size: 0.8rem; }
-.state { padding: 2rem; text-align: center; color: var(--text-secondary); }
-.table-wrap { overflow-x: auto; }
-.data-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
-.data-table th, .data-table td {
+
+.mono { font-family: ui-monospace, Menlo, Consolas, monospace; }
+
+.panel-head h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-size: 1.2rem;
+}
+
+.sub { margin: 0.3rem 0 0; color: var(--text-secondary); font-size: 0.88rem; }
+
+.notice {
+  padding: 0.8rem 0.95rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  margin-bottom: 0.85rem;
+  background: var(--status-info-bg);
+  color: var(--status-info-fg);
+  border: 1px solid color-mix(in srgb, var(--status-info-fg) 22%, transparent);
+}
+
+.state {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.batch-card {
+  padding: 0.9rem;
+  border-radius: 14px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+}
+
+.batch-card header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.45rem;
+}
+
+.batch-card code { font-size: 0.78rem; }
+.file { margin: 0; font-weight: 700; font-size: 0.9rem; }
+.muted { margin: 0.2rem 0 0; font-size: 0.75rem; color: var(--text-muted); }
+
+.progress-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.65rem;
+}
+
+.progress {
+  flex: 1;
+  height: 6px;
+  background: var(--bg-secondary);
+  border-radius: 99px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.bar { height: 100%; background: var(--color-primary); }
+
+.foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.7rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  min-width: 640px;
+}
+
+.data-table th,
+.data-table td {
   text-align: left;
   padding: 0.65rem 0.5rem;
   border-bottom: 1px solid var(--border-color);
   vertical-align: middle;
 }
-.progress {
-  width: 90px;
-  height: 6px;
-  background: var(--bg-secondary);
-  border-radius: 99px;
-  overflow: hidden;
-  display: inline-block;
-  vertical-align: middle;
-  margin-right: 0.35rem;
-}
-.bar { height: 100%; background: var(--color-primary); }
-.muted { font-size: 0.75rem; color: var(--text-muted); }
+
 .badge {
   display: inline-block;
   padding: 0.15rem 0.45rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
+  border-radius: 6px;
+  font-size: 0.72rem;
   font-weight: 700;
   text-transform: capitalize;
   background: var(--bg-secondary);
 }
-.badge.ok { background: #e8f5e9; color: #2e7d32; }
-.badge.err { background: #ffebee; color: #c62828; }
-.badge.pending { background: #eef2ff; color: #1a56db; }
+
+.badge.ok { background: var(--status-ok-bg); color: var(--status-ok-fg); }
+.badge.err { background: var(--status-err-bg); color: var(--status-err-fg); }
+.badge.pending { background: var(--status-info-bg); color: var(--status-info-fg); }
+
 .btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.4rem;
-  padding: 0.55rem 0.9rem;
-  border-radius: var(--radius-sm);
-  font-weight: 600;
+  min-height: 42px;
+  padding: 0 0.9rem;
+  border-radius: 10px;
+  font-weight: 700;
   font-size: 0.85rem;
   cursor: pointer;
   border: none;
   font-family: inherit;
 }
-.primary-btn { background: var(--color-primary); color: #fff; }
-.ghost-btn { background: transparent; border: 1px solid var(--border-color); color: var(--text-primary); }
+
+.btn.primary { background: var(--color-primary); color: #fff; }
+.btn.ghost {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
 .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
 .linkish {
   background: none;
   border: none;
@@ -303,21 +434,35 @@ onUnmounted(() => {
   cursor: pointer;
   font-family: inherit;
 }
-.actions-inline { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+.actions { display: flex; gap: 0.45rem; flex-wrap: wrap; }
+
 .stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 0.75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
   list-style: none;
   padding: 0;
   margin: 0 0 1rem;
 }
+
 .stats li {
-  background: var(--bg-secondary);
+  background: var(--bg-primary);
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  border-radius: 12px;
   padding: 0.75rem;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
 }
-.mt-4 { margin-top: 1.25rem; }
+
+.mobile-only { display: block; }
+.desktop-only { display: none; }
+
+@media (min-width: 800px) {
+  .mobile-only { display: none; }
+  .desktop-only { display: block; }
+  .stats { grid-template-columns: repeat(4, 1fr); }
+}
 </style>

@@ -1,109 +1,119 @@
 <template>
-  <div class="orders-container">
-    <div v-if="orders.length > 0" class="orders-list">
-      <div v-for="order in orders" :key="order.id" class="order-card glass-card">
-        <div class="order-header">
-          <div class="order-meta">
-            <span class="order-number">Order #{{ order.id }}</span>
-            <span class="order-date">{{ order.date }}</span>
+  <div class="orders">
+    <div v-if="loading" class="state">
+      <span class="loader"></span>
+      <p>Loading orders…</p>
+    </div>
+
+    <div v-else-if="!orders.length" class="empty panel">
+      <ShoppingBagIcon class="empty-icon" />
+      <h3>No orders yet</h3>
+      <p>When you buy from the marketplace, tracking and payments show up here.</p>
+      <router-link to="/marketplace" class="btn primary">Browse marketplace</router-link>
+    </div>
+
+    <div v-else class="list">
+      <article v-for="order in orders" :key="order.id" class="card">
+        <header class="card-top">
+          <div>
+            <strong>{{ order.id }}</strong>
+            <span>{{ formatDate(order.date) }}</span>
           </div>
-          <span class="status-badge" :class="order.status.toLowerCase()">{{ order.status }}</span>
-        </div>
-        
-        <div class="order-items">
-          <div v-for="item in order.items" :key="item.name" class="order-item">
-            <div class="item-icon-box">
-              <img v-if="item.image" :src="getImageUrl(item.image)" :alt="item.name" class="item-img" />
-              <PackageIcon v-else class="icon-sm" />
+          <span class="pill" :class="statusClass(order.status)">{{ order.status }}</span>
+        </header>
+
+        <div class="items">
+          <div v-for="(item, idx) in order.items" :key="idx" class="item">
+            <div class="thumb">
+              <img v-if="item.image" :src="getImageUrl(item.image)" :alt="item.name" />
+              <PackageIcon v-else />
             </div>
-            <div class="item-info">
-              <p class="item-name">{{ item.name }}</p>
-              <p class="item-quantity">Qty: {{ item.qty }}</p>
+            <div class="item-copy">
+              <p>{{ item.name }}</p>
+              <small>Qty {{ item.qty }}</small>
             </div>
             <span class="item-price">{{ item.price }}</span>
           </div>
+          <p v-if="!order.items.length" class="muted">No line items returned for this order.</p>
         </div>
 
-        <div class="order-footer">
-          <div class="order-total">
-            <span>Total Amount</span>
+        <footer class="card-foot">
+          <div class="total">
+            <span>Total</span>
             <strong>{{ order.total }}</strong>
           </div>
-          <div class="order-actions">
-            <!-- Paid/Processing orders see Track and Details -->
-            <template v-if="order.status !== 'Pending' && order.status !== 'Cancelled'">
-              <router-link :to="`/account/orders/${order.id.replace('ORD-', '')}`" class="btn btn-outline btn-sm action-btn">Track Order</router-link>
-              <router-link :to="`/account/orders/${order.id.replace('ORD-', '')}`" class="btn btn-primary btn-sm action-btn">Order Details</router-link>
+          <div class="actions">
+            <template v-if="!isPending(order.status) && !isCancelled(order.status)">
+              <router-link :to="`/account/orders/${order.rawId}`" class="btn ghost">Track</router-link>
+              <router-link :to="`/account/orders/${order.rawId}`" class="btn primary">Details</router-link>
             </template>
-            <!-- Unpaid orders see Pay Now and Cancel -->
-            <template v-else-if="order.status === 'Pending'">
-              <button @click="cancelOrder(order.id)" class="btn btn-outline btn-sm action-btn" :disabled="isProcessing === order.id">
-                {{ isProcessing === order.id ? 'Cancelling...' : 'Cancel Order' }}
+            <template v-else-if="isPending(order.status)">
+              <button
+                type="button"
+                class="btn ghost"
+                :disabled="isProcessing === order.id"
+                @click="cancelOrder(order.id)"
+              >
+                {{ isProcessing === order.id ? 'Cancelling…' : 'Cancel' }}
               </button>
-              <button @click="payNow(order)" class="btn btn-primary btn-sm action-btn">Pay Now</button>
+              <button type="button" class="btn primary" @click="payNow(order)">Pay now</button>
             </template>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <div v-else class="section-card glass-card">
-      <div class="empty-state">
-        <ShoppingBagIcon class="empty-icon" />
-        <h3>No Orders Yet</h3>
-        <p>You haven't placed any orders for energy systems yet.</p>
-        <router-link to="/marketplace" class="btn btn-primary mt-4">Browse Marketplace</router-link>
-      </div>
+        </footer>
+      </article>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { 
-  ShoppingBag as ShoppingBagIcon,
-  Package as PackageIcon
-} from 'lucide-vue-next';
+import { ShoppingBag as ShoppingBagIcon, Package as PackageIcon } from 'lucide-vue-next';
+import userService from '@/services/user.service';
 
 const orders = ref([]);
 const loading = ref(true);
 const isProcessing = ref(null);
 
-const getImageUrl = (path) => {
-  if (!path) return '';
-  if (path.startsWith('http')) return path;
-  return `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}${path}`;
+const getImageUrl = (path) => userService.getImageUrl(path);
+
+const isPending = (status) => /pending|unpaid/i.test(String(status || ''));
+const isCancelled = (status) => /cancel/i.test(String(status || ''));
+
+const statusClass = (status) => {
+  const s = String(status || '').toLowerCase();
+  if (s.includes('deliver') || s.includes('complete') || s.includes('paid') || s.includes('success')) return 'ok';
+  if (s.includes('ship') || s.includes('process')) return 'info';
+  if (s.includes('cancel') || s.includes('fail')) return 'err';
+  return 'warn';
+};
+
+const formatDate = (d) => {
+  if (!d) return '—';
+  try {
+    return new Date(d).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  } catch {
+    return d;
+  }
 };
 
 const fetchOrders = async () => {
+  loading.value = true;
   try {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      loading.value = false;
-      return;
-    }
-
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
-    const response = await fetch(`${baseUrl}/api/user/orders`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-
-    if (response.ok) {
-      orders.value = await response.json();
-    } else {
-      console.error('Failed to fetch orders');
-    }
+    orders.value = await userService.getOrders();
   } catch (error) {
     console.error('Error fetching orders:', error);
+    orders.value = [];
   } finally {
     loading.value = false;
   }
 };
 
-const loadPaystackScript = () => {
-  return new Promise((resolve, reject) => {
+const loadPaystackScript = () =>
+  new Promise((resolve, reject) => {
     if (window.PaystackPop) return resolve();
     const script = document.createElement('script');
     script.src = 'https://js.paystack.co/v1/inline.js';
@@ -112,27 +122,21 @@ const loadPaystackScript = () => {
     script.onerror = reject;
     document.body.appendChild(script);
   });
-};
 
 const payNow = async (order) => {
   try {
     await loadPaystackScript();
-    
-    const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     const paystackKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
-    
-    // Amount is in naira in order.total string like "₦5,000", need to parse to number
-    const amountStr = order.total.replace('₦', '').replace(/,/g, '');
-    const amount = parseFloat(amountStr);
+    const amount = order.totalAmount || Number(String(order.total).replace(/[₦,\s]/g, ''));
 
     const handler = window.PaystackPop.setup({
       key: paystackKey || 'pk_test_placeholder',
       email: user.email || 'customer@example.com',
-      amount: amount * 100, // in kobo
+      amount: Math.round(amount * 100),
       currency: 'NGN',
       callback: (response) => {
-        verifyPayment(response.reference, order.id.replace('ORD-', ''), token);
+        verifyPayment(response.reference, order.rawId);
       }
     });
     handler.openIframe();
@@ -142,305 +146,292 @@ const payNow = async (order) => {
   }
 };
 
-const verifyPayment = async (reference, orderId, token) => {
+const verifyPayment = async (reference, orderId) => {
   try {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
-    const response = await fetch(`${baseUrl}/api/user/verify-payment`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({ reference, orderId })
-    });
-
-    if (response.ok) {
-      alert('Payment successful!');
-      fetchOrders();
-    } else {
-      alert('Payment verification failed');
-    }
+    await userService.verifyPayment(reference, orderId);
+    alert('Payment successful!');
+    fetchOrders();
   } catch (error) {
     console.error('Verify error:', error);
-    alert('Error verifying payment');
+    alert(error.response?.data?.message || 'Payment verification failed');
   }
 };
 
 const cancelOrder = async (orderId) => {
-  if (!confirm('Are you sure you want to cancel this order?')) return;
-  
+  if (!confirm('Cancel this unpaid order?')) return;
   isProcessing.value = orderId;
   try {
-    const token = localStorage.getItem('token');
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
-    const response = await fetch(`${baseUrl}/api/user/orders/${orderId}/cancel`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({ reason: 'not_paid' })
-    });
-
-    if (response.ok) {
-      alert('Order cancelled successfully');
-      fetchOrders();
-    } else {
-      const data = await response.json();
-      alert(data.message || 'Failed to cancel order');
-    }
+    await userService.cancelOrder(orderId);
+    await fetchOrders();
   } catch (error) {
     console.error('Cancel error:', error);
-    alert('Error cancelling order');
+    alert(error.response?.data?.message || 'Failed to cancel order');
   } finally {
     isProcessing.value = null;
   }
 };
 
-onMounted(() => {
-  fetchOrders();
-});
+onMounted(fetchOrders);
 </script>
 
 <style scoped>
-.orders-container {
+.orders {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding-bottom: 24px;
+  gap: 0.9rem;
 }
 
-.order-card {
-  padding: 16px;
-  border-radius: 16px;
-  background: var(--bg-primary);
-  border: 1px solid var(--border-color);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  margin-bottom: 16px;
-}
-
-.order-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.order-meta {
+.state,
+.empty {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-}
-
-.order-number {
-  font-weight: 700;
-  font-size: 1rem;
-  color: var(--text-primary);
-}
-
-.order-date {
-  font-size: 0.8rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  text-align: center;
+  padding: 2.5rem 1.25rem;
   color: var(--text-secondary);
 }
 
-.status-badge {
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 0.75rem;
+.panel {
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--bg-secondary) 94%, transparent);
+  border: 1px solid var(--border-color);
+}
+
+.empty h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.empty p {
+  margin: 0;
+  max-width: 28rem;
+  font-size: 0.92rem;
+}
+
+.empty-icon {
+  width: 36px;
+  height: 36px;
+  opacity: 0.45;
+}
+
+.loader {
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--border-color);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.card {
+  padding: 1.05rem;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--bg-secondary) 94%, transparent);
+  border: 1px solid var(--border-color);
+}
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.card-top > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.card-top strong {
+  font-size: 0.98rem;
+  color: var(--text-primary);
+}
+
+.card-top span {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
   font-weight: 700;
   text-transform: capitalize;
   white-space: nowrap;
 }
 
-.status-badge.delivered { background: rgba(16, 185, 129, 0.1); color: #10b981; }
-.status-badge.shipped { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
-.status-badge.pending { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+.pill.ok { background: var(--status-ok-bg); color: var(--status-ok-fg); }
+.pill.warn { background: var(--status-warn-bg); color: var(--status-warn-fg); }
+.pill.err { background: var(--status-err-bg); color: var(--status-err-fg); }
+.pill.info { background: var(--status-info-bg); color: var(--status-info-fg); }
 
-.order-items {
+.items {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 0.65rem;
+  margin-bottom: 0.9rem;
 }
 
-.order-item {
+.item {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 0.75rem;
 }
 
-.item-icon-box {
-  width: 40px;
-  height: 40px;
-  background: var(--bg-secondary);
-  border-radius: 8px;
-  display: flex;
+.thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  overflow: hidden;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
   flex-shrink: 0;
-  overflow: hidden;
 }
 
-.item-img {
+.thumb img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.item-info {
+.thumb :deep(svg) {
+  width: 18px;
+  height: 18px;
+}
+
+.item-copy {
   flex: 1;
   min-width: 0;
 }
 
-.item-name {
-  font-weight: 600;
+.item-copy p {
+  margin: 0;
   font-size: 0.9rem;
+  font-weight: 600;
   color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin: 0;
 }
 
-.item-quantity {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  margin: 4px 0 0 0;
+.item-copy small {
+  color: var(--text-muted);
 }
 
 .item-price {
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 0.88rem;
   color: var(--text-primary);
 }
 
-.order-footer {
+.muted {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.card-foot {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding-top: 16px;
+  gap: 0.85rem;
+  padding-top: 0.85rem;
   border-top: 1px solid var(--border-color);
 }
 
-@media (min-width: 640px) {
-  .order-footer {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    gap: 0;
-  }
-}
-
-.order-total {
+.total {
   display: flex;
-  flex-direction: row;
   justify-content: space-between;
-  align-items: center;
-  width: 100%;
+  align-items: baseline;
 }
 
-@media (min-width: 640px) {
-  .order-total {
-    flex-direction: column;
-    align-items: flex-start;
-    width: auto;
-  }
-}
-
-.order-total span {
-  font-size: 0.85rem;
+.total span {
   color: var(--text-secondary);
+  font-size: 0.85rem;
 }
 
-.order-total strong {
-  font-size: 1.15rem;
-  font-weight: 800;
+.total strong {
+  font-size: 1.1rem;
   color: var(--text-primary);
 }
 
-.order-actions {
-  display: flex;
-  gap: 12px;
-  width: 100%;
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem;
 }
 
-@media (min-width: 640px) {
-  .order-actions {
-    width: auto;
-  }
-}
-
-.btn-sm {
-  flex: 1;
-  padding: 10px 0;
-  font-size: 0.85rem;
-  font-weight: 600;
-  border-radius: 8px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.2s;
-  border: none;
-}
-
-@media (min-width: 640px) {
-  .btn-sm {
-    flex: none;
-    padding: 8px 16px;
-  }
-}
-
-.action-btn {
-  text-decoration: none;
-  display: flex;
+.btn {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  min-height: 44px;
+  padding: 0 0.9rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  font-family: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.btn-outline {
+.btn.primary {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.btn.ghost {
   background: transparent;
-  border: 1px solid var(--border-color);
   color: var(--text-primary);
+  border: 1px solid var(--border-color-strong);
 }
 
-.btn-outline:hover {
-  background: var(--bg-secondary);
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-.btn-primary {
-  background: var(--color-blue-primary);
-  color: white;
-}
+@media (min-width: 720px) {
+  .card-foot {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
 
-.btn-primary:hover {
-  opacity: 0.9;
-}
+  .actions {
+    width: auto;
+    grid-template-columns: auto auto;
+  }
 
-.empty-state {
-  text-align: center;
-  padding: 40px 20px;
+  .btn {
+    min-width: 120px;
+  }
 }
-
-.empty-icon {
-  width: 48px;
-  height: 48px;
-  color: var(--text-secondary);
-  margin-bottom: 16px;
-  opacity: 0.5;
-}
-
-.empty-state h3 {
-  font-size: 1.25rem;
-  margin: 0 0 8px 0;
-  color: var(--text-primary);
-}
-
-.empty-state p {
-  font-size: 0.95rem;
-  color: var(--text-secondary);
-  margin: 0 0 24px 0;
-}
-
-.icon-sm { width: 16px; height: 16px; color: var(--text-secondary); }
 </style>

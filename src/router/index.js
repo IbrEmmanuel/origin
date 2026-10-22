@@ -237,27 +237,26 @@ router.beforeEach((to, from, next) => {
 });
 
 router.afterEach((to) => {
-    const defaultTitle = 'Origin Electric | Smart Energy & Security Solutions';
-    if (to.meta && to.meta.title) {
-        if (to.meta.title === 'Home') {
-            document.title = defaultTitle;
-        } else {
-            document.title = `${to.meta.title} | Origin Electric`;
-        }
-    } else {
-        document.title = defaultTitle;
-    }
+    // Dynamic pages (product / blog post) set richer SEO themselves after data loads.
+    if (to.name === 'Product' || to.name === 'BlogPost') return;
 
-    // Dynamic Canonical Link Sync
-    const baseDomain = 'https://originelectric.com';
-    const canonicalUrl = `${baseDomain}${to.path === '/' ? '' : to.path}`;
-    let link = document.querySelector('link[rel="canonical"]');
-    if (!link) {
-        link = document.createElement('link');
-        link.setAttribute('rel', 'canonical');
-        document.head.appendChild(link);
-    }
-    link.setAttribute('href', canonicalUrl);
+    const isPrivate = to.matched.some(
+        (r) => r.meta?.requiresAuth || r.path.startsWith('/account')
+    );
+
+    import('@/composables/useSeo').then(({ applySeo }) => {
+        const title =
+            to.meta?.title === 'Home' || !to.meta?.title
+                ? null
+                : to.meta.title;
+        applySeo({
+            title,
+            description: to.meta?.description || undefined,
+            path: to.path,
+            type: 'website',
+            noindex: isPrivate
+        });
+    });
 });
 
 export default router

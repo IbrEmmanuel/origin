@@ -89,8 +89,8 @@
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import authService from '@/services/auth.service';
-
-const route = useRoute();
+import { useTheme } from '@/composables/useTheme';
+import { useCart } from '@/composables/useCart';
 import { 
   Sun as SunIcon, 
   Moon as MoonIcon, 
@@ -98,20 +98,18 @@ import {
   X as XIcon,
   Home as HomeIcon,
   ShoppingBag as ShoppingBagIcon,
-  Calculator as CalculatorIcon,
   Mail as MailIcon,
   Phone as PhoneIcon,
   ShoppingCart as ShoppingCartIcon,
-  BookOpen as BookOpenIcon,
-  MessageSquare as MessageSquareIcon
+  BookOpen as BookOpenIcon
 } from 'lucide-vue-next';
-import { useCart } from '@/composables/useCart';
 
+const route = useRoute();
 const { cartCount } = useCart();
+const { isDark, toggleTheme } = useTheme();
 
 const isMenuOpen = ref(false);
 const isScrolled = ref(false);
-const isDark = ref(false);
 const isAuthenticated = ref(false);
 const scrollY = ref(0);
 
@@ -120,17 +118,6 @@ const accountPath = computed(() => isAuthenticated.value ? '/account' : '/login'
 const handleScroll = () => {
   scrollY.value = window.scrollY;
   isScrolled.value = window.scrollY > 20;
-};
-
-const toggleTheme = () => {
-  isDark.value = !isDark.value;
-  if (isDark.value) {
-    document.body.classList.add('dark-mode');
-    localStorage.setItem('theme', 'dark');
-  } else {
-    document.body.classList.remove('dark-mode');
-    localStorage.setItem('theme', 'light');
-  }
 };
 
 const checkAuth = () => {
@@ -144,18 +131,11 @@ watch(() => route.path, () => {
 onMounted(() => {
   window.addEventListener('scroll', handleScroll);
   checkAuth();
-  
-  const savedTheme = localStorage.getItem('theme');
-  if (savedTheme === 'dark') {
-    isDark.value = true;
-    document.body.classList.add('dark-mode');
-  }
 });
 
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll);
-});
-</script>
+});</script>
 
 <style scoped>
 /* ── Header wrapper ── */

@@ -1,46 +1,85 @@
 <template>
-  <div class="login-page">
-    <div class="orbits" aria-hidden="true">
-      <span class="orb orb-lg"></span>
-      <span class="orb orb-md"></span>
-      <span class="orb orb-sm"></span>
-      <span class="orb orb-xs"></span>
-    </div>
+  <div class="auth-tech">
+    <div class="grid-lines" aria-hidden="true"></div>
+    <div class="glow glow-a" aria-hidden="true"></div>
+    <div class="glow glow-b" aria-hidden="true"></div>
 
-    <div class="glass-circle">
-      <div class="glass-rim" aria-hidden="true"></div>
-      <div class="glass-glint" aria-hidden="true"></div>
+    <header class="topbar">
+      <router-link to="/" class="brand">
+        <img src="../assets/logo.png" alt="" class="brand-logo" />
+        <div class="brand-copy">
+          <strong>ORIGIN</strong>
+          <span>Access Console</span>
+        </div>
+      </router-link>
+      <div class="top-actions">
+        <button
+          type="button"
+          class="icon-btn"
+          @click="toggleTheme"
+          :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+        >
+          <component :is="isDark ? SunIcon : MoonIcon" />
+        </button>
+      </div>
+    </header>
 
-      <div class="glass-inner">
-        <header class="login-header">
-          <h1>LOGIN</h1>
-          <span class="title-line" aria-hidden="true"></span>
+    <main class="stage">
+      <aside class="rail" aria-hidden="true">
+        <p class="rail-kicker">ORIGIN ELECTRIC</p>
+        <h2>Power systems.<br />One signed-in workspace.</h2>
+        <ul class="rail-points">
+          <li>Orders &amp; installs</li>
+          <li>Vendor catalog &amp; bulk upload</li>
+          <li>Consultations &amp; wallet</li>
+        </ul>
+      </aside>
+
+      <section class="panel">
+        <header class="panel-head">
+          <p class="eyebrow">Account access</p>
+          <h1>Sign in</h1>
+          <p class="sub">Manage orders, products, and your energy workspace.</p>
         </header>
 
-        <form @submit.prevent="handleLogin" class="login-form">
-          <div class="field">
-            <label for="email">USERNAME</label>
-            <div class="field-row">
-              <input
-                type="email"
-                id="email"
-                v-model="email"
-                autocomplete="username"
-                placeholder="***"
-                required
-              />
-            </div>
+        <div v-if="hasSession" class="session-card">
+          <div>
+            <strong>You’re already signed in</strong>
+            <p>{{ sessionLabel }}</p>
           </div>
+          <div class="session-actions">
+            <router-link to="/account/dashboard" class="btn primary">Dashboard</router-link>
+            <button type="button" class="btn ghost" :disabled="isLoggingOut" @click="handleLogout">
+              {{ isLoggingOut ? 'Signing out…' : 'Logout' }}
+            </button>
+          </div>
+        </div>
 
-          <div class="field">
-            <label for="password">PASSWORD</label>
-            <div class="field-row">
+        <div v-if="error" class="error-banner" role="alert">{{ error }}</div>
+
+        <form class="form" @submit.prevent="handleLogin">
+          <label class="field">
+            <span>Email</span>
+            <input
+              id="email"
+              v-model="email"
+              type="email"
+              autocomplete="username"
+              inputmode="email"
+              placeholder="you@company.com"
+              required
+            />
+          </label>
+
+          <label class="field">
+            <span>Password</span>
+            <div class="password-row">
               <input
-                :type="showPassword ? 'text' : 'password'"
                 id="password"
                 v-model="password"
+                :type="showPassword ? 'text' : 'password'"
                 autocomplete="current-password"
-                placeholder="***"
+                placeholder="••••••••"
                 required
               />
               <button
@@ -52,36 +91,62 @@
                 <component :is="showPassword ? EyeIcon : EyeOffIcon" />
               </button>
             </div>
+          </label>
+
+          <div class="form-meta">
+            <label class="remember">
+              <input v-model="rememberMe" type="checkbox" />
+              <span>Remember me</span>
+            </label>
+            <router-link to="/forgot-password" class="link">Forgot password?</router-link>
           </div>
 
-          <button type="submit" class="sign-in-btn" :disabled="isLoading">
-            <span v-if="isLoading" class="loader"></span>
-            <span v-else>SIGN IN</span>
+          <button type="submit" class="btn primary wide" :disabled="isLoading">
+            <span v-if="isLoading" class="loader" aria-hidden="true"></span>
+            <span>{{ isLoading ? 'Authenticating…' : 'Sign in' }}</span>
           </button>
         </form>
 
-        <p class="forgot">
-          Forgot your password?
-          <router-link to="/forgot-password">Press here</router-link>
-        </p>
-      </div>
-    </div>
+        <div class="divider"><span>or</span></div>
 
-    <div class="login-extras">
-      <button type="button" class="google-link" @click="loginWithGoogle" :disabled="isLoading">
-        <svg class="google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-1 .67-2.28 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-        </svg>
-        Continue with Google
-      </button>
-      <p class="signup-link">
-        No account?
-        <router-link to="/signup">Register</router-link>
-      </p>
-    </div>
+        <button type="button" class="btn google wide" :disabled="isLoading" @click="loginWithGoogle">
+          <svg class="g-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-1 .67-2.28 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          Continue with Google
+        </button>
+      </section>
+    </main>
+
+    <!-- Justified modern tech dock -->
+    <nav class="dock" aria-label="Quick actions">
+      <div class="dock-track">
+        <router-link to="/" class="dock-item">
+          <span class="glyph"><HomeIcon /></span>
+          <span class="label">Home</span>
+        </router-link>
+        <router-link to="/signup" class="dock-item">
+          <span class="glyph"><UserPlusIcon /></span>
+          <span class="label">Register</span>
+        </router-link>
+        <router-link to="/forgot-password" class="dock-item">
+          <span class="glyph"><KeyIcon /></span>
+          <span class="label">Reset</span>
+        </router-link>
+        <button
+          type="button"
+          class="dock-item danger"
+          :disabled="(!hasSession && !isLoggingOut)"
+          @click="handleLogout"
+        >
+          <span class="glyph"><LogOutIcon /></span>
+          <span class="label">{{ isLoggingOut ? '…' : 'Logout' }}</span>
+        </button>
+      </div>
+    </nav>
 
     <ReferralModal
       :isOpen="isReferralModalOpen"
@@ -92,30 +157,58 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import authService from '@/services/auth.service';
 import { getAuthErrorMessage } from '@/services/api';
 import { auth, googleProvider } from '@/firebase/config';
-import { signInWithPopup } from 'firebase/auth';
+import { signInWithPopup, signOut } from 'firebase/auth';
 import ReferralModal from '@/components/ReferralModal.vue';
+import { useTheme } from '@/composables/useTheme';
 import {
   Eye as EyeIcon,
-  EyeOff as EyeOffIcon
+  EyeOff as EyeOffIcon,
+  Sun as SunIcon,
+  Moon as MoonIcon,
+  Home as HomeIcon,
+  UserPlus as UserPlusIcon,
+  KeyRound as KeyIcon,
+  LogOut as LogOutIcon
 } from 'lucide-vue-next';
 
 const router = useRouter();
 const route = useRoute();
+const { isDark, toggleTheme } = useTheme();
 
 const email = ref('');
 const password = ref('');
 const showPassword = ref(false);
 const rememberMe = ref(true);
 const isLoading = ref(false);
+const isLoggingOut = ref(false);
 const error = ref('');
-
+const sessionTick = ref(0);
 const isReferralModalOpen = ref(false);
 const googleIdToken = ref(null);
+
+const hasSession = computed(() => {
+  sessionTick.value;
+  return !!(localStorage.getItem('token') || localStorage.getItem('user'));
+});
+
+const sessionLabel = computed(() => {
+  sessionTick.value;
+  try {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    return user.email || user.name || 'Active Origin session';
+  } catch {
+    return 'Active Origin session';
+  }
+});
+
+const refreshSession = () => {
+  sessionTick.value += 1;
+};
 
 onMounted(() => {
   const saved = localStorage.getItem('remembered_email');
@@ -123,35 +216,43 @@ onMounted(() => {
     email.value = saved;
     rememberMe.value = true;
   }
+  refreshSession();
 });
+
+const handleLogout = async () => {
+  isLoggingOut.value = true;
+  error.value = '';
+  try {
+    try {
+      await signOut(auth);
+    } catch {
+      /* optional */
+    }
+    authService.logout();
+    localStorage.removeItem('remembered_email');
+    email.value = '';
+    password.value = '';
+    refreshSession();
+  } finally {
+    isLoggingOut.value = false;
+  }
+};
 
 const handleLogin = async () => {
   isLoading.value = true;
   error.value = '';
-
   try {
     const data = await authService.login(email.value, password.value);
-
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify({ ...data.user, is_verified: true }));
-
-    if (rememberMe.value) {
-      localStorage.setItem('remembered_email', email.value);
-    } else {
-      localStorage.removeItem('remembered_email');
-    }
-
-    const redirectPath = route.query.redirect || '/account/dashboard';
-    router.push(redirectPath);
+    if (rememberMe.value) localStorage.setItem('remembered_email', email.value);
+    else localStorage.removeItem('remembered_email');
+    router.push(route.query.redirect || '/account/dashboard');
   } catch (err) {
     if (err.response?.status === 403 && err.response?.data?.is_verified === false) {
-      router.push({
-        path: '/verify-email',
-        query: { email: email.value }
-      });
+      router.push({ path: '/verify-email', query: { email: email.value } });
     } else {
       error.value = getAuthErrorMessage(err);
-      alert(error.value);
     }
   } finally {
     isLoading.value = false;
@@ -161,30 +262,24 @@ const handleLogin = async () => {
 const loginWithGoogle = async () => {
   isLoading.value = true;
   error.value = '';
-
   try {
     const result = await signInWithPopup(auth, googleProvider);
     const idToken = await result.user.getIdToken();
     googleIdToken.value = idToken;
-
     const urlRef = route.query.ref;
     if (urlRef) {
       await completeGoogleLogin(urlRef);
     } else {
       try {
         const data = await authService.googleLogin(idToken);
-        if (data.isNewUser) {
-          isReferralModalOpen.value = true;
-        } else {
-          finishAuth(data);
-        }
+        if (data.isNewUser) isReferralModalOpen.value = true;
+        else finishAuth(data);
       } catch (err) {
-        console.error('Initial Google Login failed', err);
-        error.value = 'Google login failed. Please try again.';
+        error.value = getAuthErrorMessage(err, 'Google login failed. Please try again.');
       }
     }
   } catch (err) {
-    console.error('Firebase Google Auth Error:', err);
+    console.error(err);
     error.value = 'Failed to connect to Google.';
   } finally {
     isLoading.value = false;
@@ -194,13 +289,11 @@ const loginWithGoogle = async () => {
 const completeGoogleLogin = async (referralCode) => {
   isReferralModalOpen.value = false;
   isLoading.value = true;
-
   try {
     const data = await authService.googleLogin(googleIdToken.value, referralCode);
     finishAuth(data);
   } catch (err) {
     error.value = err.response?.data?.message || 'Google login failed.';
-    alert(error.value);
   } finally {
     isLoading.value = false;
   }
@@ -209,401 +302,548 @@ const completeGoogleLogin = async (referralCode) => {
 const finishAuth = (data) => {
   localStorage.setItem('token', data.token);
   localStorage.setItem('user', JSON.stringify({ ...data.user, is_verified: true }));
-  const redirectPath = route.query.redirect || '/account/dashboard';
-  router.push(redirectPath);
+  router.push(route.query.redirect || '/account/dashboard');
 };
 </script>
 
 <style scoped>
-.login-page {
+.auth-tech {
+  --ink: var(--text-primary);
+  --muted: var(--text-muted);
+  --line: var(--border-color);
+  --surface: var(--bg-secondary);
+  --base: var(--bg-primary);
+  --accent: var(--color-primary);
+
   position: relative;
+  isolation: isolate;
   min-height: 100vh;
   min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1.5rem;
-  padding: 2rem 1.25rem;
-  overflow: hidden;
-  background: #353535;
-  font-family: var(--font-main), 'Segoe UI', system-ui, sans-serif;
+  overflow-x: hidden;
+  color: var(--ink);
+  background: var(--base);
+  -webkit-font-smoothing: antialiased;
+  padding-bottom: calc(5.75rem + env(safe-area-inset-bottom, 0px));
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Soft brand orbs — quieter, less busy */
-.orbits {
+.grid-lines {
   position: absolute;
   inset: 0;
+  z-index: 0;
+  opacity: 0.35;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--line) 80%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--line) 80%, transparent) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 75% 60% at 50% 20%, #000 15%, transparent 75%);
+}
+
+.glow {
+  position: absolute;
+  border-radius: 50%;
   pointer-events: none;
   z-index: 0;
+  filter: blur(70px);
 }
 
-.orb {
-  position: absolute;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle at 30% 26%,
-    #ffd27a 0%,
-    var(--color-primary-light) 32%,
-    var(--color-primary) 62%,
-    #e86900 100%
-  );
-  box-shadow:
-    0 12px 28px rgba(0, 0, 0, 0.28),
-    inset -8px -10px 20px rgba(0, 0, 0, 0.14),
-    inset 6px 8px 16px rgba(255, 255, 255, 0.28);
-  opacity: 0.92;
+.glow-a {
+  top: -9rem;
+  right: -3rem;
+  width: min(28rem, 85vw);
+  height: min(28rem, 85vw);
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
 }
 
-.orb-lg {
-  width: clamp(140px, 22vw, 220px);
-  height: clamp(140px, 22vw, 220px);
-  top: 10%;
-  left: 12%;
+.glow-b {
+  bottom: 4rem;
+  left: -5rem;
+  width: min(18rem, 65vw);
+  height: min(18rem, 65vw);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
 }
 
-.orb-md {
-  width: clamp(72px, 11vw, 110px);
-  height: clamp(72px, 11vw, 110px);
-  bottom: 14%;
-  left: 18%;
-}
-
-.orb-sm {
-  width: clamp(40px, 6.5vw, 62px);
-  height: clamp(40px, 6.5vw, 62px);
-  top: 24%;
-  right: 20%;
-}
-
-.orb-xs {
-  width: clamp(28px, 4.5vw, 44px);
-  height: clamp(28px, 4.5vw, 44px);
-  bottom: 22%;
-  right: 16%;
-}
-
-/* Circular glass */
-.glass-circle {
-  position: relative;
-  z-index: 1;
-  width: min(88vw, 400px);
-  height: min(88vw, 400px);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: cardIn 0.55s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.glass-rim {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: linear-gradient(
-    150deg,
-    rgba(255, 255, 255, 0.85) 0%,
-    rgba(210, 210, 215, 0.5) 22%,
-    rgba(110, 110, 115, 0.4) 48%,
-    rgba(230, 230, 235, 0.55) 72%,
-    rgba(80, 80, 85, 0.5) 100%
-  );
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
-  padding: 5px;
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-}
-
-.glass-glint {
-  position: absolute;
-  top: 5px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 38%;
-  height: 8px;
-  border-radius: 50%;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(255, 255, 255, 0.2) 60%,
-    transparent 100%
-  );
-  filter: blur(0.8px);
-  z-index: 3;
-  pointer-events: none;
-}
-
-.glass-inner {
+.topbar {
   position: relative;
   z-index: 2;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
-  padding: clamp(2.25rem, 7vw, 3.5rem) clamp(2.5rem, 8vw, 3.75rem);
-  background: rgba(255, 255, 255, 0.14);
-  backdrop-filter: blur(28px) saturate(1.4);
-  -webkit-backdrop-filter: blur(28px) saturate(1.4);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  box-shadow: inset 0 1px 20px rgba(255, 255, 255, 0.1);
-  overflow: hidden;
-}
-
-.login-header {
-  text-align: center;
-  margin-bottom: 1.75rem;
-}
-
-.login-header h1 {
-  margin: 0;
-  font-family: var(--font-main);
-  font-size: clamp(1.2rem, 3.5vw, 1.5rem);
-  font-weight: 700;
-  letter-spacing: 0.28em;
-  color: #fff;
-  line-height: 1;
-  background: none;
-  -webkit-text-fill-color: #fff;
-}
-
-.title-line {
-  display: block;
-  width: 56px;
-  height: 1.5px;
-  margin: 0.7rem auto 0;
-  background: rgba(255, 255, 255, 0.9);
-}
-
-.login-form {
-  width: 100%;
-  max-width: 210px;
-  display: flex;
-  flex-direction: column;
-  gap: 1.35rem;
-}
-
-.field {
-  width: 100%;
-}
-
-.field label {
-  display: block;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  color: rgba(20, 20, 20, 0.78);
-  margin-bottom: 0.35rem;
-}
-
-.field-row {
-  position: relative;
   display: flex;
   align-items: center;
-  border-bottom: 1.5px solid rgba(255, 255, 255, 0.88);
-  padding-bottom: 0.35rem;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding:
+    max(0.85rem, env(safe-area-inset-top))
+    max(1rem, env(safe-area-inset-right))
+    0.75rem
+    max(1rem, env(safe-area-inset-left));
 }
 
-.field-row input {
-  flex: 1;
-  width: 100%;
-  border: none;
-  background: transparent;
-  outline: none;
-  color: #fff;
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  text-decoration: none;
+  color: inherit;
+  min-width: 0;
+}
+
+.brand-logo { height: 34px; width: auto; }
+
+.brand-copy {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+  min-width: 0;
+}
+
+.brand-copy strong {
+  font-family: var(--font-display), Georgia, serif;
   font-size: 0.95rem;
-  font-weight: 500;
-  letter-spacing: 0.28em;
-  padding: 0.1rem 1.5rem 0 0;
-  font-family: inherit;
-}
-
-.field-row input::placeholder {
-  color: rgba(255, 255, 255, 0.8);
-  letter-spacing: 0.4em;
   font-weight: 600;
+  letter-spacing: -0.03em;
 }
 
-.toggle-pw {
-  position: absolute;
-  right: 0;
-  bottom: 0.3rem;
+.brand-copy span {
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.top-actions {
   display: flex;
   align-items: center;
-  justify-content: center;
-  border: none;
-  background: none;
-  color: rgba(255, 255, 255, 0.7);
-  cursor: pointer;
-  padding: 0;
-  opacity: 0.85;
+  gap: 0.45rem;
 }
 
-.toggle-pw :deep(svg) {
-  width: 14px;
-  height: 14px;
-}
-
-.toggle-pw:hover {
-  color: #fff;
-  opacity: 1;
-}
-
-.sign-in-btn {
-  margin-top: 0.85rem;
-  align-self: center;
-  min-width: 108px;
-  height: 34px;
-  padding: 0 1.1rem;
-  border: none;
-  border-radius: 5px;
-  background: #2a2a2a;
-  color: #fff;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  cursor: pointer;
-  font-family: inherit;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22);
-  transition: background 0.2s ease, transform 0.2s ease;
+.icon-btn {
+  width: 42px;
+  height: 42px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.sign-in-btn:hover:not(:disabled) {
-  background: var(--color-primary);
-  transform: translateY(-1px);
+.icon-btn :deep(svg) { width: 18px; height: 18px; }
+.icon-btn:hover {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
 }
 
-.sign-in-btn:disabled {
-  opacity: 0.65;
-  cursor: not-allowed;
+.stage {
+  position: relative;
+  z-index: 1;
+  width: min(100% - 2rem, 920px);
+  margin: 0.75rem auto 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
 }
 
-.forgot {
-  margin: 1.15rem 0 0;
-  text-align: center;
-  font-size: 0.68rem;
-  color: rgba(20, 20, 20, 0.8);
+.rail { display: none; }
+
+.panel {
+  padding: clamp(1.25rem, 4vw, 1.85rem);
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+  animation: rise 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.panel-head { margin-bottom: 1.15rem; }
+
+.eyebrow {
+  margin: 0 0 0.45rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.panel-head h1 {
+  margin: 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(1.7rem, 5vw, 2.2rem);
   font-weight: 500;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+
+.sub {
+  margin: 0.45rem 0 0;
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.session-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+  padding: 0.95rem 1rem;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--color-success) 35%, var(--line));
+  background: var(--status-ok-bg);
+  color: var(--status-ok-fg);
+}
+
+.session-card strong { color: var(--ink); display: block; margin-bottom: 0.15rem; }
+.session-card p { margin: 0; color: var(--text-secondary); font-size: 0.85rem; }
+
+.session-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.error-banner {
+  margin-bottom: 0.9rem;
+  padding: 0.8rem 0.9rem;
+  border-radius: 12px;
+  background: var(--status-err-bg);
+  color: var(--status-err-fg);
+  border: 1px solid color-mix(in srgb, var(--color-error) 30%, transparent);
+  font-size: 0.86rem;
   line-height: 1.4;
 }
 
-.forgot a {
-  color: var(--color-primary);
-  font-weight: 700;
-  text-decoration: none;
-  margin-left: 0.2rem;
-}
-
-.forgot a:hover {
-  text-decoration: underline;
-}
-
-/* Secondary actions outside the circle — keeps glass clean */
-.login-extras {
-  position: relative;
-  z-index: 1;
+.form {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
+  gap: 0.95rem;
 }
 
-.google-link {
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.field input,
+.password-row {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--base);
+  color: var(--ink);
+  font: inherit;
+  font-size: 1rem;
+}
+
+.field input {
+  padding: 0.75rem 0.95rem;
+  outline: none;
+}
+
+.field input:focus,
+.password-row:focus-within {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.field input::placeholder { color: var(--muted); }
+
+.password-row {
+  display: flex;
+  align-items: center;
+  padding-right: 0.25rem;
+}
+
+.password-row input {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  min-height: 46px;
+  flex: 1;
+}
+
+.toggle-pw {
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  border-radius: 10px;
+}
+
+.toggle-pw :deep(svg) { width: 18px; height: 18px; }
+.toggle-pw:hover { color: var(--ink); }
+
+.form-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+}
+
+.remember {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  border: none;
-  background: transparent;
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 0.78rem;
-  font-weight: 500;
+  color: var(--text-secondary);
   cursor: pointer;
-  font-family: inherit;
-  padding: 0.25rem 0.5rem;
-  transition: color 0.2s ease;
+  user-select: none;
 }
 
-.google-link:hover:not(:disabled) {
-  color: #fff;
-}
+.remember input { accent-color: var(--accent); width: 16px; height: 16px; }
 
-.google-link:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.google-icon {
-  width: 15px;
-  height: 15px;
-}
-
-.signup-link {
-  margin: 0;
-  font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.55);
-}
-
-.signup-link a {
-  color: var(--color-primary);
+.link {
+  color: var(--accent);
   font-weight: 700;
   text-decoration: none;
-  margin-left: 0.2rem;
 }
 
-.signup-link a:hover {
-  text-decoration: underline;
+.link:hover { text-decoration: underline; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 48px;
+  padding: 0 1rem;
+  border-radius: 12px;
+  border: none;
+  font-weight: 700;
+  font-family: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn.wide { width: 100%; }
+.btn.primary {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 12px 28px -12px color-mix(in srgb, var(--accent) 70%, transparent);
+}
+.btn.primary:hover:not(:disabled) { filter: brightness(1.05); }
+.btn.ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--border-color-strong, var(--line));
+}
+.btn.google {
+  background: var(--base);
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+.btn:disabled { opacity: 0.65; cursor: not-allowed; }
+
+.g-icon { width: 18px; height: 18px; }
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.05rem 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
 }
 
 .loader {
-  width: 14px;
-  height: 14px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
   border-top-color: #fff;
+  border-radius: 50%;
   animation: spin 0.75s linear infinite;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
+.dock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  padding:
+    0 max(0.75rem, env(safe-area-inset-left))
+    max(0.65rem, env(safe-area-inset-bottom))
+    max(0.75rem, env(safe-area-inset-right));
+  pointer-events: none;
 }
 
-@keyframes cardIn {
-  from {
-    opacity: 0;
-    transform: scale(0.96);
+.dock-track {
+  pointer-events: auto;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 0.2rem;
+  width: min(100%, 440px);
+  margin: 0 auto;
+  padding: 0.4rem 0.3rem;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(22px) saturate(1.2);
+  -webkit-backdrop-filter: blur(22px) saturate(1.2);
+}
+
+.dock-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  min-height: 56px;
+  width: 100%;
+  padding: 0.3rem 0.1rem;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  text-decoration: none;
+  font-family: inherit;
+  border-radius: 16px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dock-item:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.glyph {
+  width: 36px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+}
+
+.glyph :deep(svg) { width: 18px; height: 18px; }
+
+.label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.dock-item.router-link-active,
+.dock-item:hover:not(:disabled) {
+  color: var(--accent);
+}
+
+.dock-item.router-link-active .glyph,
+.dock-item:hover:not(:disabled) .glyph {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+.dock-item.danger:not(:disabled) { color: var(--color-error); }
+.dock-item.danger:hover:not(:disabled) .glyph {
+  background: color-mix(in srgb, var(--color-error) 14%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-error) 28%, transparent);
+}
+
+.dock-item:active:not(:disabled) { transform: scale(0.96); }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (min-width: 900px) {
+  .stage {
+    grid-template-columns: 1fr 1.05fr;
+    align-items: stretch;
+    margin-top: 1.5rem;
   }
-  to {
-    opacity: 1;
-    transform: scale(1);
+
+  .rail {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1.75rem;
+    border-radius: 20px;
+    border: 1px solid var(--line);
+    background:
+      radial-gradient(circle at 20% 0%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 45%),
+      var(--surface);
+  }
+
+  .rail-kicker {
+    margin: 0;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .rail h2 {
+    margin: 0;
+    font-family: var(--font-display), Georgia, serif;
+    font-size: clamp(1.6rem, 2.4vw, 2.1rem);
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    color: var(--ink);
+  }
+
+  .rail-points {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.55rem;
+    color: var(--text-secondary);
+    font-size: 0.92rem;
+  }
+
+  .rail-points li {
+    padding-left: 0.9rem;
+    position: relative;
+  }
+
+  .rail-points li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.55rem;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
   }
 }
 
 @media (max-width: 420px) {
-  .glass-circle {
-    width: min(92vw, 340px);
-    height: min(92vw, 340px);
-  }
-
-  .login-form {
-    max-width: 180px;
-    gap: 1.1rem;
-  }
-
-  .login-header {
-    margin-bottom: 1.35rem;
-  }
+  .form-meta { flex-direction: column; align-items: flex-start; }
+  .session-actions { grid-template-columns: 1fr; }
 }
 </style>

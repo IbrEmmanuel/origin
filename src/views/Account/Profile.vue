@@ -202,6 +202,7 @@ import {
   Trash2 as TrashIcon,
   Copy as CopyIcon
 } from 'lucide-vue-next';
+import userService from '@/services/user.service';
 
 const isLoading = ref(true);
 const user = ref({ first_name: '', last_name: '', email: '', phone: '' });
@@ -238,28 +239,21 @@ const copyReferralLink = () => {
 
 const fetchProfile = async () => {
   try {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-    
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
-    const response = await fetch(`${baseUrl}/api/user/profile`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    
-    if (response.ok) {
-      const data = await response.json();
-      user.value = data.user;
-      addresses.value = data.addresses;
-      favorites.value = data.favorites;
-      referralData.value = data.referralData;
-      
-      // Fetch referrals list
-      const refResponse = await fetch(`${baseUrl}/api/user/referrals`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (refResponse.ok) {
-        referralsList.value = await refResponse.json();
+    const data = await userService.getProfile();
+    user.value = data.user || data || user.value;
+    addresses.value = data.addresses || [];
+    favorites.value = data.favorites || [];
+    referralData.value = data.referralData || data.referral || referralData.value;
+    if (data.settings) settings.value = { ...settings.value, ...data.settings };
+
+    try {
+      const refs = await userService.getReferrals();
+      referralsList.value = Array.isArray(refs) ? refs : refs?.referrals || refs?.items || [];
+      if (refs?.code && !referralData.value.code) {
+        referralData.value = { ...referralData.value, ...refs };
       }
+    } catch {
+      /* referrals endpoint optional */
     }
   } catch (err) {
     console.error('Failed to load profile', err);
@@ -271,40 +265,22 @@ const fetchProfile = async () => {
 onMounted(fetchProfile);
 
 const saveProfile = async () => {
-  // Frontend Validation
   if (!user.value.first_name?.trim() || !user.value.last_name?.trim() || !user.value.phone?.trim()) {
     alert('Please fill out all personal information fields (First Name, Last Name, Phone).');
     return;
   }
 
   try {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-    
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
-    const response = await fetch(`${baseUrl}/api/user/profile`, {
-      method: 'PUT',
-      headers: { 
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        first_name: user.value.first_name,
-        last_name: user.value.last_name,
-        phone: user.value.phone,
-        settings: settings.value
-      })
+    await userService.updateProfile({
+      first_name: user.value.first_name,
+      last_name: user.value.last_name,
+      phone: user.value.phone,
+      settings: settings.value
     });
-    
-    if (response.ok) {
-      alert('Profile updated successfully');
-    } else {
-      const errorData = await response.json();
-      alert(errorData.message || 'Failed to update profile');
-    }
+    alert('Profile updated successfully');
   } catch (err) {
     console.error('Failed to save profile', err);
-    alert('An unexpected error occurred while saving your profile.');
+    alert(err.response?.data?.message || 'Failed to update profile');
   }
 };
 
@@ -314,37 +290,41 @@ const saveProfile = async () => {
 .profile-container {
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
-  padding-bottom: var(--space-lg);
+  gap: 1rem;
+  padding-bottom: 0.5rem;
 }
 
 /* 1. Header Hero Card */
 .profile-header-card {
   display: flex;
   align-items: center;
-  gap: 32px;
-  padding: 32px;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg);
+  gap: 1rem;
+  padding: 1.15rem;
+  background: color-mix(in srgb, var(--bg-secondary) 94%, transparent);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
 }
 
 .user-avatar-hero {
-  width: 100px;
-  height: 100px;
-  background: linear-gradient(135deg, var(--color-blue-primary), var(--color-blue-dark));
+  width: 72px;
+  height: 72px;
+  background: linear-gradient(145deg, var(--color-primary), var(--color-orange-dark, #e65c00));
   color: white;
-  border-radius: 50%;
+  border-radius: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2.5rem;
+  font-size: 1.5rem;
   font-weight: 800;
-  box-shadow: 0 10px 20px rgba(0, 102, 204, 0.2);
+  flex-shrink: 0;
+  box-shadow: 0 12px 28px -14px color-mix(in srgb, var(--color-primary) 55%, transparent);
 }
 
 .user-info-hero h2 {
-  font-size: 1.75rem;
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-size: clamp(1.2rem, 4vw, 1.6rem);
   margin-bottom: 4px;
 }
 
@@ -888,16 +868,14 @@ input:checked + .slider-md:before { transform: translateX(24px); }
 
 @media (max-width: 768px) {
   .profile-header-card {
-    flex-direction: column;
-    text-align: center;
-    padding: 24px;
-    gap: 16px;
+    align-items: flex-start;
+    padding: 1rem;
+    gap: 0.85rem;
   }
-  .header-actions-hero { margin: 0 auto; }
+  .user-badges { flex-wrap: wrap; }
   .form-grid, .address-grid, .profile-footer-area {
     grid-template-columns: 1fr;
   }
-  .section-card { padding: 20px; }
-  .user-avatar-hero { width: 80px; height: 80px; font-size: 2rem; }
+  .section-card { padding: 1rem; }
 }
 </style>

@@ -150,6 +150,8 @@ import { useRoute, useRouter } from 'vue-router';
 import { Package as PackageIcon, Store as StoreIcon, Heart as HeartIcon, Plus as PlusIcon, Minus as MinusIcon, Trash as TrashIcon } from 'lucide-vue-next';
 import marketplaceService from '@/services/marketplace.service';
 import { useCart } from '@/composables/useCart';
+import { applySeo, productJsonLd } from '@/composables/useSeo';
+import { mediaUrl } from '@/utils/mediaUrl';
 import ImageSlider from '@/components/ImageSlider.vue';
 
 const route = useRoute();
@@ -223,12 +225,26 @@ const fetchProduct = async () => {
     relatedProducts.value = data.related || [];
     
     if (product.value) {
-      document.title = `${product.value.name} | Origin Electric`;
-      
-      const metaDesc = document.querySelector('meta[name="description"]');
-      if (metaDesc && product.value.description) {
-        metaDesc.setAttribute('content', `${product.value.description.slice(0, 150)}...`);
-      }
+      const path = `/product/${product.value.id}`;
+      let firstImage = '';
+      try {
+        const imgs = typeof product.value.images === 'string'
+          ? JSON.parse(product.value.images || '[]')
+          : product.value.images || [];
+        firstImage = Array.isArray(imgs) && imgs[0] ? imgs[0] : '';
+      } catch { /* ignore */ }
+
+      applySeo({
+        title: product.value.name,
+        description: (product.value.description || `${product.value.name} — buy from Origin Electric marketplace.`)
+          .replace(/\s+/g, ' ')
+          .slice(0, 160),
+        path,
+        image: firstImage ? mediaUrl(firstImage) : undefined,
+        type: 'product',
+        jsonLdId: 'product',
+        jsonLd: productJsonLd(product.value, path)
+      });
     }
     
     if (isLoggedIn.value) {

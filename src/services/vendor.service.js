@@ -1,4 +1,9 @@
 import api from './api';
+import {
+  rowToProductPayload,
+  saveLocalImportBatch,
+  updateLocalImportBatch
+} from '@/utils/productImport';
 
 const vendorService = {
     async apply(formData) {
@@ -187,6 +192,126 @@ const vendorService = {
             }
             throw error;
         }
+    },
+
+    /**
+     * Full-stack fallback: create/update each valid row via existing product CRUD.
+     * Used when POST /vendor/products/import is not deployed on the API host.
+     */
+    async importProductsDirectly(validRows, mode = 'create', { filename = 'import.csv', onProgress } = {}) {
+        const productsRes = await this.getProducts();
+        const list = Array.isArray(productsRes) ? productsRes : productsRes?.products || [];
+        const bySku = new Map();
+        list.forEach((p) => {
+            const key = String(p.sku || '').trim().toLowerCase();
+            if (key) bySku.set(key, p);
+        });
+
+        const batchId = `local-${Date.now()}`;
+        const batch = {
+            id: batchId,
+            batch_id: batchId,
+            filename,
+            file_name: filename,
+            mode,
+            source: 'direct_crud',
+            status: 'processing',
+            created_at: new Date().toISOString(),
+            uploaded_at: new Date().toISOString(),
+            total_records: validRows.length,
+            total: validRows.length,
+            processed_count: 0,
+            success_count: 0,
+            failed_count: 0,
+            errors: [],
+            row_errors: []
+        };
+        saveLocalImportBatch(batch);
+
+        let success = 0;
+        let failed = 0;
+        const errors = [];
+
+        for (let i = 0; i < validRows.length; i++) {
+            const row = validRows[i];
+            const payload = rowToProductPayload(row);
+            const skuKey = String(row.sku || '').trim().toLowerCase();
+            const existing = skuKey ? bySku.get(skuKey) : null;
+
+            try {
+                if (existing && mode === 'update') {
+                    await this.updateProduct(existing.id, {
+                        ...existing,
+                        ...payload,
+                        images: payload.images?.length ? payload.images : (existing.images || [])
+                    });
+                } else if (existing && mode === 'create') {
+                    throw new Error(`SKU "${row.sku}" already exists`);
+                } else {
+                    const created = await this.addProduct(payload);
+                    if (skuKey && created?.id) {
+                        bySku.set(skuKey, { ...created, sku: row.sku });
+                    } else if (skuKey) {
+                        bySku.set(skuKey, { id: created?.id || created?.product?.id, sku: row.sku });
+                    }
+                }
+                success += 1;
+            } catch (err) {
+                failed += 1;
+                const message =
+                    err.response?.data?.message ||
+                    err.response?.data?.error ||
+                    err.message ||
+                    'Failed to save product';
+                errors.push({
+                    row: row.rowIndex,
+                    rowIndex: row.rowIndex,
+                    sku: row.sku,
+                    message,
+                    error: message
+                });
+            }
+
+            const processed = i + 1;
+            updateLocalImportBatch(batchId, {
+                processed_count: processed,
+                success_count: success,
+                failed_count: failed,
+                errors,
+                row_errors: errors,
+                status: processed >= validRows.length ? (failed && !success ? 'failed' : failed ? 'completed_with_errors' : 'completed') : 'processing'
+            });
+
+            if (typeof onProgress === 'function') {
+                onProgress({
+                    processed,
+                    total: validRows.length,
+                    success,
+                    failed
+                });
+            }
+        }
+
+        const finalStatus = failed && !success ? 'failed' : failed ? 'completed_with_errors' : 'completed';
+        const result = updateLocalImportBatch(batchId, {
+            status: finalStatus,
+            processed_count: validRows.length,
+            success_count: success,
+            failed_count: failed,
+            errors,
+            row_errors: errors,
+            finished_at: new Date().toISOString()
+        });
+
+        return result || {
+            id: batchId,
+            batch_id: batchId,
+            status: finalStatus,
+            success_count: success,
+            failed_count: failed,
+            total_records: validRows.length,
+            errors
+        };
     }
 };
 

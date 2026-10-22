@@ -87,12 +87,24 @@
   --radius-xl:   12px;  /* cards                  */
   --radius-full: 9999px;
 
+  /* ── Status / feedback (dashboard badges, notices) ── */
+  --status-ok-bg:     #e8f5e9;
+  --status-ok-fg:     #2e7d32;
+  --status-err-bg:    #ffebee;
+  --status-err-fg:    #c62828;
+  --status-warn-bg:   #fff4ea;
+  --status-warn-fg:   #9a4d00;
+  --status-warn-border: #ffd2a8;
+  --status-info-bg:   #eef2ff;
+  --status-info-fg:   #1a56db;
+
   /* ── Transitions ── */
   --transition-speed:  0.3s;
   --transition-bounce: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ── Dark mode overrides ── */
+html.dark-mode,
 body.dark-mode {
   --color-light:       #141210;
   --color-beige:       #1c1917;
@@ -119,6 +131,16 @@ body.dark-mode {
 
   --color-blue-light:   #0f172a;
   --color-orange-light: #1f1108;
+
+  --status-ok-bg:     #14301c;
+  --status-ok-fg:     #86efac;
+  --status-err-bg:    #3f1212;
+  --status-err-fg:    #fca5a5;
+  --status-warn-bg:   #2a1808;
+  --status-warn-fg:   #fdba74;
+  --status-warn-border: #7c3e0f;
+  --status-info-bg:   #0f172a;
+  --status-info-fg:   #93c5fd;
 }
 
 /* ════════════════════════════════════

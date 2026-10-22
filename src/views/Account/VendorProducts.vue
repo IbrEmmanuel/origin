@@ -169,6 +169,7 @@ import {
 import imageCompression from 'browser-image-compression';
 import vendorService from '@/services/vendor.service';
 import marketplaceService from '@/services/marketplace.service';
+import { mediaUrl } from '@/utils/mediaUrl';
 
 const products = ref([]);
 const productCategories = ref([]);
@@ -232,11 +233,7 @@ const parseImages = (images) => {
   }
 };
 
-const getImageUrl = (path) => {
-  if (!path) return '';
-  if (path.startsWith('http')) return path;
-  return `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}${path}`;
-};
+const getImageUrl = (path) => mediaUrl(path);
 
 const filteredProducts = computed(() => {
   if (!searchQuery.value) return products.value;

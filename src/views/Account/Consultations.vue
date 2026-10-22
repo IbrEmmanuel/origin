@@ -277,6 +277,7 @@ import {
   CreditCard as CreditCardIcon
 } from 'lucide-vue-next';
 import consultationService from '@/services/consultationService';
+import userService from '@/services/user.service';
 
 // State
 const consultationTypes = ref([]);
@@ -539,23 +540,13 @@ onMounted(async () => {
     if (!formData.phone) formData.phone = user.phone || user.phone_number || '';
   }
 
-  // Then fetch from API for the latest data (in case localStorage is stale)
   try {
-    const token = localStorage.getItem('token');
-    if (token) {
-      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
-      const response = await fetch(`${baseUrl}/api/user/profile`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        const profile = data.user;
-        if (profile) {
-          formData.name = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
-          formData.email = profile.email || '';
-          formData.phone = profile.phone || '';
-        }
-      }
+    const data = await userService.getProfile();
+    const profile = data.user || data;
+    if (profile) {
+      formData.name = `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || formData.name;
+      formData.email = profile.email || formData.email;
+      formData.phone = profile.phone || formData.phone;
     }
   } catch (err) {
     console.error('Failed to sync profile for auto-fill', err);
@@ -566,14 +557,16 @@ onMounted(async () => {
 <style scoped>
 .booking-container {
   max-width: 800px;
-  margin: 2rem auto 0;
-  padding: 2.5rem;
+  margin: 0 auto;
+  padding: 1.25rem;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--bg-secondary) 94%, transparent);
+  border: 1px solid var(--border-color);
 }
 
-@media (max-width: 640px) {
+@media (min-width: 720px) {
   .booking-container {
-    padding: 1.5rem;
-    margin-top: 1rem;
+    padding: 2rem;
   }
 }
 
@@ -595,12 +588,12 @@ onMounted(async () => {
   cursor: pointer;
 }
 
-.back-btn:hover { color: var(--color-blue-primary); }
+.back-btn:hover { color: var(--color-primary); }
 
 .stepper { display: flex; gap: 12px; }
 .step { width: 32px; height: 6px; background: var(--border-color); border-radius: 4px; position: relative; }
-.step.active { background: var(--color-blue-primary); width: 48px; }
-.step.completed { background: var(--color-blue-primary); }
+.step.active { background: var(--color-primary); width: 48px; }
+.step.completed { background: var(--color-primary); }
 
 .step-dot {
   position: absolute;
@@ -613,16 +606,29 @@ onMounted(async () => {
   opacity: 0;
 }
 
-.step.active .step-dot { opacity: 1; color: var(--color-blue-primary); }
+.step.active .step-dot { opacity: 1; color: var(--color-primary); }
 
-.step-title { font-size: 2rem; font-weight: 900; margin-bottom: 0.5rem; }
-.step-desc { color: var(--text-secondary); margin-bottom: 2.5rem; }
+.step-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 4vw, 1.85rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+}
+.step-desc { color: var(--text-secondary); margin-bottom: 1.5rem; }
 
 .options-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2.5rem;
+  grid-template-columns: 1fr;
+  gap: 0.85rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .options-grid {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+  }
 }
 
 .option-card {
@@ -635,18 +641,18 @@ onMounted(async () => {
 }
 
 .option-card:hover {
-  border-color: var(--color-blue-primary);
+  border-color: var(--color-primary);
   transform: translateY(-4px);
   box-shadow: 0 12px 24px rgba(0, 102, 204, 0.1);
 }
 
 .btn-flex { display: flex; align-items: center; justify-content: center; gap: 8px; }
 
-.option-card.selected { border-color: var(--color-blue-primary); background: rgba(0, 102, 204, 0.03); }
+.option-card.selected { border-color: var(--color-primary); background: color-mix(in srgb, var(--color-primary) 8%, transparent); }
 
 .option-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-.option-icon { width: 32px; height: 32px; color: var(--color-blue-primary); }
-.option-price { font-weight: 800; color: var(--color-blue-primary); }
+.option-icon { width: 32px; height: 32px; color: var(--color-primary); }
+.option-price { font-weight: 800; color: var(--color-primary); }
 
 .option-card h3 { font-size: 1.25rem; font-weight: 800; margin-bottom: 0.5rem; }
 .option-card p { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.4; }
@@ -685,9 +691,9 @@ onMounted(async () => {
   cursor: pointer; 
   transition: all 0.2s; 
 }
-.slot-btn:hover { border-color: var(--color-blue-primary); color: var(--color-blue-primary); }
+.slot-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
 .payment-options { display: flex; flex-direction: column; gap: 1rem; }
-.slot-btn.selected { background: var(--color-blue-primary); border-color: var(--color-blue-primary); color: white !important; }
+.slot-btn.selected { background: var(--color-primary); border-color: var(--color-primary); color: white !important; }
 
 .details-form .form-row { display: flex; gap: 1.5rem; }
 .form-group { margin-bottom: 1.5rem; }
@@ -699,12 +705,12 @@ onMounted(async () => {
 .summary-card { background: var(--bg-primary); padding: 1.5rem; border-radius: 16px; margin-bottom: 2rem; border: 1px dashed var(--border-color); }
 .review-card { padding: 2rem; background: var(--bg-primary); border-style: solid; }
 .summary-section { display: flex; flex-direction: column; gap: 0.75rem; }
-.section-label { font-size: 0.7rem; text-transform: uppercase; color: var(--color-blue-primary); font-weight: 800; letter-spacing: 0.05em; margin-bottom: 0.4rem; }
+.section-label { font-size: 0.7rem; text-transform: uppercase; color: var(--color-primary); font-weight: 800; letter-spacing: 0.05em; margin-bottom: 0.4rem; }
 .summary-line { display: flex; justify-content: space-between; gap: 1rem; font-size: 0.95rem; }
 .summary-line.description { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
 .summary-line.description p { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; background: rgba(0, 0, 0, 0.03); padding: 0.75rem 1rem; border-radius: 10px; width: 100%; border: 1px solid var(--border-color); }
 .summary-divider { height: 1px; background: var(--border-color); margin: 1.25rem 0; }
-.total { font-size: 1.2rem; color: var(--color-blue-primary); font-weight: 900; }
+.total { font-size: 1.2rem; color: var(--color-primary); font-weight: 900; }
 .btn-paystack { background: #3bb75e; color: white; }
 .btn-paystack:hover { background: #2f9a4e; }
 
@@ -741,7 +747,7 @@ onMounted(async () => {
   .review-card { padding: 1.25rem; }
 }
 
-.loader { width: 40px; height: 40px; border: 4px solid var(--border-color); border-top-color: var(--color-blue-primary); border-radius: 50%; display: inline-block; animation: spin 1s linear infinite; }
+.loader { width: 40px; height: 40px; border: 4px solid var(--border-color); border-top-color: var(--color-primary); border-radius: 50%; display: inline-block; animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .fade-in { animation: fadeIn 0.3s ease-out; }
@@ -772,7 +778,7 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   margin-bottom: 2rem;
-  color: var(--color-blue-primary);
+  color: var(--color-primary);
 }
 
 .empty-state-card h3 {

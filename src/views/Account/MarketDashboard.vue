@@ -1,89 +1,126 @@
 <template>
-  <div class="market-dashboard">
-    <!-- Header with Search and Filter -->
-    <div class="dashboard-filter-bar">
+  <div class="market">
+    <div class="filter-bar">
       <div class="search-box">
-        <SearchIcon class="search-icon icon-sm" />
-        <input type="text" v-model="searchQuery" placeholder="Search products..." class="search-input" />
-      </div>
-      
-      <div class="category-pills-wrapper">
-        <div class="category-pills">
-          <button 
-            v-for="cat in productCategories" 
-            :key="cat.id" 
-            :class="['pill-btn', { active: selectedCategory === cat.slug }]" 
-            @click="selectedCategory = cat.slug"
-          >
-            {{ cat.name }}
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Product Grid -->
-    <div v-if="loading" class="state-container">
-      <span class="loader"></span>
-      <p>Synchronizing energy markets...</p>
-    </div>
-
-    <div v-else-if="products.length === 0" class="state-container">
-      <PackageIcon class="empty-icon" />
-      <h3>No matching systems found</h3>
-      <p>Try refining your search criteria.</p>
-      <button @click="resetFilters" class="clear-btn">Reset Filters</button>
-    </div>
-
-    <div v-else>
-      <div class="product-grid">
-        <div v-for="product in products" :key="product.id" class="product-card glass-card">
-          <div class="card-image" @click="$router.push('/product/' + product.id)">
-            <img :src="resolvePrimaryImage(product.images)" :alt="product.name" />
-            <div class="vendor-tag">
-              <StoreIcon class="icon-xs" />
-              <span>{{ product.store_name }}</span>
-            </div>
-          </div>
-          
-          <div class="card-info">
-            <div class="meta">
-              <span class="category">{{ product.category || 'Gear' }}</span>
-              <span v-if="product.stock <= 5" class="stock-warning">Low Stock</span>
-            </div>
-            <h3 class="title" @click="$router.push('/product/' + product.id)">{{ product.name }}</h3>
-            <div class="price-row">
-              <span class="price">₦{{ Number(product.price).toLocaleString() }}</span>
-              <button @click="addToCart(product, 1)" class="add-btn" :disabled="product.stock <= 0">
-                <PlusIcon v-if="!isInCart(product.id)" class="icon-sm" />
-                <CheckIcon v-else class="icon-sm" />
-              </button>
-            </div>
-          </div>
-        </div>
+        <SearchIcon class="search-icon" />
+        <input
+          v-model="searchQuery"
+          type="search"
+          placeholder="Search live catalog…"
+          class="search-input"
+          autocomplete="off"
+        />
       </div>
 
-      <div v-if="page < totalPages" class="load-more">
-        <button @click="loadMore" class="btn secondary-btn" :disabled="loadingMore">
-          {{ loadingMore ? 'Loading...' : 'Load More' }}
+      <div class="category-pills" role="tablist" aria-label="Categories">
+        <button
+          v-for="cat in productCategories"
+          :key="cat.id"
+          type="button"
+          class="pill"
+          :class="{ active: selectedCategory === cat.slug }"
+          @click="selectedCategory = cat.slug"
+        >
+          {{ cat.name }}
         </button>
       </div>
     </div>
+
+    <div v-if="loading" class="state">
+      <span class="loader"></span>
+      <p>Loading marketplace…</p>
+    </div>
+
+    <div v-else-if="!products.length" class="state empty">
+      <PackageIcon class="empty-icon" />
+      <h3>No products found</h3>
+      <p>Try another search or category.</p>
+      <button type="button" class="btn ghost" @click="resetFilters">Reset filters</button>
+    </div>
+
+    <template v-else>
+      <div class="grid">
+        <article v-for="product in products" :key="product.id" class="card">
+          <button type="button" class="media" @click="goProduct(product.id)">
+            <img :src="resolvePrimaryImage(product.images)" :alt="product.name" />
+            <span class="vendor">
+              <StoreIcon />
+              {{ product.store_name || 'Origin' }}
+            </span>
+          </button>
+
+          <div class="body">
+            <div class="meta">
+              <span class="cat">{{ product.category || 'Gear' }}</span>
+              <span v-if="product.stock <= 0" class="stock out">Sold out</span>
+              <span v-else-if="product.stock <= 5" class="stock">Low stock</span>
+            </div>
+
+            <h3 class="title" @click="goProduct(product.id)">{{ product.name }}</h3>
+            <p class="price">₦{{ Number(product.price).toLocaleString() }}</p>
+
+            <div class="actions">
+              <template v-if="getCartItem(product.id)">
+                <div class="stepper">
+                  <button type="button" class="step" @click="updateQuantity(product.id, getCartItem(product.id).quantity - 1)">
+                    <MinusIcon v-if="getCartItem(product.id).quantity > 1" />
+                    <TrashIcon v-else class="danger" />
+                  </button>
+                  <span>{{ getCartItem(product.id).quantity }}</span>
+                  <button type="button" class="step" @click="addToCart(product, 1)">
+                    <PlusIcon />
+                  </button>
+                </div>
+              </template>
+              <button
+                v-else
+                type="button"
+                class="btn cart"
+                :disabled="product.stock <= 0"
+                @click="onAddToCart(product)"
+              >
+                {{ product.stock > 0 ? 'Add to cart' : 'Sold out' }}
+              </button>
+
+              <button
+                v-if="product.stock > 0"
+                type="button"
+                class="btn buy"
+                @click="onBuyNow(product)"
+              >
+                Buy now
+              </button>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div v-if="page < totalPages" class="more">
+        <button type="button" class="btn ghost" :disabled="loadingMore" @click="loadMore">
+          {{ loadingMore ? 'Loading…' : 'Load more' }}
+        </button>
+      </div>
+    </template>
   </div>
 </template>
 
 <script setup>
 import { ref, watch, onMounted } from 'vue';
-import { 
-  Search as SearchIcon, 
-  Package as PackageIcon, 
-  Store as StoreIcon, 
+import { useRouter } from 'vue-router';
+import {
+  Search as SearchIcon,
+  Package as PackageIcon,
+  Store as StoreIcon,
   Plus as PlusIcon,
-  Check as CheckIcon
+  Minus as MinusIcon,
+  Trash2 as TrashIcon
 } from 'lucide-vue-next';
 import marketplaceService from '@/services/marketplace.service';
 import { useCart } from '@/composables/useCart';
+import { firstMediaUrl } from '@/utils/mediaUrl';
 
-const { cartItems, addToCart } = useCart();
+const router = useRouter();
+const { cartItems, addToCart, updateQuantity, buyNow } = useCart();
 
 const products = ref([]);
 const loading = ref(true);
@@ -94,6 +131,20 @@ const page = ref(1);
 const totalPages = ref(1);
 const productCategories = ref([]);
 
+const getCartItem = (id) => cartItems.value.find((item) => item.id === id);
+const resolvePrimaryImage = (imagesStr) => firstMediaUrl(imagesStr);
+const goProduct = (id) => router.push(`/product/${id}`);
+
+const onAddToCart = (product) => {
+  addToCart(product, 1);
+  marketplaceService.trackEvent?.({ type: 'add_to_cart', product_id: product.id });
+};
+
+const onBuyNow = (product) => {
+  const path = buyNow(product, 1);
+  marketplaceService.trackEvent?.({ type: 'buy_now', product_id: product.id });
+  router.push(path);
+};
 
 const fetchProducts = async (reset = false) => {
   if (reset) {
@@ -102,7 +153,7 @@ const fetchProducts = async (reset = false) => {
   } else {
     loadingMore.value = true;
   }
-  
+
   try {
     const [productsRes, categoriesRes] = await Promise.all([
       marketplaceService.getProducts({
@@ -113,16 +164,15 @@ const fetchProducts = async (reset = false) => {
       }),
       marketplaceService.getCategories()
     ]);
-    
-    if (reset) {
-      products.value = productsRes.products;
-    } else {
-      products.value.push(...productsRes.products);
-    }
-    productCategories.value = [{ id: 'all', name: 'All', slug: '' }, ...categoriesRes];
-    totalPages.value = productsRes.totalPages;
+
+    if (reset) products.value = productsRes.products || [];
+    else products.value.push(...(productsRes.products || []));
+
+    productCategories.value = [{ id: 'all', name: 'All', slug: '' }, ...(categoriesRes || [])];
+    totalPages.value = productsRes.totalPages || 1;
   } catch (err) {
     console.error('Market sync failed', err);
+    if (reset) products.value = [];
   } finally {
     loading.value = false;
     loadingMore.value = false;
@@ -131,7 +181,7 @@ const fetchProducts = async (reset = false) => {
 
 const loadMore = () => {
   if (page.value < totalPages.value) {
-    page.value++;
+    page.value += 1;
     fetchProducts(false);
   }
 };
@@ -141,313 +191,323 @@ const resetFilters = () => {
   selectedCategory.value = '';
 };
 
-const isInCart = (id) => cartItems.value.some(item => item.id === id);
-
-const resolvePrimaryImage = (imagesStr) => {
-  try {
-    const images = typeof imagesStr === 'string' ? JSON.parse(imagesStr) : imagesStr;
-    const path = images?.[0] || '';
-    if (!path) return '';
-    if (path.startsWith('http')) return path;
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
-    return `${baseUrl}${path}`;
-  } catch (e) {
-    return '';
-  }
-};
-
 let searchTimeout;
 watch([selectedCategory, searchQuery], () => {
   clearTimeout(searchTimeout);
-  searchTimeout = setTimeout(() => fetchProducts(true), 500);
+  searchTimeout = setTimeout(() => fetchProducts(true), 400);
 });
 
 onMounted(() => fetchProducts(true));
 </script>
 
 <style scoped>
-.market-dashboard {
+.market {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
-  padding-bottom: 4rem;
-  width: 100%;
-  max-width: 100vw;
-  overflow-x: hidden;
+  gap: 1rem;
 }
 
-.dashboard-filter-bar {
+.filter-bar {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 2rem;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1rem;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--bg-secondary) 94%, transparent);
 }
 
-.search-box {
-  position: relative;
-  flex: 1;
-  max-width: 400px;
-}
+.search-box { position: relative; width: 100%; }
 
 .search-icon {
   position: absolute;
   left: 14px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--text-secondary);
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
 }
 
 .search-input {
   width: 100%;
-  padding: 12px 14px 12px 42px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
+  min-height: 48px;
+  padding: 0.7rem 0.9rem 0.7rem 2.5rem;
   border-radius: 12px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
   color: var(--text-primary);
-  font-weight: 500;
-  transition: all 0.2s;
+  font: inherit;
+  font-size: 1rem;
 }
 
 .search-input:focus {
   outline: none;
-  border-color: var(--color-blue-primary);
-  box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.1);
-}
-
-.category-pills-wrapper {
-  flex: 1;
-  min-width: 0;
-  max-width: 100%;
+  border-color: color-mix(in srgb, var(--color-primary) 50%, var(--border-color));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 16%, transparent);
 }
 
 .category-pills {
   display: flex;
-  gap: 8px;
+  gap: 0.4rem;
   overflow-x: auto;
-  padding-bottom: 4px;
+  scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: none; /* Firefox */
 }
 
-.category-pills::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Edge */
-}
+.category-pills::-webkit-scrollbar { display: none; }
 
-.pill-btn {
+.pill {
   flex-shrink: 0;
-  white-space: nowrap;
-  padding: 8px 16px;
+  min-height: 36px;
+  padding: 0.4rem 0.85rem;
   border-radius: 999px;
-  background: var(--bg-secondary);
   border: 1px solid var(--border-color);
+  background: var(--bg-primary);
   color: var(--text-secondary);
-  font-weight: 600;
-  font-size: 0.85rem;
+  font-weight: 650;
+  font-size: 0.82rem;
+  font-family: inherit;
   cursor: pointer;
-  transition: all 0.2s;
 }
 
-.pill-btn.active {
-  background: var(--color-blue-primary);
-  color: white;
-  border-color: var(--color-blue-primary);
+.pill.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
 }
 
-/* Product Grid */
-.product-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 2rem;
-}
-
-.product-card {
+.state {
   display: flex;
   flex-direction: column;
-  padding: 12px;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.product-card:hover {
-  transform: translateY(-8px);
-}
-
-.card-image {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1;
-  background: var(--bg-secondary);
-  border-radius: 12px;
-  overflow: hidden;
-  cursor: pointer;
-  display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 0.65rem;
+  padding: 2.5rem 1rem;
+  text-align: center;
+  color: var(--text-secondary);
+  border-radius: 16px;
+  border: 1px dashed var(--border-color);
 }
 
-.card-image img {
+.state h3 { margin: 0; color: var(--text-primary); font-family: var(--font-display); font-weight: 500; }
+.state p { margin: 0; }
+.empty-icon { width: 36px; height: 36px; opacity: 0.45; }
+
+.loader {
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--border-color);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--bg-secondary) 94%, transparent);
+  overflow: hidden;
+}
+
+.media {
+  position: relative;
+  aspect-ratio: 1;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  background: var(--bg-primary);
+  overflow: hidden;
+}
+
+.media img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.5s ease;
 }
 
-.product-card:hover .card-image img {
-  transform: scale(1.05);
-}
-
-.vendor-tag {
+.vendor {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  background: var(--glass-bg);
-  backdrop-filter: blur(8px);
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  display: flex;
+  top: 8px;
+  left: 8px;
+  display: inline-flex;
   align-items: center;
-  gap: 5px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  gap: 4px;
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg-secondary) 88%, transparent);
+  border: 1px solid var(--border-color);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  max-width: calc(100% - 16px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.card-info {
-  padding: 1rem 0.25rem;
+.vendor :deep(svg) { width: 11px; height: 11px; flex-shrink: 0; }
+
+.body {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.45rem;
+  padding: 0.75rem;
+  flex: 1;
 }
 
 .meta {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem;
 }
 
-.category {
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-  letter-spacing: 0.05em;
-}
-
-.stock-warning {
-  font-size: 0.7rem;
+.cat {
+  font-size: 0.68rem;
   font-weight: 800;
-  color: #f97316;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
 }
+
+.stock { font-size: 0.68rem; font-weight: 700; color: #f59e0b; }
+.stock.out { color: var(--color-error); }
 
 .title {
-  font-size: 1.15rem;
+  margin: 0;
+  font-size: clamp(0.85rem, 2.8vw, 0.98rem);
   font-weight: 700;
-  line-height: 1.25;
+  line-height: 1.3;
   cursor: pointer;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  height: 2.5rem;
-}
-
-.price-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 0.5rem;
+  min-height: 2.4em;
 }
 
 .price {
-  font-size: 1.4rem;
-  font-weight: 900;
-  color: var(--color-blue-primary);
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--color-primary);
 }
 
-.add-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  border: none;
-  background: var(--color-blue-primary);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s;
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+  margin-top: auto;
+  padding-top: 0.35rem;
 }
 
-.add-btn:hover:not(:disabled) {
-  background: var(--color-blue-dark);
-  transform: scale(1.05);
-}
-
-.add-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* States */
-.state-container {
-  padding: 6rem 2rem;
-  text-align: center;
-  background: var(--bg-secondary);
-  border-radius: 20px;
-  border: 1px dashed var(--border-color);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-}
-
-.empty-icon { width: 48px; height: 48px; color: var(--text-secondary); opacity: 0.5; }
-.loader {
-  width: 40px;
-  height: 40px;
-  border: 4px solid var(--border-color);
-  border-radius: 50%;
-  border-top-color: var(--color-blue-primary);
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.load-more {
-  display: flex;
-  justify-content: center;
-  margin-top: 2rem;
+.actions:has(.stepper) {
+  grid-template-columns: 1.2fr 1fr;
 }
 
 .btn {
-  padding: 12px 32px;
-  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 0.55rem;
+  border-radius: 10px;
+  border: none;
   font-weight: 700;
+  font-size: 0.78rem;
+  font-family: inherit;
   cursor: pointer;
-  transition: all 0.2s;
-  border: 1px solid var(--border-color);
-  background: var(--bg-secondary);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn.cart {
+  background: transparent;
   color: var(--text-primary);
+  border: 1px solid var(--border-color-strong, var(--border-color));
 }
 
-.btn:hover:not(:disabled) {
-  background: var(--border-color);
+.btn.buy {
+  background: var(--color-primary);
+  color: #fff;
 }
 
-@media (max-width: 640px) {
-  .dashboard-filter-bar {
-    flex-direction: column;
-    align-items: stretch;
+.btn.ghost {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  min-width: 140px;
+}
+
+.btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 40px;
+  padding: 0 0.25rem;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+}
+
+.stepper span {
+  font-weight: 800;
+  font-size: 0.88rem;
+  min-width: 1.25rem;
+  text-align: center;
+}
+
+.step {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.step :deep(svg) { width: 14px; height: 14px; }
+.step .danger { color: var(--color-error); }
+
+.more {
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem 0 0.25rem;
+}
+
+@media (min-width: 720px) {
+  .filter-bar {
+    flex-direction: row;
+    align-items: center;
+  }
+  .search-box { max-width: 320px; }
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 1rem;
   }
-  
-  .search-box {
-    max-width: 100%;
-  }
+  .actions { grid-template-columns: 1fr 1fr; }
+}
 
-  .product-grid {
-    grid-template-columns: 1fr;
-  }
+@media (max-width: 380px) {
+  .grid { grid-template-columns: 1fr; }
+  .actions { grid-template-columns: 1fr; }
 }
 </style>

@@ -1,29 +1,43 @@
 <template>
-  <div class="vendor-dashboard">
-    <div class="stats-grid">
-      <div v-for="stat in statCards" :key="stat.label" class="stat-card glass-card">
-        <div class="stat-icon-wrapper" :style="{ color: stat.color }">
-          <component :is="stat.icon" class="icon-md" />
-        </div>
-        <div class="stat-info">
-          <p class="stat-label">{{ stat.label }}</p>
-          <h3 class="stat-value">{{ stat.value }}</h3>
-        </div>
-      </div>
+  <div class="vendor-dash">
+    <div v-if="loading" class="state">
+      <span class="loader"></span>
+      <p>Loading store metrics…</p>
     </div>
 
-    <div class="dashboard-sections mt-8">
-      <div class="wide-card glass-card">
-        <div class="card-header">
-          <h3>Recent Sales Activity</h3>
-          <button @click="$emit('switch-tab', 'orders')" class="btn-text">View All Orders</button>
+    <template v-else>
+      <div v-if="error" class="banner">{{ error }}</div>
+
+      <div class="stats">
+        <article v-for="stat in statCards" :key="stat.label" class="stat">
+          <div class="stat-icon" :style="{ color: stat.color }">
+            <component :is="stat.icon" />
+          </div>
+          <div>
+            <p class="stat-label">{{ stat.label }}</p>
+            <p class="stat-value">{{ stat.value }}</p>
+          </div>
+        </article>
+      </div>
+
+      <div class="quick">
+        <button type="button" class="quick-btn" @click="$emit('switch-tab', 'products')">Manage products</button>
+        <button type="button" class="quick-btn" @click="$emit('switch-tab', 'bulk')">Bulk upload</button>
+        <button type="button" class="quick-btn" @click="$emit('switch-tab', 'orders')">Sales orders</button>
+        <button type="button" class="quick-btn" @click="$emit('switch-tab', 'wallet')">Wallet</button>
+      </div>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h3>Recent sales</h3>
+          <button type="button" class="text-btn" @click="$emit('switch-tab', 'orders')">View all</button>
         </div>
-        
-        <div v-if="stats.recentActivity && stats.recentActivity.length > 0" class="activity-table-wrapper">
-          <table class="activity-table">
+
+        <div v-if="activities.length" class="table-wrap">
+          <table>
             <thead>
               <tr>
-                <th>Order ID</th>
+                <th>Order</th>
                 <th>Product</th>
                 <th>Qty</th>
                 <th>Amount</th>
@@ -32,62 +46,79 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="activity in stats.recentActivity" :key="activity.id">
-                <td><span class="order-id">#{{ activity.id }}</span></td>
-                <td class="product-cell">{{ activity.product_name }}</td>
+              <tr v-for="activity in activities" :key="activity.id">
+                <td><strong>#{{ activity.id }}</strong></td>
+                <td>{{ activity.product_name }}</td>
                 <td>{{ activity.qty }}</td>
-                <td class="amount">₦{{ (activity.price * activity.qty).toLocaleString() }}</td>
-                <td class="date">{{ new Date(activity.created_at).toLocaleDateString() }}</td>
-                <td>
-                  <span class="status-badge" :class="activity.status.toLowerCase()">{{ activity.status }}</span>
-                </td>
+                <td>₦{{ Number((activity.price || 0) * (activity.qty || 0)).toLocaleString() }}</td>
+                <td>{{ formatDate(activity.created_at) }}</td>
+                <td><span class="pill" :class="statusClass(activity.status)">{{ activity.status }}</span></td>
               </tr>
             </tbody>
           </table>
         </div>
-        
-        <div v-else class="placeholder-content">
-          <p class="text-secondary">Sales charts and recent order logs will appear here once you have transactions.</p>
+
+        <div v-else class="empty">
+          <p>No sales yet. Add products or run a bulk import to start selling.</p>
+          <button type="button" class="btn primary" @click="$emit('switch-tab', 'bulk')">Start bulk upload</button>
         </div>
-      </div>
-    </div>
+      </section>
+    </template>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { 
-  Package as ProductIcon, 
-  ShoppingBag as OrderIcon, 
-  TrendingUp as SalesIcon,
-  Zap as ActivityIcon
+import {
+  Package as ProductIcon,
+  ShoppingBag as OrderIcon,
+  TrendingUp as SalesIcon
 } from 'lucide-vue-next';
 import vendorService from '@/services/vendor.service';
 
-const emit = defineEmits(['switch-tab']);
+defineEmits(['switch-tab']);
 
-const stats = ref({
-  totalProducts: 0,
-  totalSales: 0,
-  totalOrders: 0
-});
-
+const loading = ref(true);
+const error = ref('');
+const activities = ref([]);
 const statCards = ref([
-  { label: 'Active Products', value: '0', icon: ProductIcon, color: 'var(--color-blue-primary)' },
-  { label: 'Total Orders', value: '0', icon: OrderIcon, color: '#10b981' },
-  { label: 'Gross Sales', value: '₦0.00', icon: SalesIcon, color: '#f59e0b' }
+  { label: 'Active products', value: '0', icon: ProductIcon, color: 'var(--color-primary)' },
+  { label: 'Total orders', value: '0', icon: OrderIcon, color: 'var(--color-success)' },
+  { label: 'Gross sales', value: '₦0', icon: SalesIcon, color: '#f59e0b' }
 ]);
 
+const formatDate = (d) => {
+  if (!d) return '—';
+  try {
+    return new Date(d).toLocaleDateString();
+  } catch {
+    return d;
+  }
+};
+
+const statusClass = (status) => {
+  const s = String(status || '').toLowerCase();
+  if (s.includes('deliver') || s.includes('complete') || s.includes('paid')) return 'ok';
+  if (s.includes('cancel') || s.includes('fail')) return 'err';
+  if (s.includes('ship') || s.includes('process')) return 'info';
+  return 'warn';
+};
+
 const fetchStats = async () => {
+  loading.value = true;
+  error.value = '';
   try {
     const data = await vendorService.getDashboardStats();
-    stats.value = data;
-    
-    statCards.value[0].value = data.totalProducts.toString();
-    statCards.value[1].value = data.totalOrders.toString();
-    statCards.value[2].value = `₦${data.totalSales.toLocaleString()}`;
+    statCards.value[0].value = String(data.totalProducts ?? data.total_products ?? 0);
+    statCards.value[1].value = String(data.totalOrders ?? data.total_orders ?? 0);
+    const sales = data.totalSales ?? data.total_sales ?? 0;
+    statCards.value[2].value = `₦${Number(sales).toLocaleString()}`;
+    activities.value = data.recentActivity || data.recent_activity || [];
   } catch (err) {
     console.error('Failed to fetch vendor stats', err);
+    error.value = err.response?.data?.message || 'Could not load vendor dashboard stats.';
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -95,119 +126,223 @@ onMounted(fetchStats);
 </script>
 
 <style scoped>
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--space-md);
+.vendor-dash {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.stat-card {
-  padding: 1.5rem;
+.state,
+.empty {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 1.25rem;
+  gap: 0.75rem;
+  padding: 2rem 1rem;
+  text-align: center;
+  color: var(--text-secondary);
 }
 
-.stat-icon-wrapper {
-  width: 48px;
-  height: 48px;
+.loader {
+  width: 26px;
+  height: 26px;
+  border: 3px solid var(--border-color);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.banner {
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  background: var(--status-warn-bg);
+  color: var(--status-warn-fg);
+  border: 1px solid var(--status-warn-border);
+  font-size: 0.88rem;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.stat {
+  padding: 1rem;
+  border-radius: 16px;
   background: var(--bg-secondary);
-  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
   display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.stat-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+}
+
+.stat-icon :deep(svg) {
+  width: 18px;
+  height: 18px;
 }
 
 .stat-label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  margin-bottom: 2px;
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
 }
 
 .stat-value {
-  font-size: 1.25rem;
-  font-weight: 800;
+  margin: 0.2rem 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.05rem, 3.5vw, 1.4rem);
+  font-weight: 500;
+  color: var(--text-primary);
 }
 
-.mt-8 { margin-top: 2rem; }
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
+.quick {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem;
 }
 
-.btn-text {
-  background: none;
-  border: none;
-  color: var(--color-blue-primary);
+.quick-btn {
+  min-height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
   font-weight: 700;
   font-size: 0.85rem;
+  font-family: inherit;
   cursor: pointer;
 }
 
-.placeholder-content {
-  padding: 3rem;
-  text-align: center;
-  border: 1px dashed var(--border-color);
-  border-radius: var(--radius-md);
+.quick-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
-.icon-md { width: 24px; height: 24px; }
+.panel {
+  padding: 1rem;
+  border-radius: 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+}
 
-/* Activity Table Styles */
-.activity-table-wrapper {
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+}
+
+.panel-head h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.text-btn {
+  border: none;
+  background: none;
+  color: var(--color-primary);
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.table-wrap {
   overflow-x: auto;
-  margin: -1.5rem;
-  margin-top: 0;
+  -webkit-overflow-scrolling: touch;
 }
 
-.activity-table {
+table {
   width: 100%;
   border-collapse: collapse;
-  white-space: nowrap;
+  min-width: 560px;
+  font-size: 0.88rem;
 }
 
-.activity-table th {
+th,
+td {
   text-align: left;
-  padding: 1rem 1.5rem;
-  font-size: 0.75rem;
+  padding: 0.7rem 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+th {
+  font-size: 0.72rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-secondary);
-  border-bottom: 1px solid var(--border-color);
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
 }
 
-.activity-table td {
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--border-color);
-  font-size: 0.9rem;
-}
-
-.order-id { font-weight: 700; color: var(--color-blue-primary); }
-.product-cell { font-weight: 600; max-width: 250px; overflow: hidden; text-overflow: ellipsis; }
-.amount { font-weight: 800; color: var(--text-primary); }
-.date { color: var(--text-secondary); }
-
-.status-badge {
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 0.75rem;
+.pill {
+  display: inline-flex;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
   font-weight: 700;
   text-transform: capitalize;
 }
 
-.status-badge.pending { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
-.status-badge.processing { background: rgba(0, 102, 204, 0.1); color: #0066cc; }
-.status-badge.shipped { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
-.status-badge.delivered { background: rgba(16, 185, 129, 0.1); color: #10b981; }
-.status-badge.cancelled { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+.pill.ok { background: var(--status-ok-bg); color: var(--status-ok-fg); }
+.pill.warn { background: var(--status-warn-bg); color: var(--status-warn-fg); }
+.pill.err { background: var(--status-err-bg); color: var(--status-err-fg); }
+.pill.info { background: var(--status-info-bg); color: var(--status-info-fg); }
 
-@media (max-width: 768px) {
-  .activity-table td, .activity-table th {
-    padding: 0.75rem 1rem;
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 1.1rem;
+  border-radius: 12px;
+  border: none;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.btn.primary {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+@media (max-width: 520px) {
+  .stats {
+    grid-template-columns: 1fr;
+  }
+
+  .stat {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+@media (min-width: 900px) {
+  .quick {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .stat {
+    flex-direction: row;
+    align-items: center;
   }
 }
 </style>

@@ -1,73 +1,72 @@
 <template>
-  <div class="content-section">
-    <!-- Redirect/Fallback for non-approved users -->
-    <div v-if="!isLoading && status !== 'approved'" class="redirect-card glass-card">
-      <div class="status-icon-wrapper">
-        <ClockIcon v-if="status === 'pending'" class="status-icon pending" />
-        <AlertTriangleIcon v-else-if="status === 'rejected'" class="status-icon rejected" />
-        <StoreIcon v-else class="status-icon" />
+  <div class="vendor-hub">
+    <div v-if="isLoading" class="state">
+      <span class="loader"></span>
+      <p>Checking vendor access…</p>
+    </div>
+
+    <div v-else-if="status !== 'approved'" class="gate">
+      <div class="gate-icon">
+        <ClockIcon v-if="status === 'pending'" />
+        <AlertTriangleIcon v-else-if="status === 'rejected'" />
+        <StoreIcon v-else />
       </div>
-      <h3>Vendor Account Required</h3>
-      <p v-if="status === 'pending'">Your application is still under review. You can track progress on the application page.</p>
-      <p v-else-if="status === 'rejected'">Your application was not approved. Please visit the application page for details.</p>
-      <p v-else>You need a vendor account to access these tools.</p>
-      
-      <router-link to="/vendor-apply" class="btn primary-btn">
-        {{ status === null ? 'Become a Vendor' : 'View Application Status' }}
+      <h3>Vendor account required</h3>
+      <p v-if="status === 'pending'">Your application is under review. Track progress on the application page.</p>
+      <p v-else-if="status === 'rejected'">Your application was not approved. Open the application page for details.</p>
+      <p v-else>Apply once to unlock catalog tools, bulk import, wallet, and sales.</p>
+      <router-link to="/vendor-apply" class="btn primary">
+        {{ status === null ? 'Become a vendor' : 'View application' }}
       </router-link>
     </div>
 
-    <!-- Approved State: Full Dashboard -->
-    <div v-else-if="status === 'approved'" class="dashboard-area">
-      <div class="dashboard-nav-tabs">
-        <button 
-          v-for="tab in tabs" 
+    <div v-else class="hub">
+      <div class="tab-rail" role="tablist" aria-label="Vendor sections">
+        <button
+          v-for="tab in tabs"
           :key="tab.id"
-          :class="['tab-btn', { active: currentTab === tab.id }]"
+          type="button"
+          role="tab"
+          class="tab"
+          :class="{ active: currentTab === tab.id }"
+          :aria-selected="currentTab === tab.id"
           @click="currentTab = tab.id"
         >
-          <component :is="tab.icon" class="icon-sm" />
-          {{ tab.label }}
+          <component :is="tab.icon" />
+          <span>{{ tab.label }}</span>
         </button>
       </div>
 
-      <div class="tab-content mt-6">
+      <div class="tab-panel">
         <VendorDashboard v-if="currentTab === 'overview'" @switch-tab="id => currentTab = id" />
-        <VendorProducts v-if="currentTab === 'products'" />
-        <VendorBulkUpload v-if="currentTab === 'bulk'" @imported="currentTab = 'batches'" />
-        <VendorBatchDashboard v-if="currentTab === 'batches'" />
-        <VendorAds v-if="currentTab === 'ads'" />
-        <VendorSettings v-if="currentTab === 'settings'" />
-        <VendorWallet v-if="currentTab === 'wallet'" />
-        <div v-if="currentTab === 'orders'">
+        <VendorProducts v-else-if="currentTab === 'products'" />
+        <VendorBulkUpload v-else-if="currentTab === 'bulk'" @imported="currentTab = 'batches'" />
+        <VendorBatchDashboard v-else-if="currentTab === 'batches'" />
+        <VendorSettings v-else-if="currentTab === 'settings'" />
+        <VendorWallet v-else-if="currentTab === 'wallet'" />
+        <div v-else-if="currentTab === 'orders'">
           <VendorOrderDetails v-if="selectedOrderId" :order-id="selectedOrderId" @back="selectedOrderId = null" />
           <VendorOrders v-else @view-details="id => selectedOrderId = id" />
         </div>
       </div>
     </div>
-
-    <!-- Loading State -->
-    <div v-if="isLoading" class="loader-container">
-      <span class="loader"></span>
-    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { ref, onMounted, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import vendorService from '@/services/vendor.service';
 import VendorDashboard from './VendorDashboard.vue';
 import VendorProducts from './VendorProducts.vue';
 import VendorBulkUpload from './VendorBulkUpload.vue';
 import VendorBatchDashboard from './VendorBatchDashboard.vue';
-import VendorAds from './VendorAds.vue';
 import VendorOrders from './VendorOrders.vue';
 import VendorOrderDetails from './VendorOrderDetails.vue';
 import VendorSettings from './VendorSettings.vue';
 import VendorWallet from './VendorWallet.vue';
-import { 
-  Clock as ClockIcon, 
+import {
+  Clock as ClockIcon,
   AlertTriangle as AlertTriangleIcon,
   LayoutDashboard as DashboardIcon,
   Package as ProductIcon,
@@ -76,11 +75,11 @@ import {
   Settings as SettingsIcon,
   Upload as UploadIcon,
   Layers as BatchesIcon,
-  Megaphone as AdsIcon,
   Store as StoreIcon
 } from 'lucide-vue-next';
 
 const route = useRoute();
+const router = useRouter();
 const status = ref(null);
 const isLoading = ref(true);
 const currentTab = ref('overview');
@@ -89,9 +88,8 @@ const selectedOrderId = ref(null);
 const tabs = [
   { id: 'overview', label: 'Overview', icon: DashboardIcon },
   { id: 'products', label: 'Products', icon: ProductIcon },
-  { id: 'bulk', label: 'Bulk Upload', icon: UploadIcon },
+  { id: 'bulk', label: 'Bulk', icon: UploadIcon },
   { id: 'batches', label: 'Batches', icon: BatchesIcon },
-  { id: 'ads', label: 'Ads', icon: AdsIcon },
   { id: 'orders', label: 'Orders', icon: ShoppingBagIcon },
   { id: 'wallet', label: 'Wallet', icon: WalletIcon },
   { id: 'settings', label: 'Settings', icon: SettingsIcon }
@@ -108,127 +106,174 @@ const fetchStatus = async () => {
   }
 };
 
+watch(currentTab, (id) => {
+  selectedOrderId.value = null;
+  if (route.query.tab !== id) {
+    router.replace({ query: { ...route.query, tab: id } });
+  }
+});
+
 onMounted(() => {
   fetchStatus();
-  if (route.query.tab && tabs.some(t => t.id === route.query.tab)) {
+  if (route.query.tab && tabs.some((t) => t.id === route.query.tab)) {
     currentTab.value = route.query.tab;
   }
 });
 </script>
 
 <style scoped>
-.redirect-card {
-  padding: 5rem 3rem;
-  text-align: center;
+.vendor-hub {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.state,
+.gate {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.5rem;
-}
-
-.status-icon-wrapper {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  text-align: center;
+  gap: 0.75rem;
+  padding: 2.5rem 1.25rem;
+  border-radius: 18px;
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
-}
-
-.status-icon { width: 32px; height: 32px; color: var(--text-secondary); }
-.status-icon.pending { color: var(--color-blue-primary); }
-.status-icon.rejected { color: #ef4444; }
-
-.redirect-card h3 { font-size: 1.75rem; font-weight: 800; }
-.redirect-card p { color: var(--text-secondary); max-width: 450px; font-size: 1.05rem; line-height: 1.6; }
-
-.loader-container {
-  display: flex;
-  justify-content: center;
-  padding: 5rem;
-}
-
-/* Vendor Dashboard Specifics */
-.dashboard-nav-tabs {
-  display: flex;
-  gap: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--border-color);
-  overflow-x: auto;
-}
-
-.tab-btn {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 20px;
-  background: transparent;
-  border: none;
-  border-radius: var(--radius-md);
   color: var(--text-secondary);
-  font-weight: 700;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.2s;
 }
 
-.tab-btn:hover {
-  background: var(--bg-secondary);
+.gate h3 {
+  margin: 0;
   color: var(--text-primary);
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-size: clamp(1.2rem, 4vw, 1.45rem);
 }
 
-.tab-btn.active {
-  background: var(--color-blue-primary);
-  color: white;
+.gate p {
+  margin: 0;
+  max-width: 28rem;
+  line-height: 1.5;
 }
 
-.mt-6 { margin-top: 1.5rem; }
-
-.placeholder-view {
-  padding: 5rem 2rem;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
+.gate-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: inline-flex;
   align-items: center;
-  gap: 1.5rem;
+  justify-content: center;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  color: var(--color-primary);
 }
 
-.icon-lg { width: 64px; height: 64px; color: var(--border-color); }
+.gate-icon :deep(svg) {
+  width: 26px;
+  height: 26px;
+}
 
-.primary-btn {
-  background: var(--color-blue-primary);
-  color: white;
-  border: none;
-  padding: 1rem 2rem;
-  border-radius: var(--radius-md);
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 1.25rem;
+  border-radius: 12px;
   font-weight: 700;
+  text-decoration: none;
+  border: none;
   cursor: pointer;
-  transition: all var(--transition-speed);
+  font-family: inherit;
 }
 
-.primary-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px -5px rgba(0, 102, 204, 0.3);
+.btn.primary {
+  background: var(--color-primary);
+  color: #fff;
 }
 
 .loader {
-  width: 20px;
-  height: 20px;
+  width: 26px;
+  height: 26px;
   border: 3px solid var(--border-color);
+  border-top-color: var(--color-primary);
   border-radius: 50%;
-  border-top-color: var(--color-blue-primary);
-  animation: spin 0.8s linear infinite;
+  animation: spin 0.75s linear infinite;
 }
 
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
 
-@media (max-width: 768px) {
-  .form-grid, .form-grid-3 {
-    grid-template-columns: 1fr;
+.hub {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.tab-rail {
+  display: flex;
+  gap: 0.35rem;
+  overflow-x: auto;
+  padding: 0.4rem;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--bg-secondary) 94%, transparent);
+  border: 1px solid var(--border-color);
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+}
+
+.tab-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 0 0 auto;
+  min-height: 42px;
+  padding: 0.45rem 0.85rem;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 700;
+  font-size: 0.82rem;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  scroll-snap-align: start;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.tab :deep(svg) {
+  width: 16px;
+  height: 16px;
+}
+
+.tab:hover {
+  color: var(--text-primary);
+  background: var(--bg-primary);
+}
+
+.tab.active {
+  background: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 8px 18px -8px rgba(255, 118, 0, 0.55);
+}
+
+.tab-panel {
+  min-height: 200px;
+}
+
+@media (min-width: 900px) {
+  .tab {
+    font-size: 0.88rem;
+    padding: 0.55rem 1rem;
   }
 }
 </style>

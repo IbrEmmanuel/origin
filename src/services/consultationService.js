@@ -1,43 +1,34 @@
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+import api from './api';
 
 const consultationService = {
-    async getMyConsultations() {
-        const token = localStorage.getItem('token');
-        const response = await axios.get(`${API_URL}/consultations`, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        return response.data;
-    },
+  async getMyConsultations() {
+    const { data } = await api.get('/consultations');
+    return data;
+  },
 
-    async getConsultationTypes() {
-        const response = await axios.get(`${API_URL}/consultations/types`);
-        return response.data;
-    },
+  async getConsultationTypes() {
+    const { data } = await api.get('/consultations/types');
+    return data;
+  },
 
-    async getAvailableSlots(date) {
-        const response = await axios.get(`${API_URL}/consultations/available-slots`, {
-            params: { date }
-        });
-        return response.data;
-    },
+  async getAvailableSlots(date) {
+    const { data } = await api.get('/consultations/available-slots', {
+      params: { date }
+    });
+    return data;
+  },
 
-    async createBooking(bookingData) {
-        const token = localStorage.getItem('token');
-        const response = await axios.post(`${API_URL}/consultations`, bookingData, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        return response.data;
-    },
+  async createBooking(bookingData) {
+    const { data } = await api.post('/consultations', bookingData);
+    return data;
+  },
 
-    async verifyPayment(consultationId, reference) {
-        const token = localStorage.getItem('token');
-        const response = await axios.post(`${API_URL}/consultations/${consultationId}/verify-payment`, { reference }, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        return response.data;
-    }
+  async verifyPayment(consultationId, reference) {
+    const { data } = await api.post(`/consultations/${consultationId}/verify-payment`, {
+      reference
+    });
+    return data;
+  }
 };
 
 export default consultationService;
