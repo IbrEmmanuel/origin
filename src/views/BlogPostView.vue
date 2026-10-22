@@ -1,76 +1,88 @@
 <template>
-  <div class="post-tech">
-    <div class="grid-lines" aria-hidden="true"></div>
-    <div class="glow glow-a" aria-hidden="true"></div>
-    <div class="glow glow-b" aria-hidden="true"></div>
-
-    <div class="shell">
+  <div class="post-page">
+    <div class="container">
       <div v-if="loading" class="loading">
         <div class="skel w-24"></div>
         <div class="skel title"></div>
         <div class="skel hero"></div>
-        <p>Loading article from API…</p>
+        <p>Loading article…</p>
       </div>
 
       <template v-else-if="post">
         <article class="article">
-          <header class="header">
+          <header class="article-header">
             <router-link to="/blog" class="back">
-              <ArrowLeft /> Back to blog
+              <ArrowLeft class="icon-sm" /> Back to blog
             </router-link>
-            <p class="category">{{ post.category_name || 'Innovation' }}</p>
-            <h1>{{ post.title }}</h1>
+            <span class="section-eyebrow">{{ post.category_name || 'Innovation' }}</span>
+            <h1 class="article-title">{{ post.title }}</h1>
             <div class="meta">
               <span>{{ post.author_name || 'Origin Editorial' }}</span>
-              <span class="dot"></span>
+              <span class="dot" aria-hidden="true"></span>
               <time :datetime="post.created_at">{{ formatDate(post.created_at) }}</time>
-              <span class="dot"></span>
-              <span>{{ post.reading_minutes || 5 }} min read</span>
+              <span class="dot" aria-hidden="true"></span>
+              <span>{{ post.reading_minutes || minutes(post) }} min read</span>
             </div>
           </header>
 
-          <div v-if="post.featured_image" class="hero">
-            <img :src="getImgUrl(post.featured_image)" :alt="post.title" />
+          <div v-if="post.featured_image" class="article-hero-image-wrapper">
+            <img
+              class="article-hero-image"
+              :src="getImgUrl(post.featured_image)"
+              :alt="post.title"
+            />
           </div>
-          <div v-else class="hero hero-fallback mono">{{ initials(post.title) }}</div>
+          <div v-else class="article-hero-image-wrapper fallback">
+            <div class="hero-fallback">{{ initials(post.title) }}</div>
+          </div>
 
-          <div class="content" v-html="renderedContent"></div>
+          <div class="article-content-wrapper">
+            <div class="blog-content" v-html="renderedContent"></div>
 
-          <footer class="footer">
-            <span class="share-label">Share</span>
-            <div class="share-actions">
-              <button type="button" class="share-btn" @click="shareNative" aria-label="Share">
-                <Share2 />
-              </button>
-              <button type="button" class="share-btn" @click="copyLink" aria-label="Copy link">
-                {{ copied ? 'Copied' : 'Copy' }}
-              </button>
-            </div>
-          </footer>
+            <footer class="share-section">
+              <div>
+                <strong>Share this article</strong>
+                <p>Pass it along to someone sizing their next system.</p>
+              </div>
+              <div class="share-buttons">
+                <button type="button" class="share-btn" @click="shareNative" aria-label="Share">
+                  <Share2 class="icon-sm" />
+                </button>
+                <button type="button" class="copy-btn" @click="copyLink">
+                  {{ copied ? 'Copied' : 'Copy link' }}
+                </button>
+              </div>
+            </footer>
+          </div>
         </article>
 
         <section v-if="related.length" class="related">
           <div class="section-label">
-            <span>More in {{ post.category_name || 'this topic' }}</span>
+            <h2>More in {{ post.category_name || 'this topic' }}</h2>
             <span class="count">{{ related.length }}</span>
           </div>
-          <div class="related-grid">
+          <div class="blog-grid related-grid">
             <article
               v-for="item in related"
               :key="item.id"
-              class="related-card"
+              class="blog-card"
               @click="$router.push(`/blog/${item.slug}`)"
               @keydown.enter="$router.push(`/blog/${item.slug}`)"
               tabindex="0"
               role="link"
             >
-              <div class="related-media">
-                <img v-if="item.featured_image" :src="getImgUrl(item.featured_image)" :alt="item.title" />
-                <div v-else class="media-fallback mono">{{ initials(item.title) }}</div>
+              <div class="blog-card-image-wrapper">
+                <img
+                  v-if="item.featured_image"
+                  class="blog-card-image"
+                  :src="getImgUrl(item.featured_image)"
+                  :alt="item.title"
+                />
+                <div v-else class="blog-placeholder">{{ initials(item.title) }}</div>
               </div>
-              <div>
-                <p class="meta mono">{{ formatDate(item.created_at) }}</p>
-                <h3>{{ item.title }}</h3>
+              <div class="blog-card-content">
+                <p class="blog-card-meta">{{ formatDate(item.created_at) }}</p>
+                <h3 class="blog-card-title">{{ item.title }}</h3>
               </div>
             </article>
           </div>
@@ -78,20 +90,20 @@
 
         <section class="cta-band">
           <div>
-            <p class="eyebrow mono">Ready to act?</p>
+            <span class="section-eyebrow">Ready to act?</span>
             <h3>Turn this insight into a working system</h3>
           </div>
           <div class="cta-actions">
-            <router-link to="/account/consultations" class="btn">Book consult</router-link>
-            <router-link to="/marketplace" class="btn ghost">Shop gear</router-link>
+            <router-link to="/account/consultations" class="btn-primary">Book consult</router-link>
+            <router-link to="/marketplace" class="btn-outline">Shop gear</router-link>
           </div>
         </section>
       </template>
 
-      <div v-else class="empty">
+      <div v-else class="empty-state">
         <h1>Article not found</h1>
         <p>{{ error || 'This post may have moved or is unpublished.' }}</p>
-        <router-link to="/blog" class="btn">Return to blog</router-link>
+        <router-link to="/blog" class="btn-primary">Return to blog</router-link>
       </div>
     </div>
   </div>
@@ -167,6 +179,7 @@ const formatDate = (dateString) => {
   });
 };
 
+const minutes = (p) => blogService.readingMinutes(p?.content);
 const getImgUrl = (path) => mediaUrl(path);
 const initials = (title) =>
   String(title || 'OE')
@@ -206,383 +219,238 @@ watch(() => route.params.slug, fetchPost);
 </script>
 
 <style scoped>
-.post-tech {
-  --navy-950: #070b14;
-  --navy-900: #0c1220;
-  --navy-800: #141c2e;
-  --ink: #e8eef8;
-  --muted: #93a0b8;
-  --line: rgba(148, 163, 184, 0.14);
-  --accent: var(--color-primary, #ff7600);
-
-  position: relative;
-  isolation: isolate;
-  min-height: 100vh;
-  min-height: 100dvh;
-  overflow: hidden;
-  color: var(--ink);
-  background: var(--navy-950);
-  -webkit-font-smoothing: antialiased;
+.post-page {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  padding: clamp(2rem, 5vw, 3.5rem) 0 var(--space-xl);
+  min-height: 60vh;
 }
 
-.grid-lines {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  opacity: 0.4;
-  pointer-events: none;
-  background-image:
-    linear-gradient(to right, rgba(148, 163, 184, 0.08) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: radial-gradient(ellipse 70% 55% at 50% 20%, #000 15%, transparent 75%);
+.container {
+  width: min(100% - 2rem, 960px);
+  margin: 0 auto;
 }
 
-.glow {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 0;
-  filter: blur(72px);
-}
-
-.glow-a {
-  top: -10rem;
-  right: -3rem;
-  width: min(28rem, 85vw);
-  height: min(28rem, 85vw);
-  background: color-mix(in srgb, var(--accent) 16%, transparent);
-}
-
-.glow-b {
-  bottom: -8rem;
-  left: -5rem;
-  width: min(20rem, 70vw);
-  height: min(20rem, 70vw);
-  background: rgba(56, 189, 248, 0.08);
-}
-
-.shell {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  max-width: 48rem;
-  margin-inline: auto;
-  padding:
-    clamp(5.25rem, 12vw, 7rem)
-    clamp(1rem, 4vw, 1.5rem)
-    clamp(3rem, 8vw, 5rem);
+.loading {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 0.85rem;
+  padding: 2rem 0;
+  color: var(--text-secondary);
 }
 
-.mono, .eyebrow {
-  font-family: ui-monospace, 'JetBrains Mono', Menlo, Consolas, monospace;
+.skel {
+  background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--border-color) 50%, var(--bg-secondary) 75%);
+  background-size: 200% 100%;
+  animation: skeletonPulse 1.5s infinite linear;
+  border-radius: var(--radius-md);
+  height: 14px;
 }
+.skel.w-24 { width: 24%; }
+.skel.title { height: 42px; width: 80%; }
+.skel.hero { height: 220px; width: 100%; margin-top: 0.5rem; }
 
-.header { margin-bottom: 0.25rem; }
+.article-header {
+  text-align: center;
+  max-width: 820px;
+  margin: 0 auto var(--space-md);
+}
 
 .back {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  margin-bottom: 1.25rem;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
+  color: var(--text-secondary);
   text-decoration: none;
-  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-weight: 600;
+  font-size: 0.88rem;
+  margin-bottom: 1.25rem;
 }
 
-.back :deep(svg) { width: 14px; height: 14px; }
-.back:hover { color: var(--accent); }
+.back:hover { color: var(--color-primary); }
 
-.category {
-  margin: 0 0 0.55rem;
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
+.section-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 118, 0, 0.1);
+  border: 1px solid rgba(255, 118, 0, 0.28);
+  border-radius: var(--radius-xs);
+  padding: 5px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--color-primary);
   text-transform: uppercase;
-  color: var(--accent);
-  font-family: ui-monospace, Menlo, Consolas, monospace;
+  margin-bottom: 1rem;
 }
 
-.header h1 {
-  margin: 0;
-  font-family: var(--font-display), Georgia, serif;
-  font-size: clamp(1.75rem, 6vw, 2.85rem);
+.article-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 5vw, 3.2rem);
   font-weight: 500;
-  letter-spacing: -0.03em;
-  line-height: 1.15;
-  color: #fff;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+  color: var(--text-primary);
+  margin: 0 0 1rem;
 }
 
 .meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.55rem;
-  margin-top: 1rem;
-  font-size: 0.85rem;
-  color: var(--muted);
+  justify-content: center;
+  gap: 0.45rem;
+  color: var(--text-muted);
+  font-size: 0.88rem;
 }
 
 .dot {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: var(--line);
+  background: var(--text-muted);
 }
 
-.hero {
-  border-radius: 16px;
-  overflow: hidden;
-  border: 1px solid var(--line);
-  background: var(--navy-900);
+.article-hero-image-wrapper {
+  margin-bottom: var(--space-lg);
 }
 
-.hero img {
+.article-hero-image {
   width: 100%;
-  height: auto;
-  max-height: 460px;
+  aspect-ratio: 21 / 9;
   object-fit: cover;
-  display: block;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-color);
 }
 
-.hero-fallback,
-.media-fallback {
-  min-height: 180px;
-  display: grid;
-  place-items: center;
-  font-size: 2rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  color: color-mix(in srgb, var(--accent) 70%, #fff);
-  background:
-    radial-gradient(circle at 30% 20%, color-mix(in srgb, var(--accent) 25%, transparent), transparent 55%),
-    var(--navy-800);
-}
-
-.content {
-  font-size: clamp(1rem, 2.5vw, 1.12rem);
-  line-height: 1.8;
-  color: var(--muted);
-}
-
-.content :deep(h2),
-.content :deep(h3) {
-  color: #fff;
-  margin: 1.6rem 0 0.7rem;
-  font-family: var(--font-display), Georgia, serif;
-  letter-spacing: -0.02em;
-}
-
-.content :deep(a) { color: var(--accent); }
-.content :deep(img) {
-  max-width: 100%;
-  border-radius: 12px;
-  margin: 1rem 0;
-}
-.content :deep(p) { margin: 0 0 1rem; }
-.content :deep(ul),
-.content :deep(ol) {
-  padding-left: 1.25rem;
-  margin: 0 0 1rem;
-}
-
-.footer {
-  margin-top: 0.5rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--line);
+.article-hero-image-wrapper.fallback .hero-fallback {
+  width: 100%;
+  aspect-ratio: 21 / 9;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.share-label {
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.share-actions { display: flex; gap: 0.45rem; }
-
-.share-btn {
-  min-height: 40px;
-  min-width: 40px;
-  padding: 0 0.75rem;
-  display: inline-flex;
-  align-items: center;
   justify-content: center;
-  border-radius: 10px;
-  border: 1px solid var(--line);
-  background: rgba(12, 18, 32, 0.7);
-  color: var(--muted);
-  cursor: pointer;
-  font-family: inherit;
-  font-weight: 700;
-  font-size: 0.78rem;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  font-weight: 500;
+  color: var(--text-muted);
 }
 
-.share-btn :deep(svg) { width: 16px; height: 16px; }
-.share-btn:hover {
-  color: var(--accent);
-  border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
+.article-content-wrapper {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.related {
+  margin-top: var(--space-xl);
 }
 
 .section-label {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
-  margin-bottom: 0.85rem;
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-  font-family: ui-monospace, Menlo, Consolas, monospace;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.section-label h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 3vw, 1.75rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
 }
 
 .count {
-  min-width: 1.5rem;
-  height: 1.5rem;
-  padding: 0 0.4rem;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--line);
-  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
 }
 
 .related-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.85rem;
+  margin-top: 0;
 }
 
-.related-card {
-  display: grid;
-  grid-template-columns: 96px 1fr;
-  gap: 0.85rem;
-  padding: 0.65rem;
-  border-radius: 14px;
-  border: 1px solid var(--line);
-  background: rgba(12, 18, 32, 0.75);
+.copy-btn {
+  min-height: 44px;
+  padding: 0 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-weight: 700;
+  font-family: inherit;
   cursor: pointer;
-  outline: none;
 }
 
-.related-card:hover,
-.related-card:focus-visible {
-  border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
-}
-
-.related-media {
-  border-radius: 10px;
-  overflow: hidden;
-  background: var(--navy-800);
-  aspect-ratio: 1;
-}
-
-.related-media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.related-card h3 {
-  margin: 0.25rem 0 0;
-  color: #fff;
-  font-size: 0.95rem;
-  font-weight: 600;
-  line-height: 1.35;
+.copy-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
 .cta-band {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  padding: 1.25rem;
-  border-radius: 16px;
-  border: 1px solid var(--line);
-  background:
-    radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 45%),
-    rgba(12, 18, 32, 0.85);
+  gap: 1.25rem;
+  margin-top: var(--space-xl);
+  padding: 1.75rem;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
 }
 
 .cta-band h3 {
-  margin: 0.2rem 0 0;
-  color: #fff;
-  font-family: var(--font-display), Georgia, serif;
+  margin: 0.65rem 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 3vw, 1.75rem);
   font-weight: 500;
+  letter-spacing: -0.02em;
 }
 
 .cta-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.55rem;
+  gap: 0.65rem;
 }
 
-.btn {
+.cta-actions .btn-primary,
+.cta-actions .btn-outline,
+.empty-state .btn-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 44px;
+  min-height: 46px;
   padding: 0 1.15rem;
-  border-radius: 12px;
-  background: var(--accent);
-  color: #fff;
-  font-weight: 700;
   text-decoration: none;
+  font-weight: 700;
+  font-size: 0.9rem;
+  border-radius: var(--radius-sm);
 }
 
-.btn.ghost {
-  background: transparent;
-  border: 1px solid var(--line);
+.empty-state h1 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  margin-bottom: 0.5rem;
 }
 
-.loading,
-.empty {
-  text-align: center;
-  padding: 2rem 0;
-  color: var(--muted);
+.empty-state p {
+  color: var(--text-secondary);
+  margin-bottom: 1.25rem;
 }
 
-.empty h1 { color: #fff; margin-bottom: 0.5rem; }
-
-.skel {
-  margin: 0 auto 1rem;
-  height: 14px;
-  border-radius: 8px;
-  background: linear-gradient(90deg, rgba(255,255,255,0.04), rgba(255,255,255,0.1), rgba(255,255,255,0.04));
-  background-size: 200% 100%;
-  animation: shimmer 1.2s linear infinite;
-}
-
-.skel.w-24 { width: 6rem; }
-.skel.title { width: min(90%, 28rem); height: 2.5rem; }
-.skel.hero { width: 100%; height: min(40vw, 280px); border-radius: 16px; }
-
-@keyframes shimmer { to { background-position: -200% 0; } }
-
-@media (min-width: 720px) {
-  .related-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .related-card { grid-template-columns: 1fr; }
+@media (min-width: 768px) {
   .cta-band {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
   }
-}
-
-@media (max-width: 560px) {
-  .footer { flex-direction: column; align-items: flex-start; }
 }
 </style>

@@ -1,15 +1,14 @@
 <template>
-  <div class="blog-tech">
-    <div class="grid-lines" aria-hidden="true"></div>
-    <div class="glow glow-a" aria-hidden="true"></div>
-    <div class="glow glow-b" aria-hidden="true"></div>
-
-    <div class="blog-shell">
-      <header class="hero">
-        <p class="eyebrow">Live from Origin · /api/blog</p>
-        <h1>Origin <span class="accent">Blog</span></h1>
-        <p class="lede">
-          Field guides, Nigeria power insights, and solar strategy — pulled live from the Origin API.
+  <div class="blog-page">
+    <header class="page-header">
+      <div class="container">
+        <span class="section-eyebrow">
+          <span class="eyebrow-dot" aria-hidden="true"></span>
+          Insights
+        </span>
+        <h1 class="page-title">Origin <span class="highlight">Blog</span></h1>
+        <p class="page-subtitle">
+          Field guides, Nigeria power insights, and solar strategy from the Origin team.
         </p>
 
         <form class="search-bar" @submit.prevent="runSearch">
@@ -24,10 +23,10 @@
           <button type="submit" class="search-btn" :disabled="loading">Search</button>
         </form>
 
-        <div class="filter-rail" role="tablist" aria-label="Blog categories">
+        <div class="category-filter-container" role="tablist" aria-label="Blog categories">
           <button
             type="button"
-            class="chip"
+            class="category-btn"
             :class="{ active: !selectedCategory }"
             @click="selectCategory(null)"
           >
@@ -37,19 +36,24 @@
             v-for="cat in categories"
             :key="cat.id"
             type="button"
-            class="chip"
+            class="category-btn"
             :class="{ active: selectedCategory === cat.slug }"
             @click="selectCategory(cat.slug)"
           >
             {{ cat.name }}
           </button>
         </div>
-      </header>
+      </div>
+    </header>
 
+    <div class="container page-section">
       <!-- Featured -->
-      <section v-if="featured.length && !searchQuery && !selectedCategory" class="featured-section">
+      <section
+        v-if="featured.length && !searchQuery && !selectedCategory"
+        class="featured-section"
+      >
         <div class="section-label">
-          <span>Featured</span>
+          <h2>Featured</h2>
           <span class="count">{{ featured.length }}</span>
         </div>
         <div class="featured-grid">
@@ -64,17 +68,22 @@
             role="link"
           >
             <div class="featured-media">
-              <img v-if="post.featured_image" :src="getImgUrl(post.featured_image)" :alt="post.title" />
-              <div v-else class="media-fallback mono">{{ initials(post.title) }}</div>
-              <span class="badge">{{ post.category_name }}</span>
+              <img
+                v-if="post.featured_image"
+                :src="getImgUrl(post.featured_image)"
+                :alt="post.title"
+              />
+              <div v-else class="media-fallback">{{ initials(post.title) }}</div>
+              <span class="blog-card-badge">{{ post.category_name }}</span>
             </div>
             <div class="featured-body">
-              <p class="meta mono">
-                <CalendarIcon /> {{ formatDate(post.created_at) }} · {{ minutes(post) }} min
+              <p class="blog-card-meta">
+                <CalendarIcon class="icon-meta" />
+                {{ formatDate(post.created_at) }} · {{ minutes(post) }} min
               </p>
-              <h2>{{ post.title }}</h2>
+              <h3>{{ post.title }}</h3>
               <p>{{ excerpt(post) }}</p>
-              <span class="cta">Read feature <ArrowRightIcon /></span>
+              <span class="blog-read-more">Read feature <ArrowRightIcon class="icon-read" /></span>
             </div>
           </article>
         </div>
@@ -83,14 +92,17 @@
       <!-- Feed -->
       <section class="feed" aria-live="polite">
         <div class="section-label">
-          <span>{{ feedTitle }}</span>
+          <h2>{{ feedTitle }}</h2>
           <span class="count">{{ posts.length }}</span>
         </div>
 
-        <div v-if="error" class="banner">{{ error }} <button type="button" @click="reload">Retry</button></div>
+        <div v-if="error" class="banner">
+          {{ error }}
+          <button type="button" @click="reload">Retry</button>
+        </div>
 
-        <div v-if="loading" class="grid">
-          <div v-for="i in 6" :key="i" class="card skeleton-card">
+        <div v-if="loading" class="blog-grid">
+          <div v-for="i in 6" :key="i" class="blog-card skeleton-card">
             <div class="skel media"></div>
             <div class="skel line w-30"></div>
             <div class="skel line w-90"></div>
@@ -98,53 +110,61 @@
           </div>
         </div>
 
-        <div v-else-if="!posts.length" class="empty">
-          <BookOpen class="empty-icon" />
+        <div v-else-if="!posts.length" class="empty-state">
+          <BookOpen class="empty-state-icon" />
           <h3>No matching stories</h3>
           <p>Try another category or clear your search.</p>
           <button type="button" class="btn-primary" @click="clearFilters">Reset filters</button>
         </div>
 
-        <div v-else class="grid">
+        <div v-else class="blog-grid">
           <article
-            v-for="(post, index) in posts"
+            v-for="post in posts"
             :key="post.id"
-            class="card"
-            :style="{ '--delay': `${index * 50}ms` }"
+            class="blog-card"
             @click="goPost(post.slug)"
             @keydown.enter="goPost(post.slug)"
             tabindex="0"
             role="link"
           >
-            <div class="media">
-              <img v-if="post.featured_image" :src="getImgUrl(post.featured_image)" :alt="post.title" loading="lazy" />
-              <div v-else class="media-fallback mono">{{ initials(post.title) }}</div>
-              <span class="badge">{{ post.category_name || 'General' }}</span>
+            <div class="blog-card-image-wrapper">
+              <img
+                v-if="post.featured_image"
+                class="blog-card-image"
+                :src="getImgUrl(post.featured_image)"
+                :alt="post.title"
+                loading="lazy"
+              />
+              <div v-else class="blog-placeholder">{{ initials(post.title) }}</div>
+              <span class="blog-card-badge">{{ post.category_name || 'General' }}</span>
             </div>
-            <div class="body">
-              <div class="meta mono">
-                <CalendarIcon />
+            <div class="blog-card-content">
+              <div class="blog-card-meta">
+                <CalendarIcon class="icon-meta" />
                 <time :datetime="post.created_at">{{ formatDate(post.created_at) }}</time>
                 <span>· {{ minutes(post) }} min</span>
               </div>
-              <h2>{{ post.title }}</h2>
-              <p>{{ excerpt(post) }}</p>
-              <div class="cta">Read article <ArrowRightIcon /></div>
+              <h3 class="blog-card-title">{{ post.title }}</h3>
+              <p class="blog-card-excerpt">{{ excerpt(post) }}</p>
+              <div class="blog-card-footer">
+                <span class="blog-read-more">
+                  Read article <ArrowRightIcon class="icon-read" />
+                </span>
+              </div>
             </div>
           </article>
         </div>
       </section>
 
-      <!-- CTA band -->
       <section class="cta-band">
         <div>
-          <p class="eyebrow">Next step</p>
+          <span class="section-eyebrow">Next step</span>
           <h3>Need a system sized for your site?</h3>
           <p>Talk to Origin engineers or browse live marketplace gear.</p>
         </div>
         <div class="cta-actions">
           <router-link to="/account/consultations" class="btn-primary">Book consult</router-link>
-          <router-link to="/marketplace" class="btn-ghost">Marketplace</router-link>
+          <router-link to="/marketplace" class="btn-outline">Marketplace</router-link>
         </div>
       </section>
     </div>
@@ -155,7 +175,6 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import {
-  Image as ImageIcon,
   ArrowRight as ArrowRightIcon,
   BookOpen,
   Calendar as CalendarIcon,
@@ -309,221 +328,150 @@ watch(
 </script>
 
 <style scoped>
-.blog-tech {
-  --navy-950: #070b14;
-  --navy-900: #0c1220;
-  --navy-800: #141c2e;
-  --ink: #e8eef8;
-  --muted: #93a0b8;
-  --line: rgba(148, 163, 184, 0.14);
-  --accent: var(--color-primary, #ff7600);
-
-  position: relative;
-  isolation: isolate;
-  min-height: 100vh;
-  min-height: 100dvh;
-  overflow: hidden;
-  color: var(--ink);
-  background: var(--navy-950);
-  -webkit-font-smoothing: antialiased;
+.blog-page {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 60vh;
 }
 
-.grid-lines {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  opacity: 0.45;
-  pointer-events: none;
-  background-image:
-    linear-gradient(to right, rgba(148, 163, 184, 0.08) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 20%, transparent 75%);
+.container {
+  width: min(100% - 2rem, 1120px);
+  margin: 0 auto;
 }
 
-.glow {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 0;
-  filter: blur(72px);
+.page-header {
+  padding: clamp(3rem, 8vw, 5.5rem) 0 var(--space-lg);
+  text-align: center;
+  background: linear-gradient(to bottom, var(--bg-secondary), transparent);
+  border-bottom: 1px solid var(--border-color);
 }
 
-.glow-a {
-  top: -10rem;
-  right: -4rem;
-  width: min(30rem, 90vw);
-  height: min(30rem, 90vw);
-  background: color-mix(in srgb, var(--accent) 18%, transparent);
-}
-
-.glow-b {
-  bottom: -8rem;
-  left: -6rem;
-  width: min(22rem, 70vw);
-  height: min(22rem, 70vw);
-  background: rgba(56, 189, 248, 0.1);
-}
-
-.blog-shell {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  max-width: 64rem;
-  margin-inline: auto;
-  padding:
-    clamp(5.5rem, 12vw, 7.5rem)
-    clamp(1rem, 4vw, 1.5rem)
-    clamp(3rem, 8vw, 5rem);
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
-.hero { text-align: center; }
-
-.eyebrow, .mono {
-  font-family: ui-monospace, 'JetBrains Mono', Menlo, Consolas, monospace;
-}
-
-.eyebrow {
-  margin: 0 0 0.75rem;
-  font-size: 0.72rem;
+.section-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 118, 0, 0.1);
+  border: 1px solid rgba(255, 118, 0, 0.28);
+  border-radius: var(--radius-xs);
+  padding: 5px 14px;
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.1em;
+  color: var(--color-primary);
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--accent) 85%, #fff);
+  margin-bottom: 1.25rem;
 }
 
-.hero h1 {
-  margin: 0;
-  font-family: var(--font-display), Georgia, serif;
-  font-size: clamp(2.1rem, 7vw, 3.5rem);
+.eyebrow-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--color-primary);
+}
+
+.page-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 6vw, 3.75rem);
   font-weight: 500;
-  letter-spacing: -0.035em;
-  line-height: 1.08;
-  color: #fff;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: var(--text-primary);
+  margin: 0 0 0.85rem;
 }
 
-.accent {
-  background: linear-gradient(120deg, var(--accent), #ffb347 55%, #7dd3fc);
+.page-title .highlight {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
   -webkit-background-clip: text;
   background-clip: text;
-  color: transparent;
+  -webkit-text-fill-color: transparent;
 }
 
-.lede {
-  margin: 0.9rem auto 0;
+.page-subtitle {
   max-width: 36rem;
-  font-size: clamp(0.95rem, 2.6vw, 1.05rem);
-  line-height: 1.6;
-  color: var(--muted);
+  margin: 0 auto 1.75rem;
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  line-height: 1.55;
 }
 
 .search-bar {
-  margin: 1.35rem auto 0;
-  max-width: 34rem;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
+  display: flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.35rem 0.35rem 0.35rem 0.85rem;
-  border-radius: 999px;
-  border: 1px solid var(--line);
-  background: rgba(12, 18, 32, 0.78);
-  backdrop-filter: blur(12px);
+  gap: 0.5rem;
+  max-width: 520px;
+  margin: 0 auto 1.5rem;
+  padding: 0.35rem 0.35rem 0.35rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  box-shadow: var(--shadow-sm);
 }
 
 .search-icon {
-  width: 16px;
-  height: 16px;
-  color: var(--muted);
+  width: 18px;
+  height: 18px;
+  color: var(--text-muted);
+  flex-shrink: 0;
 }
 
 .search-bar input {
-  min-height: 42px;
+  flex: 1;
+  min-width: 0;
   border: none;
   background: transparent;
-  color: #fff;
+  color: var(--text-primary);
   font: inherit;
+  font-size: 0.95rem;
   outline: none;
-  width: 100%;
+  min-height: 42px;
 }
-
-.search-bar input::placeholder { color: var(--muted); }
 
 .search-btn {
-  min-height: 40px;
+  min-height: 42px;
   padding: 0 1rem;
   border: none;
-  border-radius: 999px;
-  background: var(--accent);
+  border-radius: var(--radius-sm);
+  background: var(--color-primary);
   color: #fff;
   font-weight: 700;
+  font-size: 0.85rem;
   font-family: inherit;
   cursor: pointer;
 }
 
-.filter-rail {
-  display: flex;
-  justify-content: center;
-  gap: 0.45rem;
-  margin-top: 1.15rem;
-  padding: 0.35rem;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
+.search-btn:disabled { opacity: 0.65; }
 
-.filter-rail::-webkit-scrollbar { display: none; }
-
-.chip {
-  flex: 0 0 auto;
-  min-height: 40px;
-  padding: 0.45rem 0.95rem;
-  border-radius: 999px;
-  border: 1px solid var(--line);
-  background: rgba(20, 28, 46, 0.72);
-  color: var(--muted);
-  font-size: 0.82rem;
-  font-weight: 700;
-  font-family: inherit;
-  cursor: pointer;
-  white-space: nowrap;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.chip.active {
-  color: #fff;
-  background: color-mix(in srgb, var(--accent) 88%, #000);
-  border-color: transparent;
-  box-shadow: 0 10px 24px -10px color-mix(in srgb, var(--accent) 70%, transparent);
-}
+.page-section { padding: var(--space-lg) 0 var(--space-xl); }
 
 .section-label {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
-  margin-bottom: 0.85rem;
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-  font-family: ui-monospace, Menlo, Consolas, monospace;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.section-label h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 3vw, 1.75rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
 }
 
 .count {
-  min-width: 1.5rem;
-  height: 1.5rem;
-  padding: 0 0.4rem;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--line);
-  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
 }
+
+.featured-section { margin-bottom: var(--space-lg); }
 
 .featured-grid {
   display: grid;
@@ -534,281 +482,167 @@ watch(
 .featured-card {
   display: grid;
   grid-template-columns: 1fr;
-  border-radius: 18px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
   overflow: hidden;
-  border: 1px solid var(--line);
-  background: color-mix(in srgb, var(--navy-900) 88%, #000);
+  background: var(--bg-primary);
   cursor: pointer;
-  outline: none;
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition-speed), box-shadow var(--transition-speed), transform var(--transition-bounce);
 }
 
-.featured-card:hover,
-.featured-card:focus-visible {
-  border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+.featured-card:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
 .featured-media {
   position: relative;
   aspect-ratio: 16 / 10;
-  background: var(--navy-800);
+  background: var(--bg-secondary);
   overflow: hidden;
 }
 
-.featured-media img,
-.media img {
+.featured-media img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
+}
+
+.media-fallback,
+.blog-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 500;
 }
 
 .featured-body {
-  padding: 1.15rem;
+  padding: 1.25rem 1.35rem 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 0.55rem;
 }
 
-.featured-body h2,
-.body h2 {
+.featured-body h3 {
   margin: 0;
-  font-family: var(--font-display), Georgia, serif;
-  font-size: clamp(1.05rem, 3.2vw, 1.35rem);
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 2.5vw, 1.55rem);
   font-weight: 500;
   letter-spacing: -0.02em;
-  color: #fff;
-  line-height: 1.25;
+  line-height: 1.2;
+  color: var(--text-primary);
 }
 
-.featured-body p,
-.body p {
+.featured-body p {
   margin: 0;
-  color: var(--muted);
-  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-size: 0.92rem;
   line-height: 1.55;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
-}
-
-.card {
-  display: flex;
-  flex-direction: column;
-  border-radius: 18px;
-  overflow: hidden;
-  background: color-mix(in srgb, var(--navy-900) 88%, #000);
-  border: 1px solid var(--line);
-  cursor: pointer;
-  outline: none;
-  animation: rise 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
-  animation-delay: var(--delay, 0ms);
-}
-
-.card:hover,
-.card:focus-visible {
-  border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
-  transform: translateY(-3px);
-}
-
-.media {
-  position: relative;
-  aspect-ratio: 16 / 10;
-  overflow: hidden;
-  background: var(--navy-800);
-}
-
-.media-fallback {
-  width: 100%;
-  height: 100%;
-  display: grid;
-  place-items: center;
-  color: color-mix(in srgb, var(--accent) 70%, #fff);
-  font-size: 1.4rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  background:
-    radial-gradient(circle at 30% 20%, color-mix(in srgb, var(--accent) 25%, transparent), transparent 55%),
-    var(--navy-800);
-}
-
-.badge {
-  position: absolute;
-  top: 0.75rem;
-  left: 0.75rem;
-  padding: 0.28rem 0.65rem;
-  border-radius: 999px;
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #fff;
-  background: rgba(7, 11, 20, 0.72);
-  border: 1px solid var(--line);
-  backdrop-filter: blur(8px);
-}
-
-.body {
-  display: flex;
-  flex-direction: column;
-  gap: 0.55rem;
-  padding: 1.1rem 1.15rem 1.25rem;
-  flex: 1;
-}
-
-.meta {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.75rem;
-  color: var(--muted);
-}
-
-.meta :deep(svg) {
-  width: 13px;
-  height: 13px;
-}
-
-.cta {
-  margin-top: auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--accent);
-}
-
-.cta :deep(svg) {
-  width: 15px;
-  height: 15px;
-}
+.feed { margin-bottom: var(--space-lg); }
 
 .banner {
   margin-bottom: 1rem;
   padding: 0.85rem 1rem;
-  border-radius: 12px;
-  background: color-mix(in srgb, #f59e0b 16%, transparent);
-  color: #fdba74;
-  border: 1px solid color-mix(in srgb, #f59e0b 35%, transparent);
+  border-radius: var(--radius-md);
+  background: var(--status-warn-bg);
+  color: var(--status-warn-fg);
+  border: 1px solid var(--status-warn-border);
   display: flex;
-  gap: 0.75rem;
   align-items: center;
   justify-content: space-between;
+  gap: 0.75rem;
   flex-wrap: wrap;
+  font-size: 0.9rem;
 }
 
 .banner button {
-  border: none;
+  border: 1px solid currentColor;
   background: transparent;
-  color: #fff;
-  font-weight: 700;
-  cursor: pointer;
-  font-family: inherit;
-}
-
-.empty {
-  text-align: center;
-  padding: 3rem 1rem;
-  border-radius: 18px;
-  border: 1px dashed var(--line);
-  background: rgba(12, 18, 32, 0.55);
-}
-
-.empty-icon {
-  width: 36px;
-  height: 36px;
-  opacity: 0.45;
-  margin-bottom: 0.75rem;
-}
-
-.empty h3 { margin: 0 0 0.4rem; color: #fff; }
-.empty p { margin: 0 auto 1.1rem; max-width: 26rem; color: var(--muted); }
-
-.btn-primary,
-.btn-ghost {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 44px;
-  padding: 0 1.15rem;
-  border-radius: 12px;
+  color: inherit;
+  border-radius: var(--radius-sm);
+  padding: 0.35rem 0.75rem;
   font-weight: 700;
   font-family: inherit;
-  text-decoration: none;
   cursor: pointer;
-  border: none;
 }
 
-.btn-primary { background: var(--accent); color: #fff; }
-.btn-ghost {
-  background: transparent;
-  color: #fff;
-  border: 1px solid var(--line);
+.skeleton-card { pointer-events: none; padding: 0; }
+.skel {
+  background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--border-color) 50%, var(--bg-secondary) 75%);
+  background-size: 200% 100%;
+  animation: skeletonPulse 1.5s infinite linear;
+  border-radius: var(--radius-sm);
+  margin: 0.75rem 1rem;
 }
+.skel.media { aspect-ratio: 16/10; margin: 0; border-radius: 0; }
+.skel.line { height: 12px; }
+.skel.w-30 { width: 30%; }
+.skel.w-70 { width: 70%; }
+.skel.w-90 { width: 90%; }
 
 .cta-band {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  padding: 1.35rem;
-  border-radius: 18px;
-  border: 1px solid var(--line);
-  background:
-    radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 45%),
-    rgba(12, 18, 32, 0.85);
+  gap: 1.25rem;
+  padding: 1.75rem;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
 }
 
 .cta-band h3 {
-  margin: 0.25rem 0 0.35rem;
-  color: #fff;
-  font-family: var(--font-display), Georgia, serif;
+  margin: 0.65rem 0 0.4rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 3vw, 1.75rem);
   font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
 }
 
-.cta-band p { margin: 0; color: var(--muted); }
+.cta-band p {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
 
 .cta-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.55rem;
+  gap: 0.65rem;
 }
 
-.skeleton-card { pointer-events: none; animation: none; }
-.skel {
-  border-radius: 8px;
-  background: linear-gradient(90deg, rgba(255,255,255,0.04), rgba(255,255,255,0.09), rgba(255,255,255,0.04));
-  background-size: 200% 100%;
-  animation: shimmer 1.2s linear infinite;
-}
-.skel.media { aspect-ratio: 16/10; border-radius: 0; }
-.skel.line { height: 12px; margin: 0.65rem 1.1rem; }
-.w-30 { width: 30%; }
-.w-70 { width: 70%; }
-.w-90 { width: 90%; }
-
-@keyframes shimmer { to { background-position: -200% 0; } }
-@keyframes rise {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+.cta-actions .btn-primary,
+.cta-actions .btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 1.15rem;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.9rem;
+  border-radius: var(--radius-sm);
 }
 
 @media (min-width: 720px) {
+  .featured-grid {
+    grid-template-columns: 1.4fr 1fr;
+  }
   .featured-card.primary {
-    grid-template-columns: 1.15fr 1fr;
+    grid-row: span 2;
   }
   .featured-card.primary .featured-media {
-    aspect-ratio: auto;
-    min-height: 100%;
-  }
-  .featured-grid {
-    grid-template-columns: 1fr;
-  }
-  .grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.15rem;
+    aspect-ratio: 16 / 11;
   }
   .cta-band {
     flex-direction: row;
@@ -817,19 +651,10 @@ watch(
   }
 }
 
-@media (min-width: 960px) {
-  .grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 480px) {
-  .filter-rail { justify-content: flex-start; }
-  .search-bar {
-    grid-template-columns: auto 1fr;
-  }
-  .search-btn {
-    grid-column: 1 / -1;
+@media (min-width: 1024px) {
+  .featured-grid {
+    grid-template-columns: 1.5fr 1fr;
+    gap: 1.25rem;
   }
 }
 </style>
