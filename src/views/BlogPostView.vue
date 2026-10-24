@@ -1,23 +1,30 @@
 <template>
   <div class="post-page">
     <div class="container">
-      <div v-if="loading" class="loading">
+      <div v-if="loading" class="loading" aria-busy="true">
         <div class="skel w-24"></div>
         <div class="skel title"></div>
+        <div class="skel meta"></div>
         <div class="skel hero"></div>
-        <p>Loading article…</p>
+        <div class="skel line"></div>
+        <div class="skel line w-90"></div>
+        <div class="skel line w-70"></div>
       </div>
 
       <template v-else-if="post">
         <article class="article">
           <header class="article-header">
             <router-link to="/blog" class="back">
-              <ArrowLeft class="icon-sm" /> Back to blog
+              <ArrowLeft class="icon-sm" />
+              <span>Back to blog</span>
             </router-link>
-            <span class="section-eyebrow">{{ post.category_name || 'Innovation' }}</span>
+
+            <span class="post-cat">{{ post.category_name || 'Innovation' }}</span>
+
             <h1 class="article-title">{{ post.title }}</h1>
+
             <div class="meta">
-              <span>{{ post.author_name || 'Origin Editorial' }}</span>
+              <span class="meta-author">{{ post.author_name || 'Origin Editorial' }}</span>
               <span class="dot" aria-hidden="true"></span>
               <time :datetime="post.created_at">{{ formatDate(post.created_at) }}</time>
               <span class="dot" aria-hidden="true"></span>
@@ -25,30 +32,31 @@
             </div>
           </header>
 
-          <div v-if="post.featured_image" class="article-hero-image-wrapper">
+          <div v-if="post.featured_image" class="article-hero">
             <img
               class="article-hero-image"
               :src="getImgUrl(post.featured_image)"
               :alt="post.title"
             />
           </div>
-          <div v-else class="article-hero-image-wrapper fallback">
-            <div class="hero-fallback">{{ initials(post.title) }}</div>
+          <div v-else class="article-hero article-hero--fallback" aria-hidden="true">
+            <div class="hero-grid"></div>
+            <span class="hero-fallback">{{ initials(post.title) }}</span>
           </div>
 
-          <div class="article-content-wrapper">
+          <div class="article-body">
             <div class="blog-content" v-html="renderedContent"></div>
 
             <footer class="share-section">
-              <div>
+              <div class="share-copy">
                 <strong>Share this article</strong>
                 <p>Pass it along to someone sizing their next system.</p>
               </div>
-              <div class="share-buttons">
-                <button type="button" class="share-btn" @click="shareNative" aria-label="Share">
-                  <Share2 class="icon-sm" />
+              <div class="share-actions">
+                <button type="button" class="lp-btn lp-btn--outline lp-btn--icon" @click="shareNative" aria-label="Share">
+                  <Share2 class="lp-btn-icon" />
                 </button>
-                <button type="button" class="copy-btn" @click="copyLink">
+                <button type="button" class="lp-btn lp-btn--dark" @click="copyLink">
                   {{ copied ? 'Copied' : 'Copy link' }}
                 </button>
               </div>
@@ -58,7 +66,10 @@
 
         <section v-if="related.length" class="related">
           <div class="section-label">
-            <h2>More in {{ post.category_name || 'this topic' }}</h2>
+            <div class="section-label-copy">
+              <span class="post-cat">Continue reading</span>
+              <h2>More in {{ post.category_name || 'this topic' }}</h2>
+            </div>
             <span class="count">{{ related.length }}</span>
           </div>
           <div class="blog-grid related-grid">
@@ -83,19 +94,25 @@
               <div class="blog-card-content">
                 <p class="blog-card-meta">{{ formatDate(item.created_at) }}</p>
                 <h3 class="blog-card-title">{{ item.title }}</h3>
+                <span class="blog-read-more">Read article <ArrowRight class="icon-read" /></span>
               </div>
             </article>
           </div>
         </section>
 
         <section class="cta-band">
-          <div>
-            <span class="section-eyebrow">Ready to act?</span>
+          <div class="cta-copy">
+            <span class="post-cat">Ready to act?</span>
             <h3>Turn this insight into a working system</h3>
+            <p>Book an engineering consult or browse live marketplace gear.</p>
           </div>
           <div class="cta-actions">
-            <router-link to="/account/consultations" class="btn-primary">Book consult</router-link>
-            <router-link to="/marketplace" class="btn-outline">Shop gear</router-link>
+            <router-link to="/account/consultations" class="lp-btn lp-btn--accent">
+              Book consult
+            </router-link>
+            <router-link to="/marketplace" class="lp-btn lp-btn--outline">
+              Shop gear
+            </router-link>
           </div>
         </section>
       </template>
@@ -103,7 +120,7 @@
       <div v-else class="empty-state">
         <h1>Article not found</h1>
         <p>{{ error || 'This post may have moved or is unpublished.' }}</p>
-        <router-link to="/blog" class="btn-primary">Return to blog</router-link>
+        <router-link to="/blog" class="lp-btn lp-btn--accent">Return to blog</router-link>
       </div>
     </div>
   </div>
@@ -112,7 +129,7 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { ArrowLeft, Share2 } from 'lucide-vue-next';
+import { ArrowLeft, ArrowRight, Share2 } from 'lucide-vue-next';
 import blogService from '@/services/blog.service';
 import { mediaUrl } from '@/utils/mediaUrl';
 import { marked } from 'marked';
@@ -220,237 +237,466 @@ watch(() => route.params.slug, fetchPost);
 
 <style scoped>
 .post-page {
+  --lp-radius: var(--radius-sm);
   background: var(--bg-primary);
   color: var(--text-primary);
-  padding: clamp(2rem, 5vw, 3.5rem) 0 var(--space-xl);
-  min-height: 60vh;
+  padding: clamp(1.75rem, 4vw, 3rem) 0 clamp(4rem, 8vw, 6rem);
+  min-height: 70vh;
 }
 
 .container {
-  width: min(100% - 2rem, 960px);
+  width: min(100% - 2rem, 1080px);
   margin: 0 auto;
 }
 
+/* Loading */
 .loading {
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
-  padding: 2rem 0;
-  color: var(--text-secondary);
+  padding: 1rem 0 2rem;
 }
-
 .skel {
   background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--border-color) 50%, var(--bg-secondary) 75%);
   background-size: 200% 100%;
   animation: skeletonPulse 1.5s infinite linear;
-  border-radius: var(--radius-md);
+  border-radius: var(--lp-radius);
   height: 14px;
 }
-.skel.w-24 { width: 24%; }
-.skel.title { height: 42px; width: 80%; }
-.skel.hero { height: 220px; width: 100%; margin-top: 0.5rem; }
+.skel.w-24 { width: 140px; height: 28px; }
+.skel.title { height: 48px; width: min(100%, 720px); }
+.skel.meta { height: 14px; width: 280px; }
+.skel.hero { height: clamp(180px, 32vw, 360px); width: 100%; margin: 0.5rem 0 1rem; }
+.skel.line { height: 12px; width: 100%; }
+.skel.w-90 { width: 90%; }
+.skel.w-70 { width: 70%; }
 
+/* Header — stacked rows so nav + category never collide */
 .article-header {
-  text-align: center;
-  max-width: 820px;
-  margin: 0 auto var(--space-md);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  text-align: left;
+  max-width: 760px;
+  margin: 0 0 1.75rem;
+  position: relative;
+  z-index: 1;
 }
 
 .back {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  justify-content: center;
+  gap: 0.45rem;
+  height: 40px;
+  padding: 0 14px 0 12px;
+  margin: 0 0 1.15rem;
   color: var(--text-secondary);
   text-decoration: none;
   font-weight: 600;
-  font-size: 0.88rem;
-  margin-bottom: 1.25rem;
+  font-size: 0.82rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--lp-radius);
+  background: var(--bg-secondary);
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.back:hover {
+  color: var(--color-primary);
+  border-color: rgba(255, 118, 0, 0.35);
+  background: var(--color-orange-light);
 }
 
-.back:hover { color: var(--color-primary); }
-
-.section-eyebrow {
+.post-cat {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  background: rgba(255, 118, 0, 0.1);
-  border: 1px solid rgba(255, 118, 0, 0.28);
+  justify-content: center;
+  height: 28px;
+  max-width: 100%;
+  padding: 0 12px;
+  margin: 0 0 1rem;
+  background: rgba(255, 118, 0, 0.08);
+  border: 1px solid rgba(255, 118, 0, 0.35);
   border-radius: var(--radius-xs);
-  padding: 5px 14px;
-  font-size: 11px;
+  font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   color: var(--color-primary);
   text-transform: uppercase;
-  margin-bottom: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  position: relative;
+  z-index: 1;
 }
 
 .article-title {
   font-family: var(--font-display);
-  font-size: clamp(1.9rem, 5vw, 3.2rem);
-  font-weight: 500;
-  letter-spacing: -0.025em;
-  line-height: 1.1;
+  font-size: clamp(1.85rem, 4.5vw, 3rem);
+  font-weight: 550;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
   color: var(--text-primary);
   margin: 0 0 1rem;
+  text-align: left;
+  max-width: none;
+  width: 100%;
 }
 
 .meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
+  justify-content: flex-start;
+  gap: 0.5rem;
   color: var(--text-muted);
-  font-size: 0.88rem;
+  font-size: 0.86rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border-color);
 }
-
+.meta-author {
+  font-weight: 600;
+  color: var(--text-secondary);
+}
 .dot {
-  width: 4px;
-  height: 4px;
+  width: 3px;
+  height: 3px;
   border-radius: 50%;
   background: var(--text-muted);
+  opacity: 0.7;
 }
 
-.article-hero-image-wrapper {
-  margin-bottom: var(--space-lg);
+/* Hero — full-bleed tech plane */
+.article-hero {
+  position: relative;
+  margin: 0 0 2.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--bg-secondary);
 }
-
 .article-hero-image {
+  display: block;
   width: 100%;
   aspect-ratio: 21 / 9;
   object-fit: cover;
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg);
-  border: 1px solid var(--border-color);
 }
-
-.article-hero-image-wrapper.fallback .hero-fallback {
-  width: 100%;
+.article-hero--fallback {
   aspect-ratio: 21 / 9;
-  border-radius: var(--radius-xl);
-  border: 1px solid var(--border-color);
-  background: var(--bg-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 220px;
+}
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 118, 0, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 118, 0, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(ellipse at center, #000 20%, transparent 75%);
+}
+.hero-fallback {
+  position: relative;
+  z-index: 1;
   font-family: var(--font-display);
-  font-size: clamp(2rem, 6vw, 3.5rem);
+  font-size: clamp(2.4rem, 8vw, 4rem);
   font-weight: 500;
+  letter-spacing: -0.04em;
   color: var(--text-muted);
+  opacity: 0.55;
 }
 
-.article-content-wrapper {
-  max-width: 760px;
-  margin: 0 auto;
+/* Body — justified modern editorial */
+.article-body {
+  max-width: 720px;
+  margin: 0;
 }
 
+.blog-content {
+  color: var(--text-secondary);
+  font-size: 1.0625rem;
+  line-height: 1.8;
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+}
+.blog-content :deep(h2),
+.blog-content :deep(h3) {
+  font-family: var(--font-display);
+  color: var(--text-primary);
+  font-weight: 550;
+  letter-spacing: -0.025em;
+  text-align: left;
+  margin: 2.25rem 0 0.85rem;
+  line-height: 1.2;
+}
+.blog-content :deep(h2) { font-size: clamp(1.35rem, 2.5vw, 1.75rem); }
+.blog-content :deep(h3) { font-size: clamp(1.15rem, 2vw, 1.35rem); }
+.blog-content :deep(p) {
+  margin: 0 0 1.35rem;
+  text-align: justify;
+}
+.blog-content :deep(strong) {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+.blog-content :deep(a) {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.blog-content :deep(blockquote) {
+  border-left: 3px solid var(--color-primary);
+  padding: 1rem 1.35rem;
+  background: var(--bg-secondary);
+  border-radius: 0 var(--lp-radius) var(--lp-radius) 0;
+  font-style: italic;
+  font-size: 1.1rem;
+  margin: 1.75rem 0;
+  text-align: left;
+  color: var(--text-primary);
+}
+.blog-content :deep(ul),
+.blog-content :deep(ol) {
+  margin: 0 0 1.5rem;
+  padding-left: 1.35rem;
+  text-align: left;
+}
+.blog-content :deep(li) { margin-bottom: 0.45rem; }
+.blog-content :deep(img) {
+  width: 100%;
+  border-radius: var(--radius-md);
+  margin: 1.75rem 0;
+  border: 1px solid var(--border-color);
+}
+.blog-content :deep(code) {
+  background: var(--bg-secondary);
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+  font-size: 0.88em;
+  color: var(--color-primary);
+}
+.blog-content :deep(pre) {
+  background: var(--bg-secondary);
+  padding: 1.15rem;
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+  margin: 1.75rem 0;
+  border: 1px solid var(--border-color);
+  text-align: left;
+}
+
+/* Share */
+.share-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  margin-top: 2.75rem;
+  padding: 1.35rem 1.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+}
+.share-copy strong {
+  display: block;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+.share-copy p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+.share-actions {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 10px;
+  width: 100%;
+  max-width: 360px;
+}
+.share-actions .lp-btn { justify-content: center; }
+
+/* Related */
 .related {
-  margin-top: var(--space-xl);
+  margin-top: clamp(3rem, 6vw, 4.5rem);
+  padding-top: 2rem;
+  border-top: 1px solid var(--border-color);
 }
-
 .section-label {
   display: flex;
-  align-items: baseline;
+  align-items: flex-end;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.35rem;
 }
-
+.section-label-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.55rem;
+  min-width: 0;
+}
+.section-label-copy .post-cat { margin-bottom: 0; }
 .section-label h2 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(1.35rem, 3vw, 1.75rem);
-  font-weight: 500;
-  letter-spacing: -0.02em;
+  font-size: clamp(1.35rem, 3vw, 1.85rem);
+  font-weight: 550;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
 }
-
 .count {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 700;
+  letter-spacing: 0.06em;
   color: var(--text-muted);
-  padding: 0.2rem 0.55rem;
+  padding: 0.3rem 0.6rem;
   border-radius: var(--radius-xs);
   border: 1px solid var(--border-color);
   background: var(--bg-secondary);
 }
-
 .related-grid {
   margin-top: 0;
 }
 
-.copy-btn {
-  min-height: 44px;
-  padding: 0 1rem;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-color);
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  font-weight: 700;
-  font-family: inherit;
-  cursor: pointer;
-}
-
-.copy-btn:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-}
-
+/* CTA band */
 .cta-band {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  margin-top: var(--space-xl);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.35rem;
+  margin-top: clamp(2.5rem, 5vw, 3.5rem);
   padding: 1.75rem;
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
   background: var(--bg-secondary);
 }
-
+.cta-copy .post-cat { margin-bottom: 0.55rem; }
 .cta-band h3 {
-  margin: 0.65rem 0 0;
+  margin: 0 0 0.4rem;
   font-family: var(--font-display);
   font-size: clamp(1.35rem, 3vw, 1.75rem);
-  font-weight: 500;
-  letter-spacing: -0.02em;
+  font-weight: 550;
+  letter-spacing: -0.025em;
 }
-
+.cta-band p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
 .cta-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.65rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  align-self: stretch;
+  width: 100%;
 }
+.cta-actions .lp-btn { width: 100%; justify-content: center; }
 
-.cta-actions .btn-primary,
-.cta-actions .btn-outline,
-.empty-state .btn-primary {
+/* Shared landing buttons */
+.lp-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 46px;
-  padding: 0 1.15rem;
+  gap: 8px;
+  height: 44px;
+  padding: 0 18px;
+  border-radius: var(--lp-radius);
+  font-family: var(--font-main);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  white-space: nowrap;
   text-decoration: none;
-  font-weight: 700;
-  font-size: 0.9rem;
-  border-radius: var(--radius-sm);
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.18s, border-color 0.18s, color 0.18s, transform 0.2s var(--transition-bounce);
+}
+.lp-btn:hover { transform: translateY(-1px); }
+.lp-btn:active { transform: scale(0.97); }
+.lp-btn-icon { width: 15px; height: 15px; flex-shrink: 0; stroke-width: 2; }
+.lp-btn--icon { width: 44px; padding: 0; }
+.lp-btn--dark {
+  background: var(--color-dark);
+  color: var(--color-light);
+  border-color: var(--color-dark);
+}
+.lp-btn--dark:hover { background: #1a1a1a; border-color: #1a1a1a; }
+.lp-btn--accent {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+  box-shadow: 0 2px 12px -3px rgba(255, 118, 0, 0.4);
+}
+.lp-btn--accent:hover {
+  background: var(--color-primary-light);
+  border-color: var(--color-primary-light);
+}
+.lp-btn--outline {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border-color: var(--border-color-strong);
+}
+.lp-btn--outline:hover {
+  border-color: var(--text-primary);
+  background: var(--bg-secondary);
 }
 
+.dark-mode .lp-btn--dark,
+:global(html.dark-mode) .lp-btn--dark {
+  background: var(--color-light);
+  color: var(--color-dark);
+  border-color: var(--color-light);
+}
+
+.empty-state {
+  text-align: left;
+  padding: 3rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
 .empty-state h1 {
   font-family: var(--font-display);
-  font-weight: 500;
-  margin-bottom: 0.5rem;
+  font-weight: 550;
+  margin: 0;
 }
-
 .empty-state p {
   color: var(--text-secondary);
-  margin-bottom: 1.25rem;
+  margin: 0 0 0.5rem;
 }
 
 @media (min-width: 768px) {
-  .cta-band {
+  .share-section {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
   }
+  .share-actions { max-width: 280px; }
+  .cta-band {
+    grid-template-columns: 1.4fr 1fr;
+    align-items: center;
+  }
+  .cta-actions { margin-left: auto; }
+}
+
+@media (max-width: 520px) {
+  .article-title { max-width: none; }
+  .cta-actions { grid-template-columns: 1fr; max-width: none; }
+  .share-actions { max-width: none; }
+  .blog-content {
+    text-align: left;
+    hyphens: none;
+  }
+  .blog-content :deep(p) { text-align: left; }
 }
 </style>
