@@ -106,6 +106,13 @@ const fetchStatus = async () => {
   }
 };
 
+const syncTabFromRoute = () => {
+  const tab = route.query.tab;
+  if (tab && tabs.some((t) => t.id === tab) && currentTab.value !== tab) {
+    currentTab.value = tab;
+  }
+};
+
 watch(currentTab, (id) => {
   selectedOrderId.value = null;
   if (route.query.tab !== id) {
@@ -113,11 +120,11 @@ watch(currentTab, (id) => {
   }
 });
 
+watch(() => route.query.tab, syncTabFromRoute);
+
 onMounted(() => {
   fetchStatus();
-  if (route.query.tab && tabs.some((t) => t.id === route.query.tab)) {
-    currentTab.value = route.query.tab;
-  }
+  syncTabFromRoute();
 });
 </script>
 

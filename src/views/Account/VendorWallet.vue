@@ -129,7 +129,13 @@
           <div class="warning-text">
             <p class="font-bold">Missing Payout Info</p>
             <p class="text-secondary text-sm">Please complete your bank details in settings before withdrawing.</p>
-            <router-link to="/account/vendor?tab=settings" class="settings-link mt-2">Go to Settings</router-link>
+            <router-link
+              to="/account/vendor?tab=settings&setup=payout"
+              class="settings-link mt-2"
+              @click="showWithdrawModal = false"
+            >
+              Complete bank details
+            </router-link>
           </div>
         </div>
 
@@ -138,7 +144,7 @@
             <label class="label-xs">Sending to</label>
             <div class="bank-info mt-1">
               <span class="bank-name">{{ vendorProfile.bank_name }}</span>
-              <span class="acc-num">•••• {{ vendorProfile.account_number.slice(-4) }}</span>
+              <span class="acc-num">•••• {{ String(vendorProfile.account_number).slice(-4) }}</span>
             </div>
           </div>
 
@@ -207,60 +213,78 @@ const showWithdrawModal = ref(false);
 const withdrawAmount = ref(0);
 const isSubmitting = ref(false);
 
-const isPayoutInfoComplete = computed(() => {
-  return vendorProfile.value.bank_name && 
-         vendorProfile.value.account_number && 
-         vendorProfile.value.account_name;
-});
+const isPayoutInfoComplete = computed(() =>
+  vendorService.hasPayoutInfo(vendorProfile.value)
+);
 
 const fetchData = async () => {
-    loading.value = true;
-    try {
-        const [walletData, profileData] = await Promise.all([
-            vendorService.getWallet(),
-            vendorService.getProfile()
-        ]);
+  loading.value = true;
+  try {
+    const [walletData, profileData] = await Promise.all([
+      vendorService.getWallet(),
+      vendorService.getProfile()
+    ]);
 
-        vendorProfile.value = profileData;
-        stats.value.availableBalance = walletData.balance;
-        stats.value.pendingPayouts = walletData.pendingWithdrawals;
-        
-        transactions.value = walletData.transactions.map(tx => ({
-            ...tx,
-            type: tx.type === 'sale' ? 'credit' : 'debit',
-            reference: tx.order_id ? `ORD-${tx.order_id}` : 'WDR'
-        }));
-        
-        withdrawals.value = walletData.withdrawals;
+    vendorProfile.value = profileData;
+    const balance =
+      walletData.balance ??
+      walletData.available_balance ??
+      walletData.availableBalance ??
+      0;
+    const pending =
+      walletData.pendingWithdrawals ??
+      walletData.pending_withdrawals ??
+      walletData.pendingPayouts ??
+      0;
 
-        // Calculate lifetime earnings from completed sale transactions
-        const lifetime = walletData.transactions
-            .filter(tx => tx.type === 'sale' && (tx.status === 'completed' || tx.status === 'success'))
-            .reduce((sum, tx) => sum + Number(tx.amount), 0);
-        stats.value.lifetimeEarnings = lifetime;
+    stats.value.availableBalance = Number(balance) || 0;
+    stats.value.pendingPayouts = Number(pending) || 0;
 
-    } catch (err) {
-        console.error('Failed to fetch wallet data', err);
-    } finally {
-        loading.value = false;
-    }
+    const txs = Array.isArray(walletData.transactions) ? walletData.transactions : [];
+    transactions.value = txs.map((tx) => ({
+      ...tx,
+      type: tx.type === 'sale' || tx.type === 'credit' ? 'credit' : 'debit',
+      reference: tx.order_id ? `ORD-${tx.order_id}` : tx.reference || 'WDR'
+    }));
+
+    withdrawals.value = Array.isArray(walletData.withdrawals) ? walletData.withdrawals : [];
+
+    const lifetime = txs
+      .filter(
+        (tx) =>
+          (tx.type === 'sale' || tx.type === 'credit') &&
+          (tx.status === 'completed' || tx.status === 'success' || !tx.status)
+      )
+      .reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
+    stats.value.lifetimeEarnings = lifetime;
+  } catch (err) {
+    console.error('Failed to fetch wallet data', err);
+  } finally {
+    loading.value = false;
+  }
 };
 
 const handleWithdraw = async () => {
-    if (withdrawAmount.value <= 0) return alert('Please enter a valid amount');
-    if (withdrawAmount.value > stats.value.availableBalance) return alert('Insufficient balance');
+  if (!isPayoutInfoComplete.value) {
+    alert('Please complete your bank details in Settings before withdrawing.');
+    return;
+  }
+  const amount = Number(withdrawAmount.value);
+  if (!Number.isFinite(amount) || amount <= 0) return alert('Please enter a valid amount');
+  if (amount > stats.value.availableBalance) return alert('Insufficient balance');
 
-    isSubmitting.value = true;
-    try {
-        await vendorService.requestWithdrawal(withdrawAmount.value);
-        alert('Withdrawal request submitted!');
-        showWithdrawModal.value = false;
-        fetchData(); // Refresh
-    } catch (err) {
-        alert(err.response?.data?.message || 'Failed to request withdrawal');
-    } finally {
-        isSubmitting.value = false;
-    }
+  isSubmitting.value = true;
+  try {
+    await vendorService.requestWithdrawal(amount);
+    alert('Withdrawal request submitted!');
+    showWithdrawModal.value = false;
+    withdrawAmount.value = 0;
+    await fetchData();
+  } catch (err) {
+    alert(err.response?.data?.message || 'Failed to request withdrawal');
+  } finally {
+    isSubmitting.value = false;
+  }
 };
 
 const formatCurrency = (val) => {

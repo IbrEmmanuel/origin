@@ -54,14 +54,111 @@ const vendorService = {
         return response.data;
     },
 
+    /** Normalize vendor profile + payout fields from varied API shapes. */
+    normalizeProfile(raw = {}) {
+        const payout = raw.payout || raw.payout_info || raw.bank || {};
+        const bankName =
+            raw.bank_name ||
+            raw.bankName ||
+            payout.bank_name ||
+            payout.bankName ||
+            payout.name ||
+            '';
+        const accountNumber = String(
+            raw.account_number ||
+                raw.accountNumber ||
+                payout.account_number ||
+                payout.accountNumber ||
+                payout.number ||
+                ''
+        ).replace(/\D/g, '');
+        const accountName =
+            raw.account_name ||
+            raw.accountName ||
+            payout.account_name ||
+            payout.accountName ||
+            payout.account_holder ||
+            '';
+        const bankCode =
+            raw.bank_code ||
+            raw.bankCode ||
+            payout.bank_code ||
+            payout.bankCode ||
+            '';
+
+        return {
+            ...raw,
+            store_name: raw.store_name || raw.storeName || raw.business_name || '',
+            description: raw.description || raw.bio || '',
+            phone: raw.phone || raw.phone_number || '',
+            business_type: raw.business_type || raw.businessType || '',
+            street: raw.street || raw.address || raw.address_line1 || '',
+            city: raw.city || '',
+            state: raw.state || '',
+            country: raw.country || 'Nigeria',
+            bank_name: bankName,
+            bank_code: bankCode,
+            account_number: accountNumber,
+            account_name: accountName
+        };
+    },
+
+    hasPayoutInfo(profile) {
+        const p = this.normalizeProfile(profile || {});
+        return Boolean(
+            String(p.bank_name || '').trim() &&
+                String(p.account_number || '').trim().length >= 10 &&
+                String(p.account_name || '').trim()
+        );
+    },
+
     async getProfile() {
         const response = await api.get('/vendor/profile');
-        return response.data;
+        return this.normalizeProfile(response.data);
     },
 
     async updateProfile(profileData) {
         const response = await api.post('/vendor/profile', profileData);
-        return response.data;
+        return this.normalizeProfile(response.data?.profile || response.data || profileData);
+    },
+
+    async updatePayoutInfo({ bank_name, bank_code, account_number, account_name }) {
+        const payload = {
+            bank_name: String(bank_name || '').trim(),
+            bank_code: bank_code ? String(bank_code).trim() : undefined,
+            account_number: String(account_number || '').replace(/\D/g, ''),
+            account_name: String(account_name || '').trim()
+        };
+        // Prefer dedicated payout route when present; fall back to profile update.
+        try {
+            const response = await api.post('/vendor/payout-info', payload);
+            return this.normalizeProfile(response.data?.profile || response.data || payload);
+        } catch (error) {
+            if (![404, 405, 501].includes(error.response?.status)) throw error;
+        }
+        try {
+            const response = await api.put('/vendor/profile', payload);
+            return this.normalizeProfile(response.data?.profile || response.data || payload);
+        } catch (error) {
+            if (![404, 405, 501].includes(error.response?.status)) throw error;
+        }
+        const response = await api.post('/vendor/profile', payload);
+        return this.normalizeProfile(response.data?.profile || response.data || payload);
+    },
+
+    async listNigerianBanks() {
+        try {
+            const res = await fetch('https://api.paystack.co/bank?country=nigeria&currency=NGN');
+            if (!res.ok) return [];
+            const json = await res.json();
+            const list = Array.isArray(json?.data) ? json.data : [];
+            return list
+                .filter((b) => b?.active !== false && b?.name)
+                .map((b) => ({ name: b.name, code: b.code }))
+                .sort((a, b) => a.name.localeCompare(b.name));
+        } catch {
+            return [];
+        }
     },
 
     async getOrders() {
