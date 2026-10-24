@@ -169,7 +169,7 @@ import {
 import imageCompression from 'browser-image-compression';
 import vendorService from '@/services/vendor.service';
 import marketplaceService from '@/services/marketplace.service';
-import { mediaUrl } from '@/utils/mediaUrl';
+import { mediaUrl, parseProductImages } from '@/utils/mediaUrl';
 
 const products = ref([]);
 const productCategories = ref([]);
@@ -224,15 +224,7 @@ const fetchProducts = async () => {
   }
 };
 
-const parseImages = (images) => {
-  try {
-    if (typeof images === 'object' && images !== null) return images;
-    return JSON.parse(images || '[]');
-  } catch (e) {
-    return [];
-  }
-};
-
+const parseImages = (images) => parseProductImages(images);
 const getImageUrl = (path) => mediaUrl(path);
 
 const filteredProducts = computed(() => {

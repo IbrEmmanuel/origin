@@ -17,7 +17,7 @@
         <!-- Product Images Gallery -->
         <div class="product-images">
           <div class="main-image-wrapper">
-             <ImageSlider :images="resolveImages(product.images)" :alt="product.name" />
+             <ImageSlider :images="resolveImages(product.images)" :alt="product.name" fit="contain" />
           </div>
         </div>
 
@@ -130,7 +130,14 @@
         <div class="minimal-grid">
           <div v-for="prod in relatedProducts" :key="prod.id" class="minimal-card">
             <div class="card-image-wrapper cursor-pointer" @click="goToProduct(prod.id)">
-              <img :src="resolveImages(prod.images)[0]" class="product-img" />
+              <img
+                v-if="resolveImages(prod.images)[0]"
+                :src="resolveImages(prod.images)[0]"
+                :alt="prod.name"
+                class="product-img"
+                loading="lazy"
+              />
+              <div v-else class="related-fallback">No image</div>
             </div>
             <div class="card-content">
               <h3 class="card-title cursor-pointer" @click="goToProduct(prod.id)">{{ prod.name }}</h3>
@@ -151,7 +158,7 @@ import { Package as PackageIcon, Store as StoreIcon, Heart as HeartIcon, Plus as
 import marketplaceService from '@/services/marketplace.service';
 import { useCart } from '@/composables/useCart';
 import { applySeo, productJsonLd } from '@/composables/useSeo';
-import { mediaUrl } from '@/utils/mediaUrl';
+import { resolveProductImages } from '@/utils/mediaUrl';
 import ImageSlider from '@/components/ImageSlider.vue';
 
 const route = useRoute();
@@ -226,13 +233,8 @@ const fetchProduct = async () => {
     
     if (product.value) {
       const path = `/product/${product.value.id}`;
-      let firstImage = '';
-      try {
-        const imgs = typeof product.value.images === 'string'
-          ? JSON.parse(product.value.images || '[]')
-          : product.value.images || [];
-        firstImage = Array.isArray(imgs) && imgs[0] ? imgs[0] : '';
-      } catch { /* ignore */ }
+      const gallery = resolveProductImages(product.value.images);
+      const firstImage = gallery[0] || '';
 
       applySeo({
         title: product.value.name,
@@ -240,7 +242,7 @@ const fetchProduct = async () => {
           .replace(/\s+/g, ' ')
           .slice(0, 160),
         path,
-        image: firstImage ? mediaUrl(firstImage) : undefined,
+        image: firstImage || undefined,
         type: 'product',
         jsonLdId: 'product',
         jsonLd: productJsonLd(product.value, path)
@@ -293,25 +295,7 @@ const submitComment = async () => {
     }
 };
 
-const parseImages = (images) => {
-  try {
-    if (typeof images === 'object' && images !== null) return images;
-    return JSON.parse(images || '[]');
-  } catch (e) {
-    return [];
-  }
-};
-
-const getImageUrl = (path) => {
-  if (!path) return '';
-  if (path.startsWith('http')) return path;
-  return `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}${path}`;
-};
-
-const resolveImages = (imagesStr) => {
-  const arr = parseImages(imagesStr);
-  return arr.map(img => getImageUrl(img));
-};
+const resolveImages = (imagesStr) => resolveProductImages(imagesStr);
 
 onMounted(() => {
   fetchProduct();
@@ -616,10 +600,28 @@ onMounted(() => {
 @media (max-width: 992px) { .minimal-grid { grid-template-columns: repeat(2, 1fr); } }
 .minimal-card { background: var(--bg-secondary); padding: 12px; border-radius: var(--radius-lg); border: 1px solid var(--border-color); transition: transform 0.2s; }
 .minimal-card:hover { transform: translateY(-4px); }
-.card-image-wrapper { width: 100%; aspect-ratio: 1; border-radius: var(--radius-md); overflow: hidden; margin-bottom: 12px; }
-.product-img { width: 100%; height: 100%; object-fit: cover; }
+.card-image-wrapper {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-bottom: 12px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.product-img { width: 100%; height: 100%; object-fit: contain; padding: 8px; box-sizing: border-box; }
+.related-fallback {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
 .card-title { font-size: 1rem; font-weight: 700; margin: 0 0 4px 0; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.card-price { font-weight: 800; color: var(--color-blue-primary); }
+.card-price { font-weight: 800; color: var(--color-primary); }
 .section-title { font-size: 1.5rem; font-weight: 800; margin-bottom: 1.5rem; }
 .cursor-pointer { cursor: pointer; }
 </style>

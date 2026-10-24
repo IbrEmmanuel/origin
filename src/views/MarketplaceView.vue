@@ -55,10 +55,15 @@
           <div v-for="product in products" :key="product.id" class="minimal-card">
           
           <div class="card-image-wrapper">
-            <ImageSlider :images="resolveImages(product.images)" :alt="product.name" @click-image="$router.push('/product/' + product.id)" />
+            <ImageSlider
+              :images="resolveImages(product.images)"
+              :alt="product.name"
+              fit="contain"
+              @click-image="$router.push('/product/' + product.id)"
+            />
             
-            <div class="tag-vendor">
-              <StoreIcon class="tag-icon icon-xs" /> {{ product.store_name }}
+            <div v-if="product.store_name" class="tag-vendor">
+              <StoreIcon class="tag-icon icon-xs" /> {{ String(product.store_name).trim() }}
             </div>
           </div>
 
@@ -128,6 +133,7 @@ import { useRouter } from 'vue-router';
 import { Package as PackageIcon, Store as StoreIcon, Search as SearchIcon, Heart as HeartIcon, Eye as EyeIcon, Plus as PlusIcon, Minus as MinusIcon, Trash as TrashIcon } from 'lucide-vue-next';
 import marketplaceService from '@/services/marketplace.service';
 import { useCart } from '@/composables/useCart';
+import { resolveProductImages } from '@/utils/mediaUrl';
 import ImageSlider from '@/components/ImageSlider.vue';
 
 const router = useRouter();
@@ -257,27 +263,7 @@ const loadMore = () => {
     }
 };
 
-const parseImages = (images) => {
-  try {
-    if (typeof images === 'object' && images !== null) return images;
-    return JSON.parse(images || '[]');
-  } catch (e) {
-    return [];
-  }
-};
-
-const getImageUrl = (path) => {
-  if (!path) return '';
-  if (path.startsWith('http')) return path;
-  // Use production API base for relative paths
-  const base = import.meta.env.VITE_API_BASE_URL || 'https://api.originelectricltd.com';
-  return `${base}${path}`;
-};
-
-const resolveImages = (imagesStr) => {
-  const arr = parseImages(imagesStr);
-  return arr.map(img => getImageUrl(img));
-};
+const resolveImages = (imagesStr) => resolveProductImages(imagesStr);
 
 const resetFilters = () => {
     searchQuery.value = '';
@@ -463,10 +449,12 @@ onMounted(() => {
   position: relative;
   width: 100%;
   aspect-ratio: 1;
-  background: var(--bg-secondary);
+  background:
+    linear-gradient(160deg, var(--bg-secondary) 0%, var(--bg-primary) 50%, var(--bg-secondary) 100%);
   border-radius: var(--radius-sm);
   overflow: hidden;
   margin-bottom: 0.65rem;
+  border: 1px solid var(--border-color);
 }
 .tag-vendor {
   position: absolute;

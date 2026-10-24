@@ -20,7 +20,14 @@
           <div v-for="item in cartItems" :key="item.id" class="cart-item-card">
             <div class="item-image-wrapper">
               <PackageIcon v-if="!parseImages(item.images)[0]" class="fallback-icon" />
-              <img v-else :src="getImageUrl(parseImages(item.images)[0])" :alt="item.name" class="product-img" />
+              <img
+                v-else
+                :src="parseImages(item.images)[0]"
+                :alt="item.name"
+                class="product-img"
+                loading="lazy"
+                @error="($event) => ($event.target.style.display = 'none')"
+              />
             </div>
             
             <div class="item-details">
@@ -74,23 +81,11 @@
 import { computed } from 'vue';
 import { Package as PackageIcon, ShoppingCart as ShoppingCartIcon, Store as StoreIcon, Plus as PlusIcon, Minus as MinusIcon, Trash as TrashIcon } from 'lucide-vue-next';
 import { useCart } from '@/composables/useCart';
+import { resolveProductImages } from '@/utils/mediaUrl';
 
 const { cartItems, addToCart, updateQuantity, cartTotal } = useCart();
 
-const parseImages = (images) => {
-  try {
-    if (typeof images === 'object' && images !== null) return images;
-    return JSON.parse(images || '[]');
-  } catch (e) {
-    return [];
-  }
-};
-
-const getImageUrl = (path) => {
-  if (!path) return '';
-  if (path.startsWith('http')) return path;
-  return `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}${path}`;
-};
+const parseImages = (images) => resolveProductImages(images);
 </script>
 
 <style scoped>
