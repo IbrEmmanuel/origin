@@ -783,7 +783,7 @@ watch(
   }
 }
 
-@media (max-width: 560px) {
+@media (max-width: 768px) {
   .search-bar {
     grid-template-columns: auto 1fr;
     grid-template-rows: auto auto;
@@ -795,6 +795,9 @@ watch(
   .cta-actions {
     grid-template-columns: 1fr;
     max-width: none;
+  }
+  .cta-actions .lp-btn {
+    width: 100%;
   }
 }
 </style>

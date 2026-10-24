@@ -689,10 +689,12 @@ watch(() => route.params.slug, fetchPost);
   .cta-actions { margin-left: auto; }
 }
 
-@media (max-width: 520px) {
+@media (max-width: 768px) {
   .article-title { max-width: none; }
   .cta-actions { grid-template-columns: 1fr; max-width: none; }
-  .share-actions { max-width: none; }
+  .share-actions { max-width: none; grid-template-columns: 44px 1fr; }
+  .cta-actions .lp-btn,
+  .share-actions .lp-btn { width: 100%; }
   .blog-content {
     text-align: left;
     hyphens: none;

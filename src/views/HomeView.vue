@@ -710,8 +710,8 @@
               </div>
             </div>
           </div>
-          <div class="lp-actions">
-            <router-link to="/load-audit" class="lp-btn lp-btn--accent">
+          <div class="lp-actions lp-actions--block ev-cta">
+            <router-link to="/load-audit" class="lp-btn lp-btn--accent lp-btn--block">
               Request EV Charger Quote
               <ArrowRightIcon class="lp-btn-icon" />
             </router-link>
@@ -1747,6 +1747,13 @@ onMounted(() => {
 .lp-actions--center { justify-content: center; }
 .lp-actions--between { justify-content: space-between; }
 .lp-actions--stretch > .lp-btn { flex: 1 1 0; min-width: 0; }
+.lp-actions--block {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  width: 100%;
+}
+.lp-actions--block > .lp-btn { width: 100%; }
 
 .lp-btn {
   display: inline-flex;
@@ -1767,6 +1774,7 @@ onMounted(() => {
   border: 1px solid transparent;
   position: relative;
   overflow: hidden;
+  box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
   transition:
     background 0.18s ease,
@@ -1779,7 +1787,7 @@ onMounted(() => {
 .lp-btn:active { transform: scale(0.97); opacity: 0.9; }
 .lp-btn-icon { width: 15px; height: 15px; flex-shrink: 0; stroke-width: 2; }
 .lp-btn--lg { height: 48px; padding: 0 24px; font-size: 0.9rem; }
-.lp-btn--block { width: 100%; }
+.lp-btn--block { width: 100%; max-width: 100%; }
 
 .lp-btn--dark {
   background: var(--color-dark);
@@ -1833,10 +1841,25 @@ onMounted(() => {
   border-color: var(--color-light);
 }
 
-@media (max-width: 480px) {
-  .lp-actions:not(.lp-actions--center) { flex-direction: column; align-items: stretch; }
-  .lp-actions--center { flex-direction: column; align-items: stretch; }
-  .lp-btn { width: 100%; }
+/* Mobile / tablet — all landing CTAs stretch full width */
+@media (max-width: 768px) {
+  .lp-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .lp-actions--center {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .lp-actions > .lp-btn,
+  .lp-btn--block {
+    width: 100%;
+    max-width: 100%;
+  }
+  .cases-header .lp-btn,
+  .fw-cta .lp-btn {
+    width: 100%;
+  }
 }
 
 /* ----------------- SERVICES SECTION ----------------- */
@@ -2652,7 +2675,13 @@ onMounted(() => {
   align-items: flex-end;
   margin-bottom: 40px;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 16px;
+}
+@media (max-width: 768px) {
+  .cases-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 
 .cases-grid {
@@ -4012,23 +4041,29 @@ onMounted(() => {
 }
 
 .ev-features {
-  margin: 28px 0;
+  margin: 28px 0 24px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
 }
 
 .ev-feature {
-  display: flex;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
   align-items: flex-start;
   gap: 14px;
+  width: 100%;
+  padding: 14px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
 }
 
 .ev-feature-icon {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: var(--radius-sm);
-  background: rgba(255, 118, 0, 0.08);
+  background: rgba(255, 118, 0, 0.1);
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -4040,14 +4075,38 @@ onMounted(() => {
   font-size: 0.9rem;
   letter-spacing: -0.01em;
   color: var(--text-primary);
-  margin-bottom: 3px;
+  margin-bottom: 4px;
 }
 
 .ev-feature-desc {
   font-size: 0.84rem;
   color: var(--text-secondary);
-  line-height: 1.55;
-  letter-spacing: 0em;
+  line-height: 1.6;
+  letter-spacing: 0;
+  text-align: justify;
+  hyphens: auto;
+}
+
+.ev-cta {
+  width: 100%;
+  margin-top: 4px;
+}
+.ev-cta .lp-btn {
+  width: 100%;
+  height: 48px;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 900px) {
+  .ev-cta,
+  .ev-cta .lp-btn {
+    width: 100%;
+    max-width: 100%;
+  }
+  .ev-feature-desc {
+    text-align: left;
+    hyphens: none;
+  }
 }
 
 /* ----------------- CTA SECTION ----------------- */
@@ -4124,14 +4183,15 @@ onMounted(() => {
 }
 .cta-actions .lp-btn { width: 100%; }
 
-@media (max-width: 480px) {
-  .cta-section { padding: 80px 0; }
+@media (max-width: 768px) {
+  .cta-section { padding: 80px 0; background-attachment: scroll; }
   .cta-heading { font-size: 1.6rem; }
   .cta-br { display: none; }
   .cta-actions {
     grid-template-columns: 1fr;
     max-width: 100%;
   }
+  .cta-desc { max-width: 100%; }
 }
 
 /* Dynamic CSS Loader */
