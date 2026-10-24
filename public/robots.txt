@@ -1,10 +1,15 @@
-# Origin Electric — https://originelectric.com
+# Origin Electric — https://www.originelectricltd.com
 User-agent: *
 Allow: /
 Allow: /marketplace
 Allow: /product/
 Allow: /blog
 Allow: /blog/
+Allow: /services
+Allow: /about
+Allow: /projects
+Allow: /contact
+Allow: /load-audit
 Disallow: /account/
 Disallow: /checkout
 Disallow: /cart
@@ -13,5 +18,12 @@ Disallow: /signup
 Disallow: /forgot-password
 Disallow: /verify-email
 Disallow: /vendor-apply
+Disallow: /order-success
 
-Sitemap: https://originelectric.com/sitemap.xml
+User-agent: GPTBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://www.originelectricltd.com/sitemap.xml

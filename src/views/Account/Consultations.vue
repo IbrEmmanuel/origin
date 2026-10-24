@@ -278,6 +278,7 @@ import {
 } from 'lucide-vue-next';
 import consultationService from '@/services/consultationService';
 import userService from '@/services/user.service';
+import { openPaystackPopup, isPaystackConfigured } from '@/composables/usePaystack';
 
 // State
 const consultationTypes = ref([]);
@@ -417,38 +418,33 @@ const payLater = async () => {
   }
 };
 
-const loadPaystack = () => {
-  return new Promise((resolve) => {
-    if (window.PaystackPop) return resolve();
-    const script = document.createElement('script');
-    script.src = 'https://js.paystack.co/v1/inline.js';
-    script.onload = resolve;
-    document.body.appendChild(script);
-  });
-};
-
 const payWithPaystack = async () => {
+  if (!isPaystackConfigured()) {
+    alert('Paystack is not configured on this deployment. Set VITE_PAYSTACK_PUBLIC_KEY and redeploy.');
+    return;
+  }
   isSubmitting.value = true;
   try {
-    await loadPaystack();
     const bookingRes = await consultationService.createBooking(formData);
-    
-    const handler = window.PaystackPop.setup({
-      key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || 'pk_test_placeholder',
+    const consultationId = bookingRes.consultationId || bookingRes.id;
+
+    await openPaystackPopup({
       email: formData.email,
-      amount: formData.amount * 100,
-      currency: 'NGN',
-      callback: (response) => {
-        // Handle verification inside a regular function to avoid Paystack callback validation issues
-        consultationService.verifyPayment(bookingRes.consultationId, response.reference)
+      amountNaira: formData.amount,
+      metadata: { consultation_id: consultationId },
+      onSuccess: (response) => {
+        consultationService
+          .verifyPayment(consultationId, response.reference)
           .then(() => {
             checkoutSuccess.value = true;
             isBooking.value = false;
             fetchConsultations();
           })
-          .catch(err => {
+          .catch((err) => {
             console.error('Verification error', err);
-            alert('Payment was successful, but we couldn\'t verify it yet. Please contact support.');
+            alert(
+              "Payment was successful, but we couldn't verify it yet. Please contact support."
+            );
           })
           .finally(() => {
             isSubmitting.value = false;
@@ -458,32 +454,36 @@ const payWithPaystack = async () => {
         isSubmitting.value = false;
       }
     });
-    handler.openIframe();
   } catch (err) {
     console.error('Payment error', err);
+    alert(err.message || 'Payment failed to start');
     isSubmitting.value = false;
   }
 };
 
 const payExistingBooking = async (consultation) => {
+  if (!isPaystackConfigured()) {
+    alert('Paystack is not configured on this deployment. Set VITE_PAYSTACK_PUBLIC_KEY and redeploy.');
+    return;
+  }
   isSubmitting.value = true;
   try {
-    await loadPaystack();
-    
-    const handler = window.PaystackPop.setup({
-      key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || 'pk_test_placeholder',
+    await openPaystackPopup({
       email: consultation.email,
-      amount: consultation.amount * 100,
-      currency: 'NGN',
-      callback: (response) => {
-        consultationService.verifyPayment(consultation.id, response.reference)
+      amountNaira: consultation.amount,
+      metadata: { consultation_id: consultation.id },
+      onSuccess: (response) => {
+        consultationService
+          .verifyPayment(consultation.id, response.reference)
           .then(() => {
             alert('Payment successful!');
             fetchConsultations();
           })
-          .catch(err => {
+          .catch((err) => {
             console.error('Verification error', err);
-            alert('Payment was successful, but we couldn\'t verify it yet. Please contact support.');
+            alert(
+              "Payment was successful, but we couldn't verify it yet. Please contact support."
+            );
           })
           .finally(() => {
             isSubmitting.value = false;
@@ -493,9 +493,9 @@ const payExistingBooking = async (consultation) => {
         isSubmitting.value = false;
       }
     });
-    handler.openIframe();
   } catch (err) {
     console.error('Payment error', err);
+    alert(err.message || 'Payment failed to start');
     isSubmitting.value = false;
   }
 };

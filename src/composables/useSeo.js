@@ -2,10 +2,53 @@ import { mediaUrl } from '@/utils/mediaUrl';
 
 const SITE = {
   name: 'Origin Electric',
-  url: 'https://originelectric.com',
-  defaultImage: 'https://originelectric.com/logo.png',
-  twitter: '@originelectric'
+  // Canonical host where this Vue SPA is actually served (not the apex lander redirect).
+  url: 'https://www.originelectricltd.com',
+  defaultImage: 'https://www.originelectricltd.com/logo.png',
+  twitter: '@originelectric',
+  sameAs: [
+    'https://www.originelectricltd.com',
+    'https://originelectric.com'
+  ]
 };
+
+/** Organization + WebSite JSON-LD for homepage / brand SERP signals */
+export function organizationJsonLd() {
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Organization',
+        '@id': `${SITE.url}/#organization`,
+        name: SITE.name,
+        url: SITE.url,
+        logo: {
+          '@type': 'ImageObject',
+          url: SITE.defaultImage
+        },
+        description:
+          'Solar, inverter, CCTV, access control, and electrical engineering solutions for homes and industry in Nigeria.',
+        areaServed: { '@type': 'Country', name: 'Nigeria' },
+        sameAs: SITE.sameAs
+      },
+      {
+        '@type': 'WebSite',
+        '@id': `${SITE.url}/#website`,
+        url: SITE.url,
+        name: SITE.name,
+        publisher: { '@id': `${SITE.url}/#organization` },
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: {
+            '@type': 'EntryPoint',
+            urlTemplate: `${SITE.url}/marketplace?q={search_term_string}`
+          },
+          'query-input': 'required name=search_term_string'
+        }
+      }
+    ]
+  };
+}
 
 function ensureMeta(selector, attrs) {
   let el = document.querySelector(selector);

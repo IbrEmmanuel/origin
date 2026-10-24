@@ -69,6 +69,7 @@
 import { ref, onMounted } from 'vue';
 import { ShoppingBag as ShoppingBagIcon, Package as PackageIcon } from 'lucide-vue-next';
 import userService from '@/services/user.service';
+import { openPaystackPopup, isPaystackConfigured } from '@/composables/usePaystack';
 
 const orders = ref([]);
 const loading = ref(true);
@@ -112,37 +113,26 @@ const fetchOrders = async () => {
   }
 };
 
-const loadPaystackScript = () =>
-  new Promise((resolve, reject) => {
-    if (window.PaystackPop) return resolve();
-    const script = document.createElement('script');
-    script.src = 'https://js.paystack.co/v1/inline.js';
-    script.async = true;
-    script.onload = resolve;
-    script.onerror = reject;
-    document.body.appendChild(script);
-  });
-
 const payNow = async (order) => {
+  if (!isPaystackConfigured()) {
+    alert('Paystack is not configured on this deployment. Set VITE_PAYSTACK_PUBLIC_KEY and redeploy.');
+    return;
+  }
   try {
-    await loadPaystackScript();
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    const paystackKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
     const amount = order.totalAmount || Number(String(order.total).replace(/[₦,\s]/g, ''));
 
-    const handler = window.PaystackPop.setup({
-      key: paystackKey || 'pk_test_placeholder',
-      email: user.email || 'customer@example.com',
-      amount: Math.round(amount * 100),
-      currency: 'NGN',
-      callback: (response) => {
+    await openPaystackPopup({
+      email: user.email,
+      amountNaira: amount,
+      metadata: { order_id: order.rawId },
+      onSuccess: (response) => {
         verifyPayment(response.reference, order.rawId);
       }
     });
-    handler.openIframe();
   } catch (error) {
     console.error('Payment error:', error);
-    alert('Failed to initialize payment');
+    alert(error.message || 'Failed to initialize payment');
   }
 };
 

@@ -105,9 +105,24 @@
             </div>
           </div>
           
-          <button @click="processCheckout" class="primary-btn mt-4 full-width" :disabled="isProcessing || cartItems.length === 0 || deliveryFee === null">
-            {{ isProcessing ? 'Processing...' : (deliveryFee === null ? 'Select address on map' : 'Pay with Paystack') }}
+          <button
+            @click="processCheckout"
+            class="primary-btn mt-4 full-width"
+            :disabled="isProcessing || cartItems.length === 0 || deliveryFee === null || !paystackReady"
+          >
+            {{
+              isProcessing
+                ? 'Processing...'
+                : !paystackReady
+                  ? 'Paystack not configured'
+                  : deliveryFee === null
+                    ? 'Select address on map'
+                    : 'Pay with Paystack'
+            }}
           </button>
+          <p v-if="!paystackReady" class="error-msg mt-2">
+            Set VITE_PAYSTACK_PUBLIC_KEY on the host and redeploy to enable payments.
+          </p>
           <p v-if="error" class="error-msg mt-2">{{ error }}</p>
         </div>
       </div>
@@ -119,9 +134,12 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCart } from '@/composables/useCart';
+import { openPaystackPopup, isPaystackConfigured } from '@/composables/usePaystack';
+import userService from '@/services/user.service';
 
 const router = useRouter();
 const { cartItems, cartTotal, removeFromCart } = useCart();
+const paystackReady = isPaystackConfigured();
 
 /** Prefer same-origin /api (Vite/Vercel proxy). Empty VITE_API_BASE_URL is intentional. */
 const apiRoot = () => {
@@ -310,18 +328,6 @@ const loadGoogleMaps = () => {
   document.head.appendChild(script);
 };
 
-const loadPaystackScript = () => {
-  return new Promise((resolve, reject) => {
-    if (window.PaystackPop) return resolve();
-    const script = document.createElement('script');
-    script.src = 'https://js.paystack.co/v1/inline.js';
-    script.async = true;
-    script.onload = resolve;
-    script.onerror = reject;
-    document.body.appendChild(script);
-  });
-};
-
 const processCheckout = async () => {
   error.value = '';
   if (!form.value.city || !form.value.state || !form.value.country || !form.value.phone) {
@@ -334,11 +340,14 @@ const processCheckout = async () => {
     return;
   }
 
+  if (!isPaystackConfigured()) {
+    error.value =
+      'Payments are temporarily unavailable — Paystack public key is not configured on this deployment.';
+    return;
+  }
+
   isProcessing.value = true;
   try {
-    await loadPaystackScript();
-    
-    const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || '{}');
 
     // Optional server-side stock/price validation (no-op if endpoint missing)
@@ -360,21 +369,20 @@ const processCheckout = async () => {
       }
     } catch (valErr) {
       if (valErr.message && !valErr.response) throw valErr;
-      // Network/404 already handled inside validateCart for missing endpoint
       if (valErr.response && valErr.response.status !== 404) {
         throw new Error(valErr.response.data?.message || 'Cart validation failed');
       }
     }
-    
-    // Create pending order
+
+    const token = localStorage.getItem('token');
     const checkoutRes = await fetch(apiUrl('/api/user/checkout'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        Authorization: `Bearer ${token}`
       },
       body: JSON.stringify({
-        items: cartItems.value.map(item => ({ id: item.id, quantity: item.quantity })),
+        items: cartItems.value.map((item) => ({ id: item.id, quantity: item.quantity })),
         delivery_street: mapSearchInput.value ? mapSearchInput.value.value : form.value.street,
         delivery_city: form.value.city,
         delivery_state: form.value.state,
@@ -385,61 +393,48 @@ const processCheckout = async () => {
         longitude: form.value.longitude
       })
     });
-    
+
     if (!checkoutRes.ok) {
       const errBody = await checkoutRes.json().catch(() => ({}));
       throw new Error(errBody.message || 'Failed to create order');
     }
     const orderData = await checkoutRes.json();
-    
-    const paystackKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
-    const isTestMode = !paystackKey || String(paystackKey).includes('test') || paystackKey === 'pk_test_placeholder';
-    if (!paystackKey) {
-      console.warn('VITE_PAYSTACK_PUBLIC_KEY missing — using test-mode placeholder. Payments are not live.');
-    }
-    
-    // Initialize Paystack (test key = clearly non-live)
-    const handler = window.PaystackPop.setup({
-      key: paystackKey || 'pk_test_placeholder',
-      email: user.email || 'customer@example.com',
-      amount: orderData.total * 100, // in kobo
-      currency: 'NGN',
-      metadata: { test_mode: isTestMode },
-      callback: (response) => {
-        verifyPayment(response, orderData.orderId, token);
+    const orderId = orderData.orderId || orderData.order_id || orderData.id;
+    const amountNaira =
+      orderData.total ?? orderData.total_amount ?? orderData.amount ?? grandTotal.value;
+
+    await openPaystackPopup({
+      email: user.email,
+      amountNaira,
+      reference: orderData.payment_reference || undefined,
+      metadata: {
+        order_id: orderId,
+        custom_fields: [
+          { display_name: 'Order ID', variable_name: 'order_id', value: String(orderId) }
+        ]
+      },
+      onSuccess: (response) => {
+        verifyPayment(response, orderId);
       },
       onClose: () => {
         isProcessing.value = false;
       }
     });
-    handler.openIframe();
   } catch (err) {
     error.value = err.message || 'An error occurred during checkout.';
     isProcessing.value = false;
   }
 };
 
-const verifyPayment = async (response, orderId, token) => {
+const verifyPayment = async (response, orderId) => {
   try {
-    const verifyRes = await fetch(apiUrl('/api/user/verify-payment'), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({ reference: response.reference, orderId })
-    });
-    
-    if (verifyRes.ok) {
-      // Clear cart items
-      cartItems.value.forEach(item => removeFromCart(item.id));
-      router.push('/order-success');
-    } else {
-       error.value = 'Payment verification failed.';
-       isProcessing.value = false;
-    }
+    await userService.verifyPayment(response.reference, orderId);
+    cartItems.value.forEach((item) => removeFromCart(item.id));
+    router.push('/order-success');
   } catch (err) {
-    error.value = 'Error verifying payment';
+    error.value =
+      err.response?.data?.message ||
+      'Payment received but verification failed. Contact support with your Paystack reference.';
     isProcessing.value = false;
   }
 };

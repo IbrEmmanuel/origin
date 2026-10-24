@@ -9,31 +9,51 @@ const routes = [
         path: '/',
         name: 'Home',
         component: HomeView,
-        meta: { title: 'Home' }
+        meta: {
+            title: 'Home',
+            description:
+                'Origin Electric — solar, inverters, CCTV, and engineering for homes and industry in Nigeria. Shop the marketplace and book consultations.'
+        }
     },
     {
         path: '/about',
         name: 'About',
         component: () => import('../views/AboutView.vue'),
-        meta: { title: 'About Us' }
+        meta: {
+            title: 'About Us',
+            description:
+                'Learn about Origin Electric — Nigerian solar, security, and electrical engineering experts serving homes and industry.'
+        }
     },
     {
         path: '/services',
         name: 'Services',
         component: () => import('../views/ServicesView.vue'),
-        meta: { title: 'Our Services' }
+        meta: {
+            title: 'Our Services',
+            description:
+                'Solar installation, inverter systems, CCTV, access control, fire detection, and M&E protective drawings from Origin Electric.'
+        }
     },
     {
         path: '/projects',
         name: 'Projects',
         component: () => import('../views/ProjectsView.vue'),
-        meta: { title: 'Featured Projects' }
+        meta: {
+            title: 'Featured Projects',
+            description:
+                'Featured Origin Electric solar and security projects across Nigeria.'
+        }
     },
     {
         path: '/marketplace',
         name: 'Marketplace',
         component: MarketplaceView,
-        meta: { title: 'Marketplace' }
+        meta: {
+            title: 'Marketplace',
+            description:
+                'Buy solar batteries, inverters, CCTV, and energy products online from Origin Electric marketplace — Nigeria delivery.'
+        }
     },
     {
         path: '/product/:id',
@@ -51,13 +71,21 @@ const routes = [
         path: '/load-audit',
         name: 'LoadAudit',
         component: LoadAuditView,
-        meta: { title: 'Power Load Calculator' }
+        meta: {
+            title: 'Power Load Calculator',
+            description:
+                'Free power load calculator — size your solar and inverter needs with Origin Electric.'
+        }
     },
     {
         path: '/contact',
         name: 'Contact',
         component: ContactView,
-        meta: { title: 'Contact Us' }
+        meta: {
+            title: 'Contact Us',
+            description:
+                'Contact Origin Electric for solar quotes, security systems, and engineering consultations in Nigeria.'
+        }
     },
     {
         path: '/refund-policy',
@@ -75,7 +103,11 @@ const routes = [
         path: '/blog',
         name: 'Blog',
         component: () => import('../views/BlogView.vue'),
-        meta: { title: 'Energy Blog & Insights' }
+        meta: {
+            title: 'Energy Blog & Insights',
+            description:
+                'Solar, inverter, and security insights from Origin Electric — practical guides for Nigerian homes and businesses.'
+        }
     },
     {
         path: '/blog/:slug',
@@ -244,7 +276,7 @@ router.afterEach((to) => {
         (r) => r.meta?.requiresAuth || r.path.startsWith('/account')
     );
 
-    import('@/composables/useSeo').then(({ applySeo }) => {
+    import('@/composables/useSeo').then(({ applySeo, organizationJsonLd }) => {
         const title =
             to.meta?.title === 'Home' || !to.meta?.title
                 ? null
@@ -254,7 +286,9 @@ router.afterEach((to) => {
             description: to.meta?.description || undefined,
             path: to.path,
             type: 'website',
-            noindex: isPrivate
+            noindex: isPrivate,
+            jsonLd: to.name === 'Home' && !isPrivate ? organizationJsonLd() : undefined,
+            jsonLdId: 'page'
         });
     });
 });
