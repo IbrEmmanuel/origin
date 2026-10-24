@@ -150,9 +150,9 @@
                 <h3>Solar PV Systems</h3>
                 <p>Grid-tied, off-grid and hybrid solar installations from 3 kW homes to 500 kW+ commercial plants — engineered for Nigeria's climate.</p>
                 <div class="svc-bento-stats">
-                  <span><strong>1.2 MW</strong> deployed</span>
-                  <span><strong>42+</strong> sites live</span>
-                  <span><strong>25 yr</strong> panel warranty</span>
+                  <span><strong>Grid-tied</strong> &amp; hybrid</span>
+                  <span><strong>Commercial</strong> grade</span>
+                  <span><strong>Engineered</strong> for NG</span>
                 </div>
               </div>
               <router-link to="/services" class="svc-bento-link">Explore <ArrowRightIcon class="svc-bento-arrow" /></router-link>
@@ -185,9 +185,9 @@
                 <h3>BESS &amp; Battery Solutions</h3>
                 <p>Lithium and lead-acid battery banks paired with hybrid inverters — backup power that keeps your facility running when the grid fails.</p>
                 <div class="svc-bento-stats">
-                  <span><strong>48V – 800V</strong> DC bus</span>
-                  <span><strong>LFP</strong> chemistry</span>
-                  <span><strong>10 yr</strong> cell warranty</span>
+                  <span><strong>LFP</strong> ready</span>
+                  <span><strong>Hybrid</strong> inverters</span>
+                  <span><strong>Backup</strong> first</span>
                 </div>
               </div>
               <router-link to="/services" class="svc-bento-link">Explore <ArrowRightIcon class="svc-bento-arrow" /></router-link>
@@ -392,16 +392,16 @@
           </div>
           <div class="fw-header-stats reveal-right">
             <div class="fw-stat">
-              <span class="fw-stat-val">42+</span>
-              <span class="fw-stat-lbl">Sites Installed</span>
+              <span class="fw-stat-val">{{ liveStats.products || '—' }}</span>
+              <span class="fw-stat-lbl">Live Products</span>
             </div>
             <div class="fw-stat">
-              <span class="fw-stat-val">1.2 MW</span>
-              <span class="fw-stat-lbl">Solar Deployed</span>
+              <span class="fw-stat-val">{{ liveStats.categories || '—' }}</span>
+              <span class="fw-stat-lbl">Categories</span>
             </div>
             <div class="fw-stat">
-              <span class="fw-stat-val">100%</span>
-              <span class="fw-stat-lbl">On-spec Delivery</span>
+              <span class="fw-stat-val">{{ liveStats.posts || '—' }}</span>
+              <span class="fw-stat-lbl">Articles</span>
             </div>
           </div>
         </div>
@@ -531,22 +531,67 @@
       </div>
     </section>
 
-    <!-- TRUST BAR -->
+    <!-- LIVE MARKETPLACE — API products -->
+    <section class="home-market section-clipped section-divider" id="marketplace-preview">
+      <div class="container">
+        <div class="home-market-header reveal">
+          <div>
+            <span class="section-eyebrow">Live Marketplace</span>
+            <h2 class="section-title text-left">Shop verified energy gear</h2>
+            <p class="section-sub text-left">Real inventory from the Origin API — prices and stock update with the catalog.</p>
+          </div>
+          <router-link to="/marketplace" class="lp-btn lp-btn--accent">
+            Open marketplace <ArrowRightIcon class="lp-btn-icon" />
+          </router-link>
+        </div>
+
+        <div v-if="marketLoading" class="home-market-grid">
+          <div v-for="n in 4" :key="n" class="home-mkt-card home-mkt-card--skel">
+            <div class="skel media"></div>
+            <div class="skel line w-40"></div>
+            <div class="skel line w-80"></div>
+          </div>
+        </div>
+
+        <div v-else-if="marketProducts.length" class="home-market-grid reveal-stagger">
+          <router-link
+            v-for="product in marketProducts"
+            :key="product.id"
+            :to="`/product/${product.id}`"
+            class="home-mkt-card"
+          >
+            <div class="home-mkt-media">
+              <img v-if="product.image" :src="product.image" :alt="product.name" loading="lazy" />
+              <div v-else class="home-mkt-fallback"><ZapIcon /></div>
+              <span v-if="product.category" class="home-mkt-badge">{{ product.category }}</span>
+            </div>
+            <div class="home-mkt-body">
+              <h3>{{ product.name }}</h3>
+              <p class="home-mkt-price">₦{{ product.price }}</p>
+              <span class="home-mkt-cta">View product <ArrowRightIcon class="lp-btn-icon" /></span>
+            </div>
+          </router-link>
+        </div>
+
+        <div v-else class="home-market-empty">
+          <p>Marketplace catalog is loading from the API. Check back shortly or browse the full shop.</p>
+          <router-link to="/marketplace" class="lp-btn lp-btn--dark">Go to marketplace</router-link>
+        </div>
+      </div>
+    </section>
+
+    <!-- LIVE STATS BAR — API counts -->
     <div class="trust-bar section-divider reveal-fade">
-      <div class="container text-center">
-        <div class="trust-bar-label">Trusted by forward-thinking organisations</div>
-        <div class="trust-logos">
-          <span class="trust-logo">FGN MINISTRY</span>
-          <span class="trust-logo">OAU IFE</span>
-          <span class="trust-logo">ONDO STATE GOVT</span>
-          <span class="trust-logo">NESREA</span>
-          <span class="trust-logo">REA</span>
-          <span class="trust-logo">NAFDAC</span>
+      <div class="container">
+        <div class="trust-bar-label">Live from Origin systems</div>
+        <div class="trust-logos trust-logos--stats">
+          <span class="trust-logo">{{ liveStats.products || '—' }} PRODUCTS</span>
+          <span class="trust-logo">{{ liveStats.categories || '—' }} CATEGORIES</span>
+          <span class="trust-logo">{{ liveStats.posts || '—' }} ARTICLES</span>
+          <span class="trust-logo">API CONNECTED</span>
         </div>
       </div>
     </div>
-
-
 
     <!-- FINANCING -->
     <section class="financing section-clipped section-divider" id="financing">
@@ -554,16 +599,17 @@
         <div class="financing-content reveal">
           <span class="section-eyebrow">Flexible Financing</span>
           <h2 class="section-title text-left">Own your energy. Pay on your terms.</h2>
-          <p class="section-sub text-left">Energy independence shouldn't be blocked by upfront cost. We've partnered with leading Nigerian banks and fintechs to give you flexible payment plans — so you can start saving from day one.</p>
+          <p class="section-sub text-left">Spread the cost of solar, storage, and security across a structured payment plan. Final offers are confirmed after a site audit with our engineers.</p>
           <ul class="financing-bullets">
-            <li><CheckIcon class="bullet-check-icon" /> Plans from 12 to 60 months</li>
-            <li><CheckIcon class="bullet-check-icon" /> Pre-approval in under 24 hours</li>
-            <li><CheckIcon class="bullet-check-icon" /> No collateral for systems under ₦15m</li>
-            <li><CheckIcon class="bullet-check-icon" /> Partner banks: Carbon, FairMoney, Sterling Bank</li>
+            <li><CheckIcon class="bullet-check-icon" /> Tenure options from 12 to 60 months</li>
+            <li><CheckIcon class="bullet-check-icon" /> Quote after a free load audit</li>
+            <li><CheckIcon class="bullet-check-icon" /> Commercial and residential packages</li>
+            <li><CheckIcon class="bullet-check-icon" /> Estimate tool below — illustrative only</li>
           </ul>
         </div>
         <div class="financing-tool reveal">
-          <div class="tool-title">Check Your Payment Plan</div>
+          <div class="tool-title">Estimate a payment plan</div>
+          <p class="tool-disclaimer">Illustrative only — not a bank offer. Apply for a real quote via consultation.</p>
           
           <div class="tool-label">System Type</div>
           <select class="tool-select" v-model="sysType">
@@ -587,7 +633,7 @@
             <option value="60">60 months</option>
           </select>
           
-          <button type="button" class="lp-btn lp-btn--dark lp-btn--block" @click="calcPayment">Calculate My Plan</button>
+          <button type="button" class="lp-btn lp-btn--dark lp-btn--block" @click="calcPayment">Calculate estimate</button>
           
           <div :class="['tool-result', { visible: showResult }]">
             <div v-for="(plan, idx) in resultPlans" :key="idx" class="result-plan">
@@ -597,54 +643,51 @@
               <hr v-if="idx < resultPlans.length - 1" class="result-divider" />
             </div>
             <div class="lp-actions lp-actions--center mt-md">
-              <router-link to="/load-audit" class="lp-btn lp-btn--accent">Apply Now</router-link>
+              <router-link to="/account/consultations" class="lp-btn lp-btn--accent">Request real quote</router-link>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- TESTIMONIALS -->
-    <section class="testimonials section-clipped section-divider" id="testimonials">
+    <!-- FEATURED BLOG — API -->
+    <section v-if="featuredPosts.length || postsLoading" class="home-blog section-clipped section-divider" id="insights">
       <div class="container">
-        <div class="testimonials-header reveal text-center">
-          <span class="section-eyebrow">Client Voices</span>
-          <h2 class="section-title">What our clients say</h2>
+        <div class="home-blog-header reveal">
+          <div>
+            <span class="section-eyebrow">From the blog</span>
+            <h2 class="section-title text-left">Engineering insights</h2>
+            <p class="section-sub text-left">Live articles from the Origin editorial API.</p>
+          </div>
+          <router-link to="/blog" class="lp-btn lp-btn--outline">View all articles</router-link>
         </div>
-        <div class="testimonials-grid reveal-stagger">
-          <div class="testi-card">
-            <div class="testi-card-top">
-              <div class="testi-avatar">AO</div>
-              <div class="testi-stars"><StarIcon v-for="n in 5" :key="n" class="star" /></div>
-            </div>
-            <p class="testi-quote">"Origin Electrical engineered an energy solution that has completely eliminated our generator costs. The installation was professional, the documentation thorough, and the monitoring app gives us total peace of mind."</p>
-            <div class="testi-author">
-              <div class="testi-name">Adewale Okonkwo</div>
-              <div class="testi-role">MD, Okonkwo Manufacturing Ltd — Ibadan</div>
-            </div>
+
+        <div v-if="postsLoading" class="home-blog-grid">
+          <div v-for="n in 3" :key="n" class="home-blog-card home-blog-card--skel">
+            <div class="skel media"></div>
+            <div class="skel line w-50"></div>
+            <div class="skel line w-90"></div>
           </div>
-          <div class="testi-card">
-            <div class="testi-card-top">
-              <div class="testi-avatar">FK</div>
-              <div class="testi-stars"><StarIcon v-for="n in 5" :key="n" class="star" /></div>
+        </div>
+
+        <div v-else class="home-blog-grid reveal-stagger">
+          <router-link
+            v-for="post in featuredPosts"
+            :key="post.id"
+            :to="`/blog/${post.slug}`"
+            class="home-blog-card"
+          >
+            <div class="home-blog-media">
+              <img v-if="post.image" :src="post.image" :alt="post.title" loading="lazy" />
+              <div v-else class="home-blog-fallback">{{ post.initials }}</div>
+              <span class="home-blog-badge">{{ post.category }}</span>
             </div>
-            <p class="testi-quote">"We awarded the campus energy contract to Origin after seeing their M&E drawings and engineering rigour. 18 months later, we have zero unplanned outages and our electricity bill has dropped 78%."</p>
-            <div class="testi-author">
-              <div class="testi-name">Prof. Funmi Kassim</div>
-              <div class="testi-role">Director of Works, Obafemi Awolowo University</div>
+            <div class="home-blog-body">
+              <p class="home-blog-meta">{{ post.date }} · {{ post.minutes }} min</p>
+              <h3>{{ post.title }}</h3>
+              <p>{{ post.excerpt }}</p>
             </div>
-          </div>
-          <div class="testi-card">
-            <div class="testi-card-top">
-              <div class="testi-avatar">BI</div>
-              <div class="testi-stars"><StarIcon v-for="n in 5" :key="n" class="star" /></div>
-            </div>
-            <p class="testi-quote">"The integrated CCTV and access control system has transformed our hospital's security posture. Their team understood the sensitivity of a healthcare environment and delivered accordingly."</p>
-            <div class="testi-author">
-              <div class="testi-name">Dr. Bola Idowu</div>
-              <div class="testi-role">CEO, Ondo State Teaching Hospital</div>
-            </div>
-          </div>
+          </router-link>
         </div>
       </div>
     </section>
@@ -655,31 +698,26 @@
         <div class="ev-visual reveal-left">
           <div class="ev-icon"><ZapIcon class="ev-zap-icon" /></div>
           <h3>EV Charging Infrastructure</h3>
-          <div class="ev-badge"><RocketIcon class="ev-badge-icon" /> First-Mover in Nigeria</div>
+          <div class="ev-badge"><RocketIcon class="ev-badge-icon" /> Live marketplace pricing</div>
           <div class="ev-charging-pricing">
-            <div class="ev-price-item">
-              <div class="ev-price-header">
-                <div class="ev-price-label">Home Charger (AC)</div>
-                <div class="ev-price-val">from ₦350,000</div>
-              </div>
-              <div class="ev-gauge"><div class="ev-gauge-fill" style="width:14%"></div></div>
-              <div class="ev-price-kw">7 kW</div>
-            </div>
-            <div class="ev-price-item">
-              <div class="ev-price-header">
-                <div class="ev-price-label">Commercial Fleet (AC)</div>
-                <div class="ev-price-val">from ₦1.2m</div>
-              </div>
-              <div class="ev-gauge"><div class="ev-gauge-fill" style="width:44%"></div></div>
-              <div class="ev-price-kw">22 kW</div>
-            </div>
-            <div class="ev-price-item">
-              <div class="ev-price-header">
-                <div class="ev-price-label">Public Fast Charger (DC)</div>
-                <div class="ev-price-val">from ₦6.5m</div>
-              </div>
-              <div class="ev-gauge"><div class="ev-gauge-fill" style="width:100%"></div></div>
-              <div class="ev-price-kw">50 kW</div>
+            <template v-if="evProducts.length">
+              <router-link
+                v-for="item in evProducts"
+                :key="item.id"
+                :to="`/product/${item.id}`"
+                class="ev-price-item ev-price-item--link"
+              >
+                <div class="ev-price-header">
+                  <div class="ev-price-label">{{ item.name }}</div>
+                  <div class="ev-price-val">₦{{ item.price }}</div>
+                </div>
+                <div class="ev-gauge"><div class="ev-gauge-fill" :style="{ width: item.gauge }"></div></div>
+                <div class="ev-price-kw">{{ item.meta }}</div>
+              </router-link>
+            </template>
+            <div v-else class="ev-price-empty">
+              <p>Browse live EV / charging products in the marketplace for current pricing.</p>
+              <router-link to="/marketplace" class="lp-btn lp-btn--accent lp-btn--block">Shop EV gear</router-link>
             </div>
           </div>
         </div>
@@ -757,7 +795,6 @@ import {
   Wind as WindIcon,
   PenTool as PenToolIcon,
   ArrowRight as ArrowRightIcon,
-  Star as StarIcon,
   Phone as PhoneIcon,
   Check as CheckIcon,
   Landmark as LandmarkIcon,
@@ -779,6 +816,8 @@ import {
 } from 'lucide-vue-next';
 
 import marketplaceService from '@/services/marketplace.service';
+import blogService from '@/services/blog.service';
+import { mediaUrl, firstMediaUrl } from '@/utils/mediaUrl';
 
 // PDF Assets
 import projectOndoImg from '../assets/pdf-assets/project-ondo.jpg';
@@ -840,23 +879,122 @@ const calcPayment = () => {
     alert('Minimum financed amount is ₦500,000.');
     return;
   }
+  // Illustrative amortisation only — not a lender quote
   const rates = { 12: 0.025, 24: 0.022, 36: 0.019, 48: 0.018, 60: 0.017 };
   const r = rates[tenureVal];
   const base = (budgetVal * r * Math.pow(1 + r, tenureVal)) / (Math.pow(1 + r, tenureVal) - 1);
   const fmt = n => '₦' + Math.round(n).toLocaleString('en-NG');
-  
-  const plans = [
-    { name: 'Carbon Finance', adj: 1.0 },
-    { name: 'Sterling Bank Clean Energy', adj: 1.02 },
-    { name: 'FairMoney Business', adj: 0.98 },
-  ];
 
-  resultPlans.value = plans.map(p => ({
-    name: p.name,
-    amount: fmt(base * p.adj),
-    term: `for ${tenureVal} months · Total: ${fmt(base * p.adj * tenureVal)}`
-  }));
+  resultPlans.value = [
+    {
+      name: 'Illustrative estimate',
+      amount: fmt(base),
+      term: `for ${tenureVal} months · Est. total: ${fmt(base * tenureVal)} · confirm via consult`
+    }
+  ];
   showResult.value = true;
+};
+
+// ----------------- LIVE API DATA (marketplace + blog) -----------------
+const marketProducts = ref([]);
+const marketLoading = ref(true);
+const featuredPosts = ref([]);
+const postsLoading = ref(true);
+const evProducts = ref([]);
+const liveStats = ref({ products: 0, categories: 0, posts: 0 });
+
+const mapProductCard = (p) => ({
+  id: p.id,
+  name: p.name,
+  price: Number(p.price).toLocaleString('en-NG'),
+  category: p.category || p.category_name || '',
+  image: firstMediaUrl(p.images) || mediaUrl(p.featured_image) || ''
+});
+
+const isEvRelated = (p) => {
+  const hay = `${p.name || ''} ${p.category || ''} ${p.description || ''}`.toLowerCase();
+  return /ev|charg|electric vehicle|wall.?box|dc fast|ac charg/.test(hay);
+};
+
+const fetchLiveCatalog = async () => {
+  marketLoading.value = true;
+  try {
+    const [productsRes, categoriesRes] = await Promise.all([
+      marketplaceService.getProducts({ page: 1, limit: 48 }),
+      marketplaceService.getCategories().catch(() => [])
+    ]);
+    const raw = productsRes.products || productsRes || [];
+    const list = Array.isArray(raw) ? raw : [];
+    liveStats.value.products = productsRes.total || list.length || 0;
+
+    let cats = categoriesRes;
+    if (!Array.isArray(cats) && cats?.value) cats = cats.value;
+    if (!Array.isArray(cats) && cats && typeof cats === 'object') {
+      cats = Object.keys(cats);
+    }
+    liveStats.value.categories = Array.isArray(cats) ? cats.length : 0;
+
+    marketProducts.value = list.slice(0, 8).map(mapProductCard);
+
+    const ev = list.filter(isEvRelated).slice(0, 3);
+    const maxPrice = Math.max(...ev.map((p) => Number(p.price) || 0), 1);
+    evProducts.value = ev.map((p) => ({
+      id: p.id,
+      name: p.name,
+      price: Number(p.price).toLocaleString('en-NG'),
+      meta: p.category || 'Marketplace',
+      gauge: `${Math.max(12, Math.round((Number(p.price) / maxPrice) * 100))}%`
+    }));
+  } catch (e) {
+    console.error('Live catalog fetch error:', e);
+    marketProducts.value = [];
+    evProducts.value = [];
+  } finally {
+    marketLoading.value = false;
+  }
+};
+
+const fetchFeaturedBlog = async () => {
+  postsLoading.value = true;
+  try {
+    const posts = await blogService.getFeaturedPosts();
+    liveStats.value.posts = posts.length;
+    featuredPosts.value = posts.slice(0, 3).map((p) => {
+      const plain = String(p.excerpt || p.content || '')
+        .replace(/[#*`_~]/g, '')
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+        .replace(/\s+/g, ' ')
+        .trim();
+      return {
+        id: p.id,
+        slug: p.slug,
+        title: p.title,
+        category: p.category_name || 'Insights',
+        image: p.featured_image ? mediaUrl(p.featured_image) : '',
+        date: p.created_at
+          ? new Date(p.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+          : '—',
+        minutes: blogService.readingMinutes(p.content),
+        excerpt: plain.length > 120 ? `${plain.slice(0, 120)}…` : plain,
+        initials: String(p.title || 'OE')
+          .split(/\s+/)
+          .slice(0, 2)
+          .map((w) => w[0] || '')
+          .join('')
+          .toUpperCase()
+      };
+    });
+    // Prefer total article count when possible
+    try {
+      const all = await blogService.getAllPosts();
+      if (all.length) liveStats.value.posts = all.length;
+    } catch { /* keep featured length */ }
+  } catch (e) {
+    console.error('Featured blog fetch error:', e);
+    featuredPosts.value = [];
+  } finally {
+    postsLoading.value = false;
+  }
 };
 
 // ----------------- HERO H1 TYPEWRITER -----------------
@@ -1013,6 +1151,10 @@ onMounted(() => {
 
   // Start ticker immediately (skeleton chips give it content to scroll)
   startTicker();
+
+  // Live API: hero ticker + marketplace preview + blog + EV pricing
+  fetchLiveCatalog();
+  fetchFeaturedBlog();
 
   // Fetch products, then restart ticker so it re-measures the real item width
   fetchHeroProducts().then(() => {
@@ -1728,11 +1870,11 @@ onMounted(() => {
    SECTION COMMON — premium spacing + tech rails
    ══════════════════════════════════════════ */
 .services, .process, .cases, .fieldwork, .financing,
-.testimonials, .ev-section { padding: 88px 0; }
+.home-market, .home-blog, .ev-section { padding: 88px 0; }
 
 @media (max-width: 992px) {
   .services, .process, .cases, .fieldwork,
-  .financing, .testimonials, .ev-section { padding: 64px 0; }
+  .financing, .home-market, .home-blog, .ev-section { padding: 64px 0; }
 }
 
 /* Shared landing CTA system — sharp, justified, modern tech */
@@ -3187,6 +3329,7 @@ onMounted(() => {
   border-top: 1px solid var(--border-color);
   border-bottom: 1px solid var(--border-color);
   padding: 40px 0;
+  text-align: center;
 }
 
 .trust-bar-label {
@@ -3196,6 +3339,242 @@ onMounted(() => {
   text-transform: uppercase;
   color: var(--text-secondary);
   margin-bottom: 20px;
+}
+
+.trust-logos--stats {
+  gap: 12px;
+}
+
+.tool-disclaimer {
+  margin: -4px 0 16px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+/* ── Live marketplace preview ── */
+.home-market { background: var(--bg-primary); }
+.home-market-header,
+.home-blog-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.75rem;
+}
+.home-market-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+.home-mkt-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--bg-primary);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.3s var(--transition-bounce), border-color 0.2s, box-shadow 0.3s;
+}
+.home-mkt-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255,118,0,0.4);
+  box-shadow: var(--shadow-md);
+}
+.home-mkt-media {
+  position: relative;
+  aspect-ratio: 1;
+  background: var(--bg-secondary);
+  overflow: hidden;
+}
+.home-mkt-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.home-mkt-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+}
+.home-mkt-fallback svg { width: 28px; height: 28px; }
+.home-mkt-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: var(--radius-xs);
+}
+.home-mkt-body {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  text-align: left;
+}
+.home-mkt-body h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 550;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.home-mkt-price {
+  margin: 0;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--color-primary);
+}
+.home-mkt-cta {
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.home-market-empty {
+  padding: 2rem;
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  color: var(--text-secondary);
+}
+.home-mkt-card--skel,
+.home-blog-card--skel { pointer-events: none; }
+.home-mkt-card--skel .skel.media,
+.home-blog-card--skel .skel.media {
+  aspect-ratio: 1;
+  margin: 0;
+  border-radius: 0;
+  background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--border-color) 50%, var(--bg-secondary) 75%);
+  background-size: 200% 100%;
+  animation: skeletonPulse 1.5s infinite linear;
+}
+.home-mkt-card--skel .skel.line,
+.home-blog-card--skel .skel.line {
+  height: 12px;
+  margin: 10px 14px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--border-color) 50%, var(--bg-secondary) 75%);
+  background-size: 200% 100%;
+  animation: skeletonPulse 1.5s infinite linear;
+}
+.skel.w-40 { width: 40%; }
+.skel.w-50 { width: 50%; }
+.skel.w-80 { width: 80%; }
+.skel.w-90 { width: 90%; }
+
+/* ── Live blog preview ── */
+.home-blog { background: var(--bg-secondary); }
+.home-blog-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+.home-blog-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.3s var(--transition-bounce), border-color 0.2s, box-shadow 0.3s;
+}
+.home-blog-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255,118,0,0.4);
+  box-shadow: var(--shadow-md);
+}
+.home-blog-media {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  background: var(--bg-secondary);
+  overflow: hidden;
+}
+.home-blog-media img { width: 100%; height: 100%; object-fit: cover; }
+.home-blog-fallback {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  color: var(--text-muted);
+}
+.home-blog-badge {
+  position: absolute; top: 10px; left: 10px;
+  background: var(--color-primary); color: #fff;
+  font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; padding: 4px 8px; border-radius: var(--radius-xs);
+}
+.home-blog-body { padding: 1.1rem 1.15rem 1.25rem; text-align: left; }
+.home-blog-meta { margin: 0 0 6px; font-size: 0.74rem; color: var(--text-muted); }
+.home-blog-body h3 {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 550;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+.home-blog-body p:last-child {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+.ev-price-item--link { text-decoration: none; color: inherit; display: block; }
+.ev-price-empty {
+  text-align: left;
+  padding: 8px 0 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (max-width: 992px) {
+  .home-market-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .home-blog-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 768px) {
+  .home-market-header,
+  .home-blog-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .home-market-header .lp-btn,
+  .home-blog-header .lp-btn { width: 100%; }
+  .home-market-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .home-blog-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 420px) {
+  .home-market-grid { grid-template-columns: 1fr; }
 }
 
 .trust-logos {
