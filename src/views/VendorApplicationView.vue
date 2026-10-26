@@ -109,26 +109,28 @@
         </form>
       </div>
 
-      <!-- Pending State -->
+      <!-- Pending State — no dashboard access until admin approves -->
       <div v-else-if="status === 'pending'" class="status-card glass-card pending">
         <div class="status-icon-wrapper">
           <ClockIcon class="status-icon" />
         </div>
-        <h2>Application Under Review</h2>
+        <h2>Waiting for Admin Approval</h2>
         <p>
-          Thank you for applying to be an Origin Electric vendor! Our team is currently reviewing your business details and verification documents.
+          Your supplier application is submitted. An Origin Electric admin must approve it in the admin dashboard before you can open the Vendor Dashboard or manage products.
         </p>
         <div class="status-details">
           <div class="detail-item">
             <span class="detail-label">Status</span>
-            <span class="detail-value status-tag pending">Pending Review</span>
+            <span class="detail-value status-tag pending">Pending Admin Approval</span>
           </div>
           <div class="detail-item">
             <span class="detail-label">Estimated Time</span>
             <span class="detail-value">2-3 Business Days</span>
           </div>
         </div>
-        <p class="status-footer">We'll notify you via email ({{ user?.email }}) as soon as your account is activated.</p>
+        <p class="status-footer">
+          “Go to Vendor Dashboard” appears only after approval. We’ll email {{ user?.email }} when you’re activated.
+        </p>
         <router-link to="/" class="btn secondary-btn">Back to Home</router-link>
       </div>
 
@@ -151,13 +153,13 @@
         </div>
       </div>
 
-      <!-- Approved State: Simple Hub -->
+      <!-- Approved only — sole place that links into the vendor hub -->
       <div v-else-if="status === 'approved'" class="status-card glass-card approved">
         <div class="status-icon-wrapper">
           <CheckCircleIcon class="status-icon" />
         </div>
-        <h2>Welcome to the Network!</h2>
-        <p>Your vendor account is active. You can now start managing your products and orders from the dashboard.</p>
+        <h2>Approved by Admin</h2>
+        <p>Your supplier account is active. You can now manage products, orders, and wallet from the Vendor Dashboard.</p>
         <div class="status-details">
           <div class="detail-item">
             <span class="detail-label">Status</span>
@@ -227,9 +229,11 @@ const fetchProfile = async () => {
 const fetchStatus = async () => {
   try {
     const data = await vendorService.getStatus();
-    status.value = data.status;
+    const raw = data?.status;
+    status.value = raw == null || raw === '' ? null : String(raw).toLowerCase();
   } catch (err) {
     console.error('Failed to fetch vendor status', err);
+    status.value = null;
   } finally {
     isLoading.value = false;
   }

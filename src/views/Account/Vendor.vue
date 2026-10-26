@@ -11,12 +11,16 @@
         <AlertTriangleIcon v-else-if="status === 'rejected'" />
         <StoreIcon v-else />
       </div>
-      <h3>Vendor account required</h3>
-      <p v-if="status === 'pending'">Your application is under review. Track progress on the application page.</p>
-      <p v-else-if="status === 'rejected'">Your application was not approved. Open the application page for details.</p>
-      <p v-else>Apply once to unlock catalog tools, bulk import, wallet, and sales.</p>
+      <h3 v-if="status === 'pending'">Waiting for admin approval</h3>
+      <h3 v-else-if="status === 'rejected'">Application not approved</h3>
+      <h3 v-else>Supplier approval required</h3>
+      <p v-if="status === 'pending'">
+        An admin must approve your application before the Vendor Dashboard unlocks. “Go to Vendor Dashboard” appears only after approval.
+      </p>
+      <p v-else-if="status === 'rejected'">Your application was rejected. You cannot access the supplier dashboard.</p>
+      <p v-else>Apply as a supplier first. Dashboard access is granted only after admin approval.</p>
       <router-link to="/vendor-apply" class="btn primary">
-        {{ status === null ? 'Become a vendor' : 'View application' }}
+        {{ status === null ? 'Apply as supplier' : 'View application status' }}
       </router-link>
     </div>
 
@@ -102,9 +106,19 @@ const tabs = [
 const fetchStatus = async () => {
   try {
     const data = await vendorService.getStatus();
-    status.value = data.status;
+    status.value = String(data?.status || '').toLowerCase() || null;
+    // Hard gate: never leave non-approved users on the hub URL
+    if (status.value !== 'approved') {
+      router.replace({
+        name: 'VendorApply',
+        query: { waiting: status.value || 'apply' }
+      });
+      return;
+    }
   } catch (err) {
     console.error('Failed to fetch vendor status', err);
+    router.replace({ name: 'VendorApply', query: { waiting: 'apply' } });
+    return;
   } finally {
     isLoading.value = false;
   }

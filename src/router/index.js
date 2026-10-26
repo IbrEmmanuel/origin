@@ -158,7 +158,11 @@ const routes = [
                 path: 'vendor',
                 name: 'AccountVendor',
                 component: () => import('../views/Account/Vendor.vue'),
-                meta: { title: 'Vendor Dashboard' }
+                meta: {
+                    title: 'Vendor Dashboard',
+                    // Only approved suppliers (admin-approved) may open the hub
+                    requiresVendorApproved: true
+                }
             },
             {
                 path: 'market',
@@ -244,7 +248,7 @@ const router = createRouter({
     }
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
     const isAuthenticated = !!localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     const isVerified = user.is_verified;
@@ -252,20 +256,45 @@ router.beforeEach((to, from, next) => {
     if (to.matched.some(record => record.meta.requiresAuth)) {
         if (!isAuthenticated) {
             next({ name: 'Login', query: { redirect: to.fullPath } });
-        } else if (!isVerified) {
+            return;
+        }
+        if (!isVerified) {
             next({ name: 'VerifyEmail', query: { email: user.email } });
-        } else {
-            next();
+            return;
         }
     } else if (to.matched.some(record => record.meta.guestOnly)) {
         if (isAuthenticated && isVerified) {
             next({ name: 'AccountDashboard' });
-        } else {
-            next();
+            return;
         }
-    } else {
         next();
+        return;
     }
+
+    // Supplier hub: block until admin approves the vendor application
+    if (to.matched.some((record) => record.meta.requiresVendorApproved)) {
+        if (!isAuthenticated) {
+            next({ name: 'Login', query: { redirect: to.fullPath } });
+            return;
+        }
+        try {
+            const { default: vendorService } = await import('@/services/vendor.service');
+            const data = await vendorService.getStatus();
+            const status = String(data?.status || '').toLowerCase();
+            if (status !== 'approved') {
+                next({
+                    name: 'VendorApply',
+                    query: { waiting: status || 'apply' }
+                });
+                return;
+            }
+        } catch {
+            next({ name: 'VendorApply', query: { waiting: 'apply' } });
+            return;
+        }
+    }
+
+    next();
 });
 
 router.afterEach((to) => {

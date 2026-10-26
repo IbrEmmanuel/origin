@@ -325,7 +325,7 @@ const handleLogout = () => {
 const fetchVendorStatus = async () => {
   try {
     const data = await vendorService.getStatus();
-    vendorStatus.value = data.status;
+    vendorStatus.value = String(data?.status || '').toLowerCase() || null;
   } catch (err) {
     console.error('Failed to fetch vendor status', err);
   }
