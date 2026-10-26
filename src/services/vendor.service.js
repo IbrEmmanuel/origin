@@ -2,7 +2,8 @@ import api from './api';
 import {
   rowToProductPayload,
   saveLocalImportBatch,
-  updateLocalImportBatch
+  updateLocalImportBatch,
+  getLocalImportBatch
 } from '@/utils/productImport';
 
 const vendorService = {
@@ -19,6 +20,124 @@ const vendorService = {
     async getDashboardStats() {
         const response = await api.get('/vendor/dashboard-stats');
         return response.data;
+    },
+
+    /**
+     * Live supplier overview: prefer /vendor/dashboard-stats, otherwise compose
+     * from products + orders + wallet so the hub never shows empty “demo” zeros
+     * when the dedicated stats route is missing or incomplete.
+     */
+    async getLiveDashboard() {
+        let stats = null;
+        try {
+            stats = await this.getDashboardStats();
+        } catch {
+            stats = null;
+        }
+
+        const hasStats =
+            stats &&
+            (stats.totalProducts != null ||
+                stats.total_products != null ||
+                stats.totalOrders != null ||
+                stats.total_orders != null ||
+                stats.totalSales != null ||
+                stats.total_sales != null ||
+                (stats.recentActivity || stats.recent_activity || []).length);
+
+        if (hasStats) {
+            return {
+                source: 'dashboard-stats',
+                totalProducts: Number(stats.totalProducts ?? stats.total_products ?? 0),
+                totalOrders: Number(stats.totalOrders ?? stats.total_orders ?? 0),
+                totalSales: Number(stats.totalSales ?? stats.total_sales ?? 0),
+                recentActivity: stats.recentActivity || stats.recent_activity || [],
+                walletBalance: Number(
+                    stats.walletBalance ?? stats.wallet_balance ?? stats.available_balance ?? 0
+                )
+            };
+        }
+
+        const [productsRes, ordersRes, walletRes] = await Promise.allSettled([
+            this.getProducts(),
+            this.getOrders(),
+            this.getWallet()
+        ]);
+
+        const productsRaw =
+            productsRes.status === 'fulfilled' ? productsRes.value : [];
+        const products = Array.isArray(productsRaw)
+            ? productsRaw
+            : productsRaw?.products || [];
+
+        const ordersRaw = ordersRes.status === 'fulfilled' ? ordersRes.value : [];
+        const orders = Array.isArray(ordersRaw)
+            ? ordersRaw
+            : ordersRaw?.orders || ordersRaw?.items || [];
+
+        const wallet =
+            walletRes.status === 'fulfilled' ? walletRes.value || {} : {};
+
+        const totalSales = orders.reduce((sum, o) => {
+            const line =
+                o.vendor_total ??
+                o.vendorTotal ??
+                o.total ??
+                o.amount ??
+                o.subtotal ??
+                0;
+            return sum + (Number(line) || 0);
+        }, 0);
+
+        const recentActivity = orders
+            .slice()
+            .sort(
+                (a, b) =>
+                    new Date(b.created_at || b.createdAt || 0) -
+                    new Date(a.created_at || a.createdAt || 0)
+            )
+            .slice(0, 8)
+            .map((o) => ({
+                id: o.id,
+                product_name:
+                    o.product_name ||
+                    o.items?.[0]?.name ||
+                    o.items?.[0]?.product_name ||
+                    `${o.items_count || o.items?.length || 0} item(s)`,
+                qty: o.items_count || o.items?.length || o.qty || 1,
+                price:
+                    Number(o.vendor_total ?? o.vendorTotal ?? o.total ?? o.amount ?? 0) /
+                    Math.max(1, o.items_count || o.items?.length || 1),
+                created_at: o.created_at || o.createdAt,
+                status: o.status || 'processing'
+            }));
+
+        if (
+            productsRes.status === 'rejected' &&
+            ordersRes.status === 'rejected' &&
+            walletRes.status === 'rejected'
+        ) {
+            const err =
+                productsRes.reason ||
+                ordersRes.reason ||
+                walletRes.reason ||
+                new Error('Could not load supplier dashboard');
+            throw err;
+        }
+
+        return {
+            source: 'composed',
+            totalProducts: products.length,
+            totalOrders: orders.length,
+            totalSales,
+            recentActivity,
+            walletBalance: Number(
+                wallet.balance ??
+                    wallet.available_balance ??
+                    wallet.availableBalance ??
+                    0
+            )
+        };
     },
 
     async getProducts() {
@@ -365,7 +484,9 @@ const vendorService = {
                     rowIndex: row.rowIndex,
                     sku: row.sku,
                     message,
-                    error: message
+                    error: message,
+                    // Keep payload so Batches → Retry can re-POST to live product API
+                    rowData: { ...row }
                 });
             }
 
@@ -409,6 +530,26 @@ const vendorService = {
             total_records: validRows.length,
             errors
         };
+    },
+
+    /**
+     * Retry failed rows from a local (direct CRUD) import batch against the live API.
+     */
+    async retryLocalImportBatch(batchId, { onProgress } = {}) {
+        const batch = getLocalImportBatch(batchId);
+        if (!batch) {
+            throw new Error('Import batch not found on this device');
+        }
+        const failedRows = (batch.errors || batch.row_errors || [])
+            .map((e) => e.rowData)
+            .filter(Boolean);
+        if (!failedRows.length) {
+            throw new Error('No retryable row data stored for this batch');
+        }
+        return this.importProductsDirectly(failedRows, batch.mode || 'create', {
+            filename: `retry-${batch.filename || batch.file_name || 'import.csv'}`,
+            onProgress
+        });
     }
 };
 

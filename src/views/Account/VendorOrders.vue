@@ -21,6 +21,12 @@
       </div>
     </div>
 
+    <div v-else-if="loadError" class="empty-pipeline glass-card">
+      <h3>Orders unavailable</h3>
+      <p>{{ loadError }}</p>
+      <button type="button" class="btn-text" @click="fetchOrders">Retry</button>
+    </div>
+
     <div v-else-if="filteredOrders.length > 0" class="pipeline-content">
       <div class="orders-list">
         <div v-for="order in filteredOrders" :key="order.id" class="order-pipeline-item glass-card">
@@ -105,6 +111,7 @@ const emit = defineEmits(['view-details']);
 
 const orders = ref([]);
 const loading = ref(true);
+const loadError = ref('');
 const activeStatus = ref('all');
 
 const statusTabs = [
@@ -116,11 +123,17 @@ const statusTabs = [
 ];
 
 const fetchOrders = async () => {
+  loading.value = true;
+  loadError.value = '';
   try {
     const data = await vendorService.getOrders();
-    orders.value = data;
+    orders.value = Array.isArray(data) ? data : data?.orders || data?.items || [];
   } catch (err) {
     console.error('Failed to fetch vendor orders', err);
+    orders.value = [];
+    loadError.value =
+      err.response?.data?.message ||
+      'Could not load live supplier orders from the API.';
   } finally {
     loading.value = false;
   }
@@ -128,12 +141,16 @@ const fetchOrders = async () => {
 
 const filteredOrders = computed(() => {
   if (activeStatus.value === 'all') return orders.value;
-  return orders.value.filter(o => o.status.toLowerCase() === activeStatus.value);
+  return orders.value.filter(
+    (o) => String(o.status || '').toLowerCase() === activeStatus.value
+  );
 });
 
 const getCount = (statusId) => {
   if (statusId === 'all') return orders.value.length;
-  return orders.value.filter(o => o.status.toLowerCase() === statusId).length;
+  return orders.value.filter(
+    (o) => String(o.status || '').toLowerCase() === statusId
+  ).length;
 };
 
 const formatDate = (dateStr) => {

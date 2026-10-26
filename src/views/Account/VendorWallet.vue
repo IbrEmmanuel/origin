@@ -1,5 +1,9 @@
 <template>
   <div class="vendor-wallet">
+    <div v-if="loadError" class="wallet-error" role="alert">
+      {{ loadError }}
+      <button type="button" class="retry-link" @click="fetchData">Retry</button>
+    </div>
     <!-- Balance Overview Cards -->
     <div class="wallet-stats mb-8">
       <div class="stat-card glass-card">
@@ -200,6 +204,7 @@ import {
 import vendorService from '@/services/vendor.service';
 
 const loading = ref(true);
+const loadError = ref('');
 const stats = ref({
   availableBalance: 0,
   pendingPayouts: 0,
@@ -219,6 +224,7 @@ const isPayoutInfoComplete = computed(() =>
 
 const fetchData = async () => {
   loading.value = true;
+  loadError.value = '';
   try {
     const [walletData, profileData] = await Promise.all([
       vendorService.getWallet(),
@@ -259,6 +265,9 @@ const fetchData = async () => {
     stats.value.lifetimeEarnings = lifetime;
   } catch (err) {
     console.error('Failed to fetch wallet data', err);
+    loadError.value =
+      err.response?.data?.message ||
+      'Could not load live wallet data from the Origin API.';
   } finally {
     loading.value = false;
   }
@@ -299,6 +308,31 @@ onMounted(fetchData);
 </script>
 
 <style scoped>
+.wallet-error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--color-error) 35%, var(--border-color));
+  background: color-mix(in srgb, var(--color-error) 8%, var(--bg-primary));
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.retry-link {
+  border: none;
+  background: transparent;
+  color: var(--color-primary);
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: underline;
+}
+
 .wallet-stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

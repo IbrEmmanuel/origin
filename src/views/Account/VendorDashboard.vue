@@ -108,15 +108,16 @@ const fetchStats = async () => {
   loading.value = true;
   error.value = '';
   try {
-    const data = await vendorService.getDashboardStats();
-    statCards.value[0].value = String(data.totalProducts ?? data.total_products ?? 0);
-    statCards.value[1].value = String(data.totalOrders ?? data.total_orders ?? 0);
-    const sales = data.totalSales ?? data.total_sales ?? 0;
-    statCards.value[2].value = `₦${Number(sales).toLocaleString()}`;
-    activities.value = data.recentActivity || data.recent_activity || [];
+    const data = await vendorService.getLiveDashboard();
+    statCards.value[0].value = String(data.totalProducts ?? 0);
+    statCards.value[1].value = String(data.totalOrders ?? 0);
+    statCards.value[2].value = `₦${Number(data.totalSales ?? 0).toLocaleString()}`;
+    activities.value = data.recentActivity || [];
   } catch (err) {
     console.error('Failed to fetch vendor stats', err);
-    error.value = err.response?.data?.message || 'Could not load vendor dashboard stats.';
+    error.value =
+      err.response?.data?.message ||
+      'Could not load live supplier metrics. Check your connection and try again.';
   } finally {
     loading.value = false;
   }

@@ -10,6 +10,11 @@
       </button>
     </div>
 
+    <div v-if="loadError" class="products-error" role="alert">
+      {{ loadError }}
+      <button type="button" class="retry-link" @click="fetchProducts">Retry</button>
+    </div>
+
     <!-- Add/Edit Product Form (INLINE) -->
     <div v-if="showForm" class="product-form-container glass-card mb-8">
       <div class="form-header">
@@ -194,6 +199,7 @@ import {
 const products = ref([]);
 const productCategories = ref([]);
 const loading = ref(true);
+const loadError = ref('');
 const searchQuery = ref('');
 const showForm = ref(false);
 const editingProductData = ref(null);
@@ -232,15 +238,24 @@ const imagePreviews = ref([]); // Now stores { src, file, isExisting, path }
 
 const fetchProducts = async () => {
   loading.value = true;
+  loadError.value = '';
   try {
     const [productsRes, categoriesRes] = await Promise.all([
       vendorService.getProducts(),
       marketplaceService.getCategories()
     ]);
-    products.value = productsRes;
-    productCategories.value = categoriesRes;
+    products.value = Array.isArray(productsRes)
+      ? productsRes
+      : productsRes?.products || [];
+    productCategories.value = Array.isArray(categoriesRes)
+      ? categoriesRes
+      : categoriesRes?.categories || [];
   } catch (err) {
     console.error('Failed to fetch data', err);
+    products.value = [];
+    loadError.value =
+      err.response?.data?.message ||
+      'Could not load your live catalog from the Origin API.';
   } finally {
     loading.value = false;
   }
@@ -392,6 +407,31 @@ onMounted(fetchProducts);
 </script>
 
 <style scoped>
+.products-error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--color-error) 35%, var(--border-color));
+  background: color-mix(in srgb, var(--color-error) 8%, var(--bg-primary));
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.retry-link {
+  border: none;
+  background: transparent;
+  color: var(--color-primary);
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: underline;
+}
+
 .action-bar {
   display: flex;
   justify-content: space-between;

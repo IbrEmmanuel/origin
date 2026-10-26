@@ -71,7 +71,7 @@
               <span class="rail-mark">{{ userInitials }}</span>
               <div class="rail-id-copy">
                 <strong>{{ userName }}</strong>
-                <small>{{ vendorStatus === 'approved' ? 'Vendor' : 'Account' }}</small>
+                <small>{{ vendorStatus === 'approved' ? 'Supplier' : 'Account' }}</small>
               </div>
             </div>
             <button
@@ -231,8 +231,8 @@ const navItems = computed(() => {
     vendorStatus.value === 'approved'
       ? {
           path: '/account/vendor',
-          label: 'Vendor',
-          dock: 'Vendor',
+          label: 'Supplier',
+          dock: 'Supplier',
           icon: VendorIcon,
           description: 'Products, bulk import, orders, and wallet.'
         }

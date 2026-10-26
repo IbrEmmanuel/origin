@@ -21,6 +21,10 @@
     </div>
 
     <div v-else class="hub">
+      <div class="live-bar" role="status">
+        <span class="live-dot" aria-hidden="true"></span>
+        <span>Supplier workspace · live Origin API</span>
+      </div>
       <div class="tab-rail" role="tablist" aria-label="Vendor sections">
         <button
           v-for="tab in tabs"
@@ -133,6 +137,28 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.live-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  align-self: flex-start;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.18);
 }
 
 .state,

@@ -12,8 +12,8 @@
         </button>
       </div>
 
-      <div v-if="!available" class="notice">
-        Showing imports from this account. Server batch routes are used when available.
+      <div class="notice">
+        Imports write to your live catalog via the Origin product API. Batch history merges server jobs with this device’s import runs.
       </div>
 
       <div v-if="loading && !batches.length" class="state">Loading batches…</div>
@@ -237,16 +237,39 @@ const retryFailed = async () => {
   if (!id) return;
   retrying.value = true;
   try {
+    const isLocal =
+      String(id).startsWith('local-') || detail.value?.source === 'direct_crud';
+
+    if (isLocal) {
+      const result = await vendorService.retryLocalImportBatch(id);
+      await openDetail(result);
+      await load();
+      alert(
+        result.failed_count
+          ? `Retry finished with ${result.failed_count} failure(s).`
+          : `Retried successfully — ${result.success_count} product(s) saved to your live catalog.`
+      );
+      return;
+    }
+
     const res = await vendorService.retryBatchFailed(id);
     if (!res.available) {
-      alert('Retry endpoint not available on API yet.');
+      // Server job API missing — fall back to local row payloads if present
+      if ((detail.value?.errors || []).some((e) => e.rowData)) {
+        const result = await vendorService.retryLocalImportBatch(id);
+        await openDetail(result);
+        await load();
+        alert(`Retried via live product API — ${result.success_count} ok, ${result.failed_count} failed.`);
+        return;
+      }
+      alert('Could not retry: no server retry route and no stored row data.');
       return;
     }
     await openDetail({ id });
     await load();
-    alert('Failed rows queued for retry.');
+    alert('Failed rows queued for retry on the server.');
   } catch (e) {
-    alert(e.response?.data?.message || 'Retry failed');
+    alert(e.response?.data?.message || e.message || 'Retry failed');
   } finally {
     retrying.value = false;
   }
