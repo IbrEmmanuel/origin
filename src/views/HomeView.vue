@@ -2,19 +2,31 @@
   <div class="home-view">
     <!-- HERO SECTION -->
     <section class="hero" id="home">
-      <!-- Background slideshow -->
-      <div class="hero-bg">
-        <transition-group name="slide-fade" tag="div" class="hero-slides-wrap">
-          <div
-            v-for="(slide, i) in heroSlides"
-            v-show="i === heroSlideActive"
-            :key="slide"
-            class="hero-slide"
-            :class="`kb-${heroSlideKbDir[heroSlideActive]}`"
-            :style="{ backgroundImage: `url(${slide})` }"
-            aria-hidden="true"
-          ></div>
-        </transition-group>
+      <!-- Cinematic video background + poster fallback -->
+      <div class="hero-bg" aria-hidden="true">
+        <div
+          class="hero-poster"
+          :style="{ backgroundImage: `url(${heroPoster})` }"
+        ></div>
+        <video
+          v-if="heroVideoEnabled"
+          ref="heroVideoRef"
+          class="hero-video"
+          :class="{ 'is-ready': heroVideoReady }"
+          :poster="heroPoster"
+          autoplay
+          muted
+          loop
+          playsinline
+          preload="metadata"
+          disablePictureInPicture
+          tabindex="-1"
+          aria-hidden="true"
+          @playing="onHeroVideoPlaying"
+          @error="onHeroVideoError"
+        >
+          <source :src="HERO_VIDEO_SRC" type="video/mp4" />
+        </video>
         <div class="hero-bg-overlay"></div>
       </div>
 
@@ -669,7 +681,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, nextTick, onMounted, onUnmounted } from 'vue';
 import { 
   Calculator as CalculatorIcon, 
   Calendar as CalendarIcon, 
@@ -717,36 +729,52 @@ import projectIfeImg from '../assets/pdf-assets/project-ife.jpg';
 // Section Background Images
 import ctaSolarDuskBg from '../assets/cta_solar_dusk_bg.jpg';
 
-// oooooo Hero Slideshow Images — web-optimised versions (compressed, portrait-cropped to 16:9)
-import heroSlide0 from '../assets/oooooo/web/IMG_0020.jpg';
-import heroSlide1 from '../assets/oooooo/web/IMG_0036.jpg';
-import heroSlide2 from '../assets/oooooo/web/IMG_0058.jpg';
-import heroSlide3 from '../assets/oooooo/web/IMG_3321.jpg';
-import heroSlide4 from '../assets/oooooo/web/IMG_3335.jpg';
+// Poster fallback — web-optimised project still (used when video is off / loading / blocked)
+import heroPoster from '../assets/oooooo/web/IMG_0020.jpg';
 
-// ----------------- HERO SLIDESHOW -----------------
-const heroSlides = [heroSlide0, heroSlide1, heroSlide2, heroSlide3, heroSlide4];
+// ----------------- HERO CINEMATIC VIDEO -----------------
+/** Public path to the hero loop. Place WebM beside it as origin-electric-hero.webm when available. */
+const HERO_VIDEO_SRC = '/origing.mp4';
 
-// KB direction cycles with every advance — stored as reactive so the
-// active slide div gets a fresh class (which restarts the CSS animation)
-const KB_DIRS = ['zil', 'zir', 'zol', 'zor'];
-const heroSlideActive = ref(0);
-const heroSlideKbDir  = ref(KB_DIRS[0]);
-let   heroSlideTimer  = null;
+const heroVideoRef = ref(null);
+const heroVideoEnabled = ref(false);
+const heroVideoReady = ref(false);
 
-const advanceHeroSlide = () => {
-  const next = (heroSlideActive.value + 1) % heroSlides.length;
-  heroSlideActive.value = next;
-  heroSlideKbDir.value  = KB_DIRS[next % KB_DIRS.length];
+const shouldEnableHeroVideo = () => {
+  if (typeof window === 'undefined') return false;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
+  const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  if (conn?.saveData) return false;
+  if (conn?.effectiveType && /^(slow-2g|2g)$/i.test(conn.effectiveType)) return false;
+  return true;
 };
 
-const startHeroSlideshow = () => {
-  clearInterval(heroSlideTimer);
-  heroSlideTimer = setInterval(advanceHeroSlide, 5500);
+const onHeroVideoPlaying = () => {
+  heroVideoReady.value = true;
 };
 
-const stopHeroSlideshow = () => {
-  clearInterval(heroSlideTimer);
+const onHeroVideoError = () => {
+  heroVideoEnabled.value = false;
+  heroVideoReady.value = false;
+};
+
+const tryPlayHeroVideo = async () => {
+  const el = heroVideoRef.value;
+  if (!el) return;
+  try {
+    el.muted = true;
+    el.defaultMuted = true;
+    el.setAttribute('muted', '');
+    el.playsInline = true;
+    const playPromise = el.play();
+    if (playPromise && typeof playPromise.then === 'function') {
+      await playPromise;
+    }
+    heroVideoReady.value = true;
+  } catch {
+    // Autoplay blocked — poster remains visible; hero stays complete
+    heroVideoReady.value = false;
+  }
 };
 
 // ----------------- FINANCING PLAN CALCULATOR -----------------
@@ -1021,7 +1049,12 @@ const stopHeroScroll  = () => {};
 onUnmounted(() => {
   if (tickerRaf) cancelAnimationFrame(tickerRaf);
   stopSwap();
-  stopHeroSlideshow();
+  const el = heroVideoRef.value;
+  if (el) {
+    el.pause();
+    el.removeAttribute('src');
+    el.load();
+  }
 });
 
 // ----------------- INSTALLER MODAL -----------------
@@ -1034,8 +1067,13 @@ onMounted(() => {
   // Start H1 word swap
   startSwap();
 
-  // Start hero background slideshow
-  startHeroSlideshow();
+  // Cinematic hero video (poster-only when reduced-motion / save-data / slow network)
+  heroVideoEnabled.value = shouldEnableHeroVideo();
+  if (heroVideoEnabled.value) {
+    nextTick(() => {
+      tryPlayHeroVideo();
+    });
+  }
 
   // Start ticker immediately (skeleton chips give it content to scroll)
   startTicker();
@@ -1108,22 +1146,17 @@ onMounted(() => {
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
-/* Hero background */
+/* Hero background — poster + cinematic video */
 .hero-bg {
   position: absolute;
   inset: 0;
   z-index: 0;
   overflow: hidden;
-}
-/* ── Hero Slideshow ── */
-.hero-slides-wrap {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  pointer-events: none;
+  background-color: #050806;
 }
 
-.hero-slide {
+.hero-poster {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -1131,80 +1164,46 @@ onMounted(() => {
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;
-  will-change: opacity, transform;
+  transform: scale(1.02);
 }
 
-/* Vue transition-group enter/leave hooks */
-.slide-fade-enter-active {
-  z-index: 2;
-  animation: kbSlideIn 5.5s ease-out forwards;
-}
-.slide-fade-leave-active {
-  z-index: 1;
-  animation: kbSlideOut 1.3s ease-in forwards;
-}
-.slide-fade-enter-from { opacity: 0; }
-.slide-fade-leave-to   { opacity: 0; }
-
-/* Per-direction Ken Burns on enter */
-.slide-fade-enter-active.kb-zil { animation: kbSlideIn_zil 5.5s ease-out forwards; }
-.slide-fade-enter-active.kb-zir { animation: kbSlideIn_zir 5.5s ease-out forwards; }
-.slide-fade-enter-active.kb-zol { animation: kbSlideIn_zol 5.5s ease-out forwards; }
-.slide-fade-enter-active.kb-zor { animation: kbSlideIn_zor 5.5s ease-out forwards; }
-
-@keyframes kbSlideIn {
-  0%   { opacity: 0; transform: scale(1.08); }
-  12%  { opacity: 1; }
-  100% { opacity: 1; transform: scale(1.00); }
-}
-@keyframes kbSlideOut {
-  0%   { opacity: 1; }
-  100% { opacity: 0; }
-}
-/* Zoom-in from left */
-@keyframes kbSlideIn_zil {
-  0%   { opacity: 0; transform: scale(1.10) translate(2.5%,  1%); }
-  12%  { opacity: 1; }
-  100% { opacity: 1; transform: scale(1.00) translate(0%,    0%); }
-}
-/* Zoom-in from right */
-@keyframes kbSlideIn_zir {
-  0%   { opacity: 0; transform: scale(1.10) translate(-2.5%, -1%); }
-  12%  { opacity: 1; }
-  100% { opacity: 1; transform: scale(1.00) translate(0%,    0%);  }
-}
-/* Zoom-out to left */
-@keyframes kbSlideIn_zol {
-  0%   { opacity: 0; transform: scale(1.00) translate(0%,    0%); }
-  12%  { opacity: 1; }
-  100% { opacity: 1; transform: scale(1.10) translate(2.5%, -1%); }
-}
-/* Zoom-out to right */
-@keyframes kbSlideIn_zor {
-  0%   { opacity: 0; transform: scale(1.00) translate(0%,    0%);  }
-  12%  { opacity: 1; }
-  100% { opacity: 1; transform: scale(1.10) translate(-2.5%, 1%); }
+.hero-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  opacity: 0;
+  transition: opacity 0.9s ease;
+  /* Avoid iOS/Android fullscreen chrome stealing the layout */
+  max-width: 100%;
+  pointer-events: none;
 }
 
-/* Overlay sits on top of all slides */
+.hero-video.is-ready {
+  opacity: 1;
+}
+
+/* Cinematic brand overlay — stronger behind centered copy */
 .hero-bg-overlay {
   position: absolute;
   inset: 0;
   z-index: 3;
-  background: linear-gradient(
-    160deg,
-    rgba(0,0,0,0.70) 0%,
-    rgba(0,0,0,0.45) 55%,
-    rgba(0,0,0,0.25) 100%
-  );
-}
-
-.hero-bg-img {
-  display: none;
-}
-/* placeholder so the closing brace below stays valid */
-.hero-bg-overlay-placeholder {
-  display: none;
+  background:
+    radial-gradient(
+      ellipse 85% 70% at 50% 42%,
+      rgba(5, 8, 6, 0.28) 0%,
+      rgba(5, 8, 6, 0.62) 55%,
+      rgba(5, 8, 6, 0.82) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(11, 31, 23, 0.55) 0%,
+      rgba(0, 0, 0, 0.25) 38%,
+      rgba(0, 0, 0, 0.55) 72%,
+      rgba(0, 0, 0, 0.78) 100%
+    );
 }
 
 /* Circuit SVG decoration */
@@ -1212,7 +1211,7 @@ onMounted(() => {
   position: absolute;
   right: 0; top: 0;
   width: 55%; height: 100%;
-  opacity: 0.05;
+  opacity: 0.04;
   z-index: 4;
   pointer-events: none;
 }
@@ -1256,6 +1255,7 @@ onMounted(() => {
   color: #fff;
   margin: 0 0 1rem;
   line-height: 1;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.45);
 }
 .hero-brand::after {
   content: '';
@@ -1301,13 +1301,14 @@ onMounted(() => {
 .hero-h1 {
   font-family: var(--font-display);
   /* matches reference text-4xl → text-7xl clamp */
-  font-size: clamp(2.6rem, 6.5vw, 5rem);
+  font-size: clamp(2.45rem, 6.5vw, 5rem);
   font-weight: 700;
   line-height: 1.08;
   letter-spacing: -0.03em;
   color: #fff;
   margin-bottom: 1.25rem;
   max-width: 820px;
+  text-shadow: 0 2px 28px rgba(0, 0, 0, 0.5);
 }
 .hero-h1 .highlight {
   background: linear-gradient(135deg, var(--orange), var(--orange2));
@@ -1355,12 +1356,13 @@ onMounted(() => {
 
 /* Sub-copy */
 .hero-sub {
-  font-size: 1.05rem;
-  color: rgba(255,255,255,0.68);
+  font-size: clamp(0.98rem, 2.2vw, 1.08rem);
+  color: rgba(255, 255, 255, 0.82);
   max-width: 520px;
   line-height: 1.65;
   margin-bottom: 2rem;
   font-weight: 400;
+  text-shadow: 0 1px 16px rgba(0, 0, 0, 0.45);
 }
 
 /* ══════════════════════════════════════
@@ -1683,9 +1685,16 @@ onMounted(() => {
 }
 .hero-ticker-shoplink:hover { color: var(--orange2); }
 
-/* Respect reduced-motion — stop the rAF ticker via pauseTicker on mount */
+/* Respect reduced-motion — poster only; quiet decorative motion */
 @media (prefers-reduced-motion: reduce) {
   .hero-ticker-track { transition: none; }
+  .hero-video { display: none !important; }
+  .hero-type-text { animation: none; }
+  .hero-type-cursor { animation: none; opacity: 1; }
+  .circuit-path,
+  .circuit-dot { animation: none; }
+  .circuit-path { stroke-dashoffset: 0; opacity: 0.7; }
+  .circuit-dot { opacity: 0.7; }
 }
 
 /* ══════════════════════════════════════
@@ -1712,7 +1721,16 @@ onMounted(() => {
     gap: 8px;
     max-width: 100%;
   }
-  .hero-btn { height: 42px; padding: 0 10px; font-size: 0.74rem; }
+  .hero-btn {
+    height: auto;
+    min-height: 44px;
+    padding: 10px 8px;
+    font-size: 0.72rem;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.2;
+  }
+  .hero-btn span { white-space: normal; }
   .hero-cta-tiles { display: grid; grid-template-columns: 1fr 1fr; }
   .hero-tile { flex: unset; }
   .hero-ticker-wrap {
