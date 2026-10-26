@@ -89,14 +89,16 @@ onUnmounted(() => {
   --fab-orange: #c45a12;
   --fab-cream: #fff8f1;
   position: fixed;
-  right: 1.25rem;
-  bottom: 1.5rem;
+  right: max(1.25rem, env(safe-area-inset-right, 0px));
+  bottom: max(1.5rem, env(safe-area-inset-bottom, 0px));
   z-index: 950;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 0.75rem;
   pointer-events: none;
+  /* Keep dock from covering service CTAs / page chrome */
+  max-width: min(18rem, calc(100vw - 1.5rem));
 }
 
 .fab-dock > * {
@@ -191,6 +193,18 @@ onUnmounted(() => {
   animation: none;
 }
 
+.fab-main:focus-visible,
+.fab-hint:focus-visible {
+  outline: 3px solid var(--fab-orange);
+  outline-offset: 3px;
+}
+
+.fab-hint:focus-visible .fab-hint-bubble {
+  box-shadow:
+    0 3px 0 rgba(196, 90, 18, 0.22),
+    0 14px 30px rgba(11, 31, 58, 0.22);
+}
+
 .fab-main:active {
   transform: scale(0.96);
 }
@@ -225,11 +239,11 @@ onUnmounted(() => {
   50%       { transform: translateY(-5px); }
 }
 
-/* ── Mobile ── */
-@media (max-width: 768px) {
+/* ── Mobile — clear bottom nav (≈62px) + safe area ── */
+@media (max-width: 992px) {
   .fab-dock {
-    right: 0.875rem;
-    bottom: 5rem; /* clears the 62px mobile bottom nav */
+    right: max(0.875rem, env(safe-area-inset-right, 0px));
+    bottom: calc(5.25rem + env(safe-area-inset-bottom, 0px));
     gap: 0.5rem;
   }
 
@@ -252,8 +266,8 @@ onUnmounted(() => {
 
 @media (max-width: 400px) {
   .fab-dock {
-    right: 0.75rem;
-    bottom: 4.75rem;
+    right: max(0.75rem, env(safe-area-inset-right, 0px));
+    bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
   }
 
   /* Hide the hint bubble on very small screens to save space */
