@@ -12,7 +12,8 @@
     "test:watch": "vitest",
     "test:paystack": "node scripts/test-paystack-stack.mjs",
     "health": "node scripts/health-check.mjs",
-    "sitemap": "node scripts/generate-sitemap.mjs"
+    "sitemap": "node scripts/generate-sitemap.mjs",
+    "test:vendor": "node scripts/test-vendor-stack.mjs"
   },
   "dependencies": {
     "axios": "^1.6.8",
