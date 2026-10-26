@@ -54,7 +54,14 @@
         </router-link>
         
         <!-- Mobile Toggle -->
-        <button class="menu-toggle" @click="isMenuOpen = !isMenuOpen" aria-label="Toggle Menu">
+        <button
+          class="menu-toggle"
+          type="button"
+          :aria-expanded="isMenuOpen"
+          aria-controls="mobile-nav-drawer"
+          aria-label="Toggle Menu"
+          @click="toggleMenu"
+        >
           <div class="hamburger" :class="{ 'is-active': isMenuOpen }">
             <span></span><span></span><span></span>
           </div>
@@ -64,21 +71,29 @@
 
     <!-- Mobile Navigation Overlay -->
     <Transition name="fade-slide">
-      <div v-if="isMenuOpen" class="mobile-nav-overlay" @click="isMenuOpen = false">
-        <div class="mobile-menu" @click.stop>
+      <div
+        v-if="isMenuOpen"
+        class="mobile-nav-overlay"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Mobile navigation"
+        @click="closeMenu"
+      >
+        <div id="mobile-nav-drawer" class="mobile-menu" @click.stop>
           <div class="mobile-menu-header">
             <img src="../assets/logo.png" alt="Origin Electric" class="logo-img" />
-            <button class="close-btn" @click="isMenuOpen = false">
+            <button type="button" class="close-btn" aria-label="Close menu" @click="closeMenu">
               <XIcon class="icon" />
             </button>
           </div>
           <ul class="mobile-links">
-            <li><router-link to="/" @click="isMenuOpen = false"><HomeIcon class="icon-sm" /> Home</router-link></li>
-            <li><router-link to="/marketplace" @click="isMenuOpen = false"><ShoppingBagIcon class="icon-sm" /> Marketplace</router-link></li>
-            <li><router-link to="/blog" @click="isMenuOpen = false"><BookOpenIcon class="icon-sm" /> Blog</router-link></li>
-            <li><router-link to="/contact" @click="isMenuOpen = false"><MailIcon class="icon-sm" /> Contact</router-link></li>
-            <li><router-link to="/vendor-apply" @click="isMenuOpen = false"><StoreIcon class="icon-sm" /> Are You a Supplier?</router-link></li>
-            <li><router-link :to="accountPath" @click="isMenuOpen = false"><UserIcon class="icon-sm" /> Account</router-link></li>
+            <li><router-link to="/" @click="closeMenu"><HomeIcon class="icon-sm" /> Home</router-link></li>
+            <li><router-link to="/marketplace" @click="closeMenu"><ShoppingBagIcon class="icon-sm" /> Marketplace</router-link></li>
+            <li><router-link to="/cart" @click="closeMenu"><ShoppingCartIcon class="icon-sm" /> Cart ({{ cartCount }})</router-link></li>
+            <li><router-link to="/blog" @click="closeMenu"><BookOpenIcon class="icon-sm" /> Blog</router-link></li>
+            <li><router-link to="/contact" @click="closeMenu"><MailIcon class="icon-sm" /> Contact</router-link></li>
+            <li><router-link to="/vendor-apply" @click="closeMenu"><StoreIcon class="icon-sm" /> Are You a Supplier?</router-link></li>
+            <li><router-link :to="accountPath" @click="closeMenu"><UserIcon class="icon-sm" /> Account</router-link></li>
           </ul>
         </div>
       </div>
@@ -127,18 +142,41 @@ const checkAuth = () => {
   isAuthenticated.value = authService.isAuthenticated();
 };
 
+const setDrawerLock = (open) => {
+  document.documentElement.classList.toggle('nav-drawer-open', open);
+};
+
+const closeMenu = () => {
+  isMenuOpen.value = false;
+};
+
+const toggleMenu = () => {
+  isMenuOpen.value = !isMenuOpen.value;
+};
+
+const onKeydown = (e) => {
+  if (e.key === 'Escape' && isMenuOpen.value) closeMenu();
+};
+
+watch(isMenuOpen, (open) => setDrawerLock(open));
+
 watch(() => route.path, () => {
   checkAuth();
+  closeMenu();
 });
 
 onMounted(() => {
-  window.addEventListener('scroll', handleScroll);
+  window.addEventListener('scroll', handleScroll, { passive: true });
+  window.addEventListener('keydown', onKeydown);
   checkAuth();
 });
 
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll);
-});</script>
+  window.removeEventListener('keydown', onKeydown);
+  setDrawerLock(false);
+});
+</script>
 
 <style scoped>
 /* ── Header wrapper ── */
@@ -147,6 +185,8 @@ onUnmounted(() => {
   top: 0; left: 0;
   width: 100%;
   z-index: 1000;
+  padding-top: env(safe-area-inset-top, 0px);
+  background: var(--bg-primary);
 }
 
 /* ── Top bar ── */
@@ -458,27 +498,31 @@ onUnmounted(() => {
 .mobile-nav-overlay {
   position: fixed;
   top: 0; left: 0;
-  width: 100%; height: 100vh;
+  width: 100%;
+  height: 100%;
+  min-height: 100dvh;
   background: rgba(47,47,47,0.35);
   backdrop-filter: blur(6px);
   display: flex;
   justify-content: flex-end;
   z-index: 2000;
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
 .mobile-menu {
-  width: 80%;
+  width: min(86vw, 320px);
   max-width: 320px;
   height: 100%;
   background: var(--bg-primary);
   border-left: 1px solid var(--border-color);
-  padding: 1.5rem;
+  padding: 1.25rem 1.25rem calc(1.5rem + env(safe-area-inset-bottom, 0px));
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
   box-shadow: -8px 0 32px rgba(47,47,47,0.1);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 .mobile-menu-header {
@@ -491,7 +535,9 @@ onUnmounted(() => {
 .close-btn {
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
-  padding: 8px;
+  padding: 10px;
+  min-width: 44px;
+  min-height: 44px;
   border-radius: var(--radius-xs);
   color: var(--text-primary);
   cursor: pointer;
@@ -510,11 +556,12 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 12px;
+  padding: 12px;
+  min-height: 44px;
   border-radius: var(--radius-xs);
   font-family: var(--font-main);
   font-weight: 500;
-  font-size: 0.875rem;
+  font-size: 0.95rem;
   color: var(--text-primary);
   background: transparent;
   border: 1px solid transparent;
@@ -523,9 +570,11 @@ onUnmounted(() => {
     color 0.18s ease,
     border-color 0.18s ease;
 }
-.mobile-links a:hover {
-  background: var(--color-beige);
-  border-color: var(--border-color);
+@media (hover: hover) and (pointer: fine) {
+  .mobile-links a:hover {
+    background: var(--color-beige);
+    border-color: var(--border-color);
+  }
 }
 .mobile-links a.router-link-active {
   background: rgba(255,118,0,0.08);

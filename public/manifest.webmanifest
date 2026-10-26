@@ -1,0 +1,24 @@
+{
+  "name": "Origin Electric",
+  "short_name": "Origin",
+  "description": "Solar, storage, CCTV, and electrical marketplace for Nigeria.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fffdfa",
+  "theme_color": "#ff7600",
+  "lang": "en-NG",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

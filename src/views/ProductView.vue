@@ -305,12 +305,13 @@ onMounted(() => {
 <style scoped>
 /* Page Level Overrides */
 .product-page {
-  padding-top: 100px;
-  min-height: 100vh;
+  padding-top: calc(5.5rem + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+  min-height: 100svh;
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  overflow-x: hidden;
+  font-family: var(--font-main);
+  overflow-x: clip;
   width: 100%;
 }
 
@@ -394,12 +395,13 @@ onMounted(() => {
 .meta-stock.out { color: #ff3b30; }
 
 .product-title {
-  font-size: 2.5rem;
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
   font-weight: 800;
   color: var(--text-primary);
   margin: 0 0 1rem 0;
   line-height: 1.2;
   letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
 }
 
 .product-vendor {
@@ -410,27 +412,40 @@ onMounted(() => {
   gap: 8px;
   margin: 0 0 1.5rem 0;
   font-weight: 500;
+  overflow-wrap: anywhere;
+  min-width: 0;
 }
 
 .product-price {
-  font-size: 2.5rem;
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
   font-weight: 900;
   color: var(--color-blue-primary);
   margin-bottom: 2rem;
 }
 
 .product-description {
-  font-size: 1.1rem;
+  font-size: clamp(1rem, 2.5vw, 1.1rem);
   line-height: 1.6;
   color: var(--text-primary);
   margin-bottom: 2.5rem;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .product-actions {
   display: flex;
-  gap: 1rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
   align-items: stretch;
+}
+
+@media (max-width: 560px) {
+  .product-actions {
+    flex-direction: column;
+  }
+  .product-actions > * {
+    width: 100%;
+  }
 }
 
 .buy-now-btn {
@@ -577,7 +592,18 @@ onMounted(() => {
 .tab-btn.active { color: var(--color-blue-primary); border-bottom-color: var(--color-blue-primary); }
 
 .glass-card { background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 16px; }
-.form-input { width: 100%; border: 1px solid var(--border-color); background: var(--bg-primary); border-radius: 12px; padding: 12px; color: var(--text-primary); font-family: inherit; resize: vertical; }
+.form-input {
+  width: 100%;
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  border-radius: 12px;
+  padding: 12px;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 16px;
+  resize: vertical;
+  box-sizing: border-box;
+}
 .form-input:focus { outline: none; border-color: var(--color-blue-primary); }
 
 .star-btn { background: none; border: none; font-size: 1.5rem; color: #cbd5e1; cursor: pointer; padding: 0 4px; }

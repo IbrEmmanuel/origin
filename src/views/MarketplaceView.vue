@@ -277,21 +277,22 @@ onMounted(() => {
 
 <style scoped>
 .marketplace-page {
-  min-height: 100vh;
+  min-height: 100svh;
   background: var(--bg-primary);
   color: var(--text-primary);
   font-family: var(--font-main);
-  overflow-x: hidden;
+  overflow-x: clip;
   width: 100%;
 }
 
 .marketplace-container {
   padding-top: 1.25rem;
-  padding-bottom: 5.5rem;
-  padding-left: 1rem;
-  padding-right: 1rem;
-  width: min(100% - 0rem, 1200px);
+  padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+  padding-left: max(1rem, env(safe-area-inset-left, 0px));
+  padding-right: max(1rem, env(safe-area-inset-right, 0px));
+  width: min(100%, 1200px);
   margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .page-header {
@@ -355,7 +356,7 @@ onMounted(() => {
   border: 1px solid var(--border-color);
   background: var(--bg-secondary);
   border-radius: var(--radius-sm);
-  font-size: 0.95rem;
+  font-size: 16px;
   color: var(--text-primary);
   font-family: inherit;
   box-sizing: border-box;
@@ -418,8 +419,8 @@ onMounted(() => {
   gap: 12px;
   align-items: stretch;
 }
-@media (min-width: 480px) {
-  .minimal-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (min-width: 360px) {
+  .minimal-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 }
 @media (min-width: 900px) {
   .minimal-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
@@ -460,6 +461,8 @@ onMounted(() => {
   position: absolute;
   top: 10px;
   left: 10px;
+  right: 10px;
+  max-width: calc(100% - 20px);
   background: var(--glass-bg);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
@@ -472,6 +475,9 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .card-content {
@@ -548,24 +554,26 @@ onMounted(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 42px;
+  min-height: 44px;
+  height: 44px;
   width: 100%;
   border-radius: var(--radius-sm);
   font-size: 0.82rem;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
-  transition: background 0.18s, transform 0.2s var(--transition-bounce), border-color 0.18s;
+  transition: background 0.18s, border-color 0.18s;
 }
 .primary-btn {
   background: var(--color-primary);
   color: #fff;
   border: 1px solid var(--color-primary);
 }
-.primary-btn:hover:not(:disabled) {
-  background: var(--color-primary-light);
-  border-color: var(--color-primary-light);
-  transform: translateY(-1px);
+@media (hover: hover) and (pointer: fine) {
+  .primary-btn:hover:not(:disabled) {
+    background: var(--color-primary-light);
+    border-color: var(--color-primary-light);
+  }
 }
 .primary-btn:disabled {
   background: var(--border-color-strong);

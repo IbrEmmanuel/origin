@@ -91,12 +91,13 @@ const parseImages = (images) => resolveProductImages(images);
 <style scoped>
 /* Page Level Overrides */
 .cart-page {
-  padding-top: 100px;
-  min-height: 100vh;
+  padding-top: calc(5.5rem + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+  min-height: 100svh;
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  overflow-x: hidden;
+  font-family: var(--font-main);
+  overflow-x: clip;
   width: 100%;
 }
 
@@ -116,7 +117,7 @@ const parseImages = (images) => resolveProductImages(images);
 }
 
 .page-title {
-  font-size: 3.5rem;
+  font-size: clamp(1.75rem, 6vw, 3.25rem);
   font-weight: 800;
   letter-spacing: -0.04em;
   margin-bottom: 0.5rem;
@@ -124,7 +125,7 @@ const parseImages = (images) => resolveProductImages(images);
 }
 
 .page-subtitle {
-  font-size: 1.25rem;
+  font-size: clamp(0.95rem, 2.5vw, 1.2rem);
   color: var(--text-secondary);
   max-width: 600px;
   margin: 0 auto;
@@ -219,11 +220,12 @@ const parseImages = (images) => resolveProductImages(images);
 }
 
 .item-title {
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: var(--text-primary);
   margin: 0 0 0.25rem 0;
   line-height: 1.3;
+  overflow-wrap: anywhere;
 }
 
 .item-vendor {
@@ -233,6 +235,8 @@ const parseImages = (images) => resolveProductImages(images);
   align-items: center;
   gap: 6px;
   margin: 0 0 0.5rem 0;
+  overflow-wrap: anywhere;
+  min-width: 0;
 }
 
 .item-price {
@@ -260,8 +264,8 @@ const parseImages = (images) => resolveProductImages(images);
   background: var(--bg-primary);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -270,7 +274,9 @@ const parseImages = (images) => resolveProductImages(images);
   transition: background 0.2s ease;
 }
 
-.step-btn:hover { background: var(--border-color); }
+@media (hover: hover) and (pointer: fine) {
+  .step-btn:hover { background: var(--border-color); }
+}
 .text-danger { color: var(--color-orange-primary); }
 
 .step-val {

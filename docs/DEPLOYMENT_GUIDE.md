@@ -37,12 +37,16 @@ Open `http://localhost:5173`. API calls go to `/api` → Vite proxy → producti
 
    - `VITE_API_URL=/api` **or** absolute API URL if using browser-direct
    - `VITE_API_BASE_URL=https://api.originelectricltd.com`
-   - `VITE_PAYSTACK_PUBLIC_KEY=pk_live_…` (or `pk_test_…`)
+   - `VITE_PAYSTACK_PUBLIC_KEY=pk_live_…` (or `pk_test_…`) — **required for checkout**
+   - `VITE_GOOGLE_MAPS_API_KEY=…` — optional; enables checkout map + Places search
    - `VITE_SITE_URL=https://www.originelectricltd.com`
    - Agent vars as needed
 
+   **API host only (never `VITE_*`):** `PAYSTACK_SECRET_KEY`, webhook signing secret, DB URL.
+
 4. Redeploy after any `VITE_*` change (they are baked at build time).
-5. Verify: `npm run health` and a test checkout in Paystack test mode.
+5. Verify: `npm run health` and a test checkout in Paystack **test** mode (`pk_test_…`).
+6. Checkout without a real public key shows “Payment unavailable” to customers; technical setup detail appears only in local/dev diagnostics.
 
 ## Rollback
 

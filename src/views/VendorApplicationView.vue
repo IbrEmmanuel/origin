@@ -56,7 +56,7 @@
               <label for="phone">Phone Number</label>
               <div class="input-wrapper">
                 <PhoneIcon class="input-icon" />
-                <input type="tel" id="phone" v-model="form.phone" required placeholder="+234..." />
+                <input type="tel" id="phone" v-model="form.phone" required placeholder="+234..." inputmode="tel" autocomplete="tel" />
               </div>
             </div>
             <div class="form-group">
@@ -257,9 +257,11 @@ onMounted(() => {
 
 <style scoped>
 .vendor-apply-page {
-  min-height: 100vh;
+  min-height: 100svh;
   background-color: var(--bg-primary);
-  padding-top: 80px; /* Header offset */
+  padding-top: calc(5.5rem + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+  overflow-x: clip;
   background-image: 
     radial-gradient(at 100% 0%, rgba(0, 102, 204, 0.05) 0px, transparent 50%),
     radial-gradient(at 0% 100%, rgba(16, 185, 129, 0.05) 0px, transparent 50%);
@@ -267,11 +269,15 @@ onMounted(() => {
 
 .container-narrow {
   max-width: 800px;
+  width: 100%;
+  padding-left: max(1rem, env(safe-area-inset-left, 0px));
+  padding-right: max(1rem, env(safe-area-inset-right, 0px));
+  box-sizing: border-box;
 }
 
 /* Welcome Card */
 .welcome-card {
-  padding: 4rem;
+  padding: clamp(1.5rem, 5vw, 4rem);
   text-align: center;
   border: 1px solid var(--border-color);
 }
@@ -290,7 +296,7 @@ onMounted(() => {
 }
 
 .title {
-  font-size: 3.5rem;
+  font-size: clamp(1.75rem, 7vw, 3.25rem);
   font-weight: 800;
   margin-bottom: 1rem;
   letter-spacing: -0.04em;
@@ -299,7 +305,7 @@ onMounted(() => {
 }
 
 .description {
-  font-size: 1.25rem;
+  font-size: clamp(1rem, 2.8vw, 1.25rem);
   color: var(--text-secondary);
   max-width: 600px;
   margin: 0 auto 3rem;
@@ -308,10 +314,18 @@ onMounted(() => {
 
 .benefits-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
-  margin-bottom: 4rem;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
   text-align: left;
+}
+
+@media (min-width: 640px) {
+  .benefits-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    margin-bottom: 4rem;
+  }
 }
 
 .benefit-item h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
@@ -332,25 +346,27 @@ onMounted(() => {
 
 /* Form Card */
 .form-card {
-  padding: 3rem;
+  padding: clamp(1.25rem, 4vw, 3rem);
   border: 1px solid var(--border-color);
 }
 
 .form-header {
   display: flex;
   align-items: center;
-  gap: 2rem;
-  margin-bottom: 3rem;
-  padding-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
   border-bottom: 1px solid var(--border-color);
 }
 
-.form-header h2 { font-size: 1.75rem; font-weight: 800; }
+.form-header h2 { font-size: clamp(1.25rem, 4vw, 1.75rem); font-weight: 800; }
 
 .back-btn {
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
-  padding: 8px 16px;
+  padding: 10px 16px;
+  min-height: 44px;
   border-radius: var(--radius-md);
   color: var(--text-primary);
   font-weight: 600;
@@ -358,15 +374,25 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.2s;
+  transition: background 0.2s;
 }
-.back-btn:hover { background: var(--border-color); }
+@media (hover: hover) and (pointer: fine) {
+  .back-btn:hover { background: var(--border-color); }
+}
 
 .vendor-form { display: flex; flex-direction: column; gap: 1.5rem; }
-.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-.form-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+.form-grid,
+.form-grid-3 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+@media (min-width: 640px) {
+  .form-grid { grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .form-grid-3 { grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+}
 
-.form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+.form-group { display: flex; flex-direction: column; gap: 0.5rem; min-width: 0; }
 .form-group label { font-weight: 600; font-size: 0.9rem; color: var(--text-primary); }
 
 .input-wrapper { position: relative; display: flex; align-items: center; }
@@ -374,14 +400,16 @@ onMounted(() => {
 
 input, select, textarea {
   width: 100%;
+  max-width: 100%;
   padding: 12px 14px;
   border-radius: 12px;
   border: 1.5px solid var(--border-color);
   background: var(--bg-secondary);
   color: var(--text-primary);
-  font-size: 1rem;
+  font-size: 16px;
   font-family: inherit;
-  transition: all 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
 }
 
 .input-wrapper input, .input-wrapper select { padding-left: 3rem; }
@@ -452,13 +480,9 @@ input:focus, select:focus, textarea:focus {
 .btn-lg { padding: 1.125rem 3rem; font-size: 1.25rem; }
 
 @media (max-width: 768px) {
-  .welcome-card, .form-card, .status-card { padding: 2.5rem 1.5rem; }
-  .title { font-size: 2.5rem; }
-  .benefits-grid { grid-template-columns: 1fr; gap: 1.5rem; }
-  .form-grid, .form-grid-3 { grid-template-columns: 1fr; }
   .action-group { flex-direction: column; width: 100%; }
   .action-group .btn { width: 100%; }
-  .form-header { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
+  .btn-lg { width: 100%; padding: 1rem 1.25rem; font-size: 1.05rem; }
 }
 
 .loader {

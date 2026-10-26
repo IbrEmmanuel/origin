@@ -52,19 +52,20 @@ function isActive(item) {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    align-items: center;
+    align-items: stretch;
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
-    height: 62px;
+    min-height: 62px;
+    height: auto;
     background: var(--bg-primary);
     border-top: 0.5px solid var(--border-color);
-    padding: 0 8px;
+    padding: 4px 6px calc(4px + env(safe-area-inset-bottom, 0px));
+    padding-left: max(6px, env(safe-area-inset-left, 0px));
+    padding-right: max(6px, env(safe-area-inset-right, 0px));
     z-index: 900;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06);
-    /* Safe area for modern phones */
-    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 }
 
@@ -76,13 +77,13 @@ function isActive(item) {
   justify-content: center;
   flex: 1;
   gap: 3px;
-  padding: 8px 4px 6px;
+  padding: 8px 4px;
+  min-height: 48px;
   position: relative;
   text-decoration: none;
   color: var(--text-secondary);
   transition: color 0.2s ease;
   min-width: 0;
-  /* kill the router-link active class default */
   border-radius: 0;
 }
 

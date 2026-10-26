@@ -148,6 +148,23 @@ body.dark-mode {
    ════════════════════════════════════ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  overflow-x: clip;
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 body {
   font-family: var(--font-main);
   font-size: var(--font-size-base);
@@ -157,11 +174,46 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background-color var(--transition-speed), color var(--transition-speed);
+  overflow-x: clip;
+  min-width: 0;
+  /* iOS notch / home indicator */
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* Lock background scroll when mobile drawer is open */
+html.nav-drawer-open,
+html.nav-drawer-open body {
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
 }
 
 a { text-decoration: none; color: inherit; transition: color var(--transition-speed); }
 ul { list-style: none; }
 img { max-width: 100%; height: auto; display: block; }
+
+/* Forms — 16px minimum prevents iOS Safari auto-zoom */
+input,
+select,
+textarea,
+button {
+  font: inherit;
+  max-width: 100%;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+select,
+textarea {
+  font-size: 16px;
+}
+
+button,
+a,
+[role="button"] {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
 
 /* ════════════════════════════════════
    LAYOUT
@@ -179,17 +231,34 @@ img { max-width: 100%; height: auto; display: block; }
 
 /* Safe-area aware main content */
 .main-content {
-  padding-top: 80px;
-  min-height: 100vh;
+  padding-top: calc(80px + env(safe-area-inset-top, 0px));
+  min-height: 100svh;
   padding-bottom: env(safe-area-inset-bottom, 0px);
+  min-width: 0;
+  width: 100%;
+  overflow-x: clip;
 }
 
 @media (max-width: 992px) {
-  .main-content { padding-top: 110px; }
+  .main-content {
+    padding-top: calc(96px + env(safe-area-inset-top, 0px));
+  }
+  .main-content.has-bottom-nav {
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 .main-content.is-account,
 .main-content.is-standalone { padding-top: 0 !important; }
+
+/* Utility: responsive table scroll */
+.table-scroll {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
 
 /* Section border pattern — matches reference border-b border-border/40 py-12 */
 .section-border {

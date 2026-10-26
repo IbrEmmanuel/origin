@@ -39,19 +39,17 @@ const hideGlobalLayout = computed(() => {
 .app-container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  min-height: 100svh;
+  min-width: 0;
+  overflow-x: clip;
 }
 
 .main-content {
   flex: 1;
+  min-width: 0;
 }
 
-/* Push footer/content above the mobile bottom nav */
-@media (max-width: 992px) {
-  .main-content.has-bottom-nav {
-    padding-bottom: 62px;
-  }
-}
+/* Bottom padding for mobile nav is handled in global.css (includes safe-area) */
 
 /* Ensure font family is applied universally if not already */
 #app {
