@@ -1,26 +1,25 @@
 ﻿<template>
   <div class="home-view">
-    <!-- HERO — full-bleed video, brand-led -->
+    <!-- HERO — full-bleed video backdrop (no installation stills) -->
     <section class="hero" id="home">
       <div class="hero-bg" aria-hidden="true">
-        <div
-          class="hero-poster"
-          :style="{ backgroundImage: `url(${heroPoster})` }"
-        ></div>
+        <div class="hero-poster"></div>
         <video
           v-if="heroVideoEnabled"
           ref="heroVideoRef"
           class="hero-video"
           :class="{ 'is-ready': heroVideoReady }"
-          :poster="heroPoster"
           autoplay
           muted
           loop
           playsinline
-          preload="metadata"
+          webkit-playsinline
+          preload="auto"
           disablePictureInPicture
           tabindex="-1"
           aria-hidden="true"
+          @loadeddata="onHeroVideoFrame"
+          @canplay="onHeroVideoFrame"
           @playing="onHeroVideoPlaying"
           @error="onHeroVideoError"
         >
@@ -709,12 +708,9 @@ import projectIfeImg from '../assets/pdf-assets/project-ife.jpg';
 // Section Background Images
 import ctaSolarDuskBg from '../assets/cta_solar_dusk_bg.jpg';
 
-// Poster fallback — web-optimised project still (used when video is off / loading / blocked)
-import heroPoster from '../assets/oooooo/web/IMG_0020.jpg';
-
 // ----------------- HERO CINEMATIC VIDEO -----------------
-/** Public path to the hero loop. Place WebM beside it as origin-electric-hero.webm when available. */
-const HERO_VIDEO_SRC = '/origing.mp4';
+/** Cache-busted public path — must stay extensionful so SPA rewrites do not swallow it. */
+const HERO_VIDEO_SRC = '/origing.mp4?v=20261026';
 
 const heroVideoRef = ref(null);
 const heroVideoEnabled = ref(false);
@@ -725,12 +721,21 @@ const shouldEnableHeroVideo = () => {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
   const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
   if (conn?.saveData) return false;
+  // Allow 3g+; only skip truly slow links
   if (conn?.effectiveType && /^(slow-2g|2g)$/i.test(conn.effectiveType)) return false;
   return true;
 };
 
-const onHeroVideoPlaying = () => {
+const markHeroVideoReady = () => {
   heroVideoReady.value = true;
+};
+
+const onHeroVideoFrame = () => {
+  markHeroVideoReady();
+};
+
+const onHeroVideoPlaying = () => {
+  markHeroVideoReady();
 };
 
 const onHeroVideoError = () => {
@@ -745,15 +750,18 @@ const tryPlayHeroVideo = async () => {
     el.muted = true;
     el.defaultMuted = true;
     el.setAttribute('muted', '');
+    el.setAttribute('playsinline', '');
+    el.setAttribute('webkit-playsinline', '');
     el.playsInline = true;
+    el.load();
     const playPromise = el.play();
     if (playPromise && typeof playPromise.then === 'function') {
       await playPromise;
     }
-    heroVideoReady.value = true;
+    markHeroVideoReady();
   } catch {
-    // Autoplay blocked — poster remains visible; hero stays complete
-    heroVideoReady.value = false;
+    // Keep first decoded frame visible if autoplay is blocked
+    if (el.readyState >= 2) markHeroVideoReady();
   }
 };
 
@@ -1064,15 +1072,16 @@ onMounted(() => {
   background-color: #050806;
 }
 
+/* Dark cinematic wash — never an installation still */
 .hero-poster {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  background-size: cover;
-  background-position: center center;
-  background-repeat: no-repeat;
-  transform: scale(1.04);
+  background:
+    radial-gradient(ellipse 70% 55% at 72% 38%, rgba(255, 118, 0, 0.14) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 40% at 20% 80%, rgba(20, 60, 45, 0.35) 0%, transparent 60%),
+    linear-gradient(145deg, #0a100e 0%, #121816 42%, #0b0f0d 100%);
 }
 
 .hero-video {
@@ -1084,10 +1093,11 @@ onMounted(() => {
   object-position: 62% 40%;
   opacity: 0;
   transform: scale(1.06);
-  filter: contrast(1.08) saturate(1.12);
-  transition: opacity 1.15s ease;
+  filter: contrast(1.1) saturate(1.15) brightness(0.96);
+  transition: opacity 0.85s ease;
   max-width: 100%;
   pointer-events: none;
+  z-index: 1;
 }
 
 .hero-video.is-ready {

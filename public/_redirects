@@ -1,1 +1,2 @@
-/* /index.html 200
+# SPA fallback lives in vercel.json (extensionless routes only).
+# A previous /* → index.html rule here rewrote /origing.mp4 to HTML.
