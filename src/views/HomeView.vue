@@ -1096,6 +1096,7 @@ onMounted(() => {
   min-height: 100svh;
   padding-top: calc(5.5rem + env(safe-area-inset-top, 0px));
   padding-bottom: 0;              /* ticker bleeds to edge */
+  overflow-x: clip;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1539,10 +1540,15 @@ onMounted(() => {
    Pure CSS @keyframes marquee — no JS.
    ══════════════════════════════════════ */
 .hero-ticker-wrap {
-  width: 100vw;          /* bleed beyond container */
-  margin-left: calc(-50vw + 50%);
+  /* Bleed past hero-body padding without 100vw scrollbar bugs */
+  align-self: stretch;
+  width: calc(100% + 3rem);
+  max-width: none;
+  margin-left: -1.5rem;
+  margin-right: -1.5rem;
   position: relative;
   padding-bottom: 2.75rem;
+  overflow: hidden;
 }
 
 /* Fade edges */
@@ -1706,6 +1712,11 @@ onMounted(() => {
   .hero-btn { height: 42px; padding: 0 10px; font-size: 0.74rem; }
   .hero-cta-tiles { display: grid; grid-template-columns: 1fr 1fr; }
   .hero-tile { flex: unset; }
+  .hero-ticker-wrap {
+    width: calc(100% + 2rem);
+    margin-left: -1rem;
+    margin-right: -1rem;
+  }
   .hero-ticker-fade { width: 48px; }
 }
 

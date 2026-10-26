@@ -4,7 +4,8 @@
       <header class="home-services__intro">
         <span class="home-services__eyebrow">What We Do</span>
         <h2 id="home-services-title" class="home-services__title">
-          Engineering solutions that <span class="home-services__accent">actually work</span>
+          Engineering solutions that
+          <span class="home-services__accent">actually work</span>
         </h2>
         <p class="home-services__sub">
           End-to-end systems — designed, installed, and maintained by one engineering team.
@@ -28,12 +29,17 @@
               :fetchpriority="service.featured ? 'high' : 'auto'"
               width="800"
               height="500"
+              decoding="async"
             />
             <div class="svc-card__shade" aria-hidden="true" />
           </div>
 
           <div class="svc-card__body">
-            <div class="svc-card__icon" :class="{ 'svc-card__icon--accent': service.featured }" aria-hidden="true">
+            <div
+              class="svc-card__icon"
+              :class="{ 'svc-card__icon--accent': service.featured }"
+              aria-hidden="true"
+            >
               <component :is="iconMap[service.icon]" />
             </div>
             <span class="svc-card__category">{{ service.category }}</span>
@@ -82,9 +88,8 @@ const iconMap = {
   --hs-radius: var(--radius-md, 12px);
   background: var(--bg-primary, #faf9f7);
   border-top: 1px solid var(--border-color, #e8e4de);
-  padding: clamp(3rem, 6vw, 4.5rem) 0 clamp(3.25rem, 7vw, 5rem);
-  /* Keep content clear of floating chat FAB on the right */
-  padding-right: max(0px, env(safe-area-inset-right, 0px));
+  padding: clamp(2.75rem, 6vw, 4.5rem) 0 clamp(3rem, 7vw, 5rem);
+  overflow-x: clip;
 }
 
 .home-services__inner {
@@ -97,7 +102,7 @@ const iconMap = {
 
 .home-services__intro {
   max-width: 36rem;
-  margin-bottom: clamp(1.75rem, 4vw, 2.5rem);
+  margin-bottom: clamp(1.5rem, 3.5vw, 2.35rem);
 }
 
 .home-services__eyebrow {
@@ -107,17 +112,19 @@ const iconMap = {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--color-primary, #ff7600);
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.7rem;
 }
 
 .home-services__title {
-  margin: 0 0 0.75rem;
+  margin: 0 0 0.7rem;
   font-family: var(--font-display, Georgia, serif);
-  font-size: clamp(1.65rem, 3.4vw, 2.55rem);
+  font-size: clamp(1.55rem, 3.2vw, 2.45rem);
   font-weight: 550;
   letter-spacing: -0.03em;
-  line-height: 1.15;
+  line-height: 1.18;
   color: var(--text-primary, #1c1a17);
+  text-wrap: balance;
+  overflow-wrap: break-word;
 }
 
 .home-services__accent {
@@ -126,7 +133,7 @@ const iconMap = {
 
 .home-services__sub {
   margin: 0;
-  font-size: 1.02rem;
+  font-size: clamp(0.95rem, 2.2vw, 1.02rem);
   line-height: 1.6;
   color: var(--text-secondary, #5c574f);
   max-width: 34rem;
@@ -145,6 +152,7 @@ const iconMap = {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  width: 100%;
   background: var(--bg-primary, #fff);
   border: 1px solid var(--border-color, #e8e4de);
   border-radius: var(--hs-radius);
@@ -152,15 +160,15 @@ const iconMap = {
   transition: border-color 0.2s ease, transform 0.25s ease;
 }
 
-/* Featured Solar — full-bleed lead row; image + copy side-by-side on desktop */
+/* Featured Solar — full-width lead; image + copy side-by-side on desktop */
 .svc-card--featured {
   grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: 1.35fr 1fr;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
   align-items: stretch;
 }
 
-/* Last two supporting cards share a balanced bottom row */
+/* Last two supporting cards share a balanced bottom row on desktop */
 .svc-card:nth-child(5),
 .svc-card:nth-child(6) {
   grid-column: span 6;
@@ -176,7 +184,7 @@ const iconMap = {
 
 .svc-card--featured .svc-card__media {
   aspect-ratio: auto;
-  min-height: 280px;
+  min-height: 260px;
   height: 100%;
 }
 
@@ -193,9 +201,9 @@ const iconMap = {
   inset: 0;
   background: linear-gradient(
     to top,
-    rgba(20, 16, 12, 0.28) 0%,
-    rgba(20, 16, 12, 0.05) 45%,
-    transparent 70%
+    rgba(20, 16, 12, 0.22) 0%,
+    rgba(20, 16, 12, 0.04) 42%,
+    transparent 68%
   );
   pointer-events: none;
 }
@@ -203,9 +211,10 @@ const iconMap = {
 .svc-card__body {
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
-  padding: 1.1rem 1.15rem 1.25rem;
-  flex: 0 0 auto;
+  gap: 0.4rem;
+  padding: 1.05rem 1.1rem 1.2rem;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .svc-card__icon {
@@ -217,7 +226,8 @@ const iconMap = {
   border-radius: 8px;
   background: var(--color-dark, #2f2f2f);
   color: #fff;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.2rem;
+  flex-shrink: 0;
 }
 
 .svc-card__icon--accent {
@@ -246,15 +256,16 @@ const iconMap = {
   letter-spacing: -0.02em;
   line-height: 1.25;
   color: var(--text-primary, #1c1a17);
+  overflow-wrap: break-word;
 }
 
 .svc-card--featured .svc-card__body {
   justify-content: center;
-  padding: clamp(1.25rem, 3vw, 2rem) clamp(1.25rem, 3vw, 2.25rem);
+  padding: clamp(1.15rem, 2.8vw, 2rem) clamp(1.15rem, 2.8vw, 2.15rem);
 }
 
 .svc-card--featured .svc-card__name {
-  font-size: clamp(1.25rem, 2.2vw, 1.55rem);
+  font-size: clamp(1.2rem, 2.1vw, 1.5rem);
 }
 
 .svc-card--featured .svc-card__desc {
@@ -268,16 +279,18 @@ const iconMap = {
   line-height: 1.55;
   color: var(--text-secondary, #5c574f);
   flex: 1;
+  overflow-wrap: break-word;
 }
 
 .svc-card__cta {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.4rem;
-  margin-top: 0.55rem;
+  margin-top: 0.5rem;
   width: fit-content;
-  min-height: 2.25rem;
-  padding: 0 0.85rem;
+  min-height: 2.35rem;
+  padding: 0 0.9rem;
   border-radius: 8px;
   border: 1.5px solid var(--color-primary, #ff7600);
   color: var(--color-primary, #ff7600);
@@ -285,6 +298,7 @@ const iconMap = {
   font-weight: 700;
   text-decoration: none;
   transition: background 0.2s ease, color 0.2s ease, gap 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .svc-card__cta-icon {
@@ -311,64 +325,95 @@ const iconMap = {
   }
 }
 
-/* Tablet — 2 columns */
+/* Tablet — 2 columns; orphan last card goes full width */
 @media (max-width: 960px) {
   .home-services__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
   .svc-card,
   .svc-card--featured,
   .svc-card:nth-child(5),
   .svc-card:nth-child(6) {
     grid-column: span 1;
   }
+
   .svc-card--featured {
     grid-column: 1 / -1;
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+    grid-template-columns: none;
   }
+
   .svc-card--featured .svc-card__media {
     aspect-ratio: 21 / 10;
     min-height: 0;
     height: auto;
+    width: 100%;
+  }
+
+  /* EV alone on last row → full width so no empty half */
+  .svc-card:not(.svc-card--featured):last-child {
+    grid-column: 1 / -1;
+  }
+
+  .svc-card:not(.svc-card--featured):last-child .svc-card__media {
+    aspect-ratio: 21 / 9;
   }
 }
 
-/* Mobile — single column; clear FAB / bottom nav */
+/* Mobile — single column; keep FAB clear via bottom space, not side squeeze */
 @media (max-width: 640px) {
   .home-services {
-    padding-bottom: calc(3rem + 4.5rem);
+    padding-bottom: calc(3rem + 5.25rem + env(safe-area-inset-bottom, 0px));
   }
+
   .home-services__inner {
-    padding-inline: max(var(--hs-pad), 0.85rem);
-    /* Leave room for right-side FAB so titles/CTAs stay readable */
-    padding-right: max(0.85rem, calc(0.85rem + 3.5rem));
+    padding-inline: max(var(--hs-pad), 1rem);
   }
+
+  .home-services__intro {
+    max-width: none;
+    margin-bottom: 1.35rem;
+  }
+
+  .home-services__title {
+    font-size: clamp(1.45rem, 7vw, 1.85rem);
+  }
+
   .home-services__grid {
     grid-template-columns: minmax(0, 1fr);
     gap: 12px;
   }
+
   .svc-card,
   .svc-card--featured,
   .svc-card:nth-child(5),
-  .svc-card:nth-child(6) {
-    grid-column: span 1;
+  .svc-card:nth-child(6),
+  .svc-card:not(.svc-card--featured):last-child {
+    grid-column: 1 / -1;
   }
+
   .svc-card--featured {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
   }
-  .svc-card--featured .svc-card__media {
+
+  .svc-card--featured .svc-card__media,
+  .svc-card:not(.svc-card--featured):last-child .svc-card__media {
     aspect-ratio: 16 / 10;
     min-height: 0;
     height: auto;
   }
-  .svc-card__body {
-    padding: 1rem 1.05rem 1.15rem;
-  }
+
+  .svc-card__body,
   .svc-card--featured .svc-card__body {
-    padding: 1.1rem 1.05rem 1.25rem;
+    padding: 1rem 1rem 1.15rem;
   }
+
   .svc-card__cta {
-    min-height: 2.5rem;
+    width: 100%;
+    min-height: 2.65rem;
   }
 }
 
