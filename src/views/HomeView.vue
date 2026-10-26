@@ -707,10 +707,11 @@ import projectIfeImg from '../assets/pdf-assets/project-ife.jpg';
 
 // Section Background Images
 import ctaSolarDuskBg from '../assets/cta_solar_dusk_bg.jpg';
+import heroVideoUrl from '../assets/video/origing.mp4';
 
 // ----------------- HERO CINEMATIC VIDEO -----------------
-/** Cache-busted public path — must stay extensionful so SPA rewrites do not swallow it. */
-const HERO_VIDEO_SRC = '/origing.mp4?v=20261026';
+// Bundled hashed asset so the MP4 always ships with the build (not rewritten to HTML).
+const HERO_VIDEO_SRC = heroVideoUrl;
 
 const heroVideoRef = ref(null);
 const heroVideoEnabled = ref(false);
@@ -1090,11 +1091,12 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 62% 40%;
+  object-position: 55% 42%;
   opacity: 0;
-  transform: scale(1.06);
-  filter: contrast(1.1) saturate(1.15) brightness(0.96);
-  transition: opacity 0.85s ease;
+  transform: scale(1.08);
+  /* Cinematic grade — denser, less “phone video” */
+  filter: contrast(1.18) saturate(0.92) brightness(0.78) sepia(0.08);
+  transition: opacity 0.9s ease;
   max-width: 100%;
   pointer-events: none;
   z-index: 1;
@@ -1102,33 +1104,39 @@ onMounted(() => {
 
 .hero-video.is-ready {
   opacity: 1;
-  animation: hero-video-drift 32s ease-in-out infinite alternate;
+  animation: hero-video-drift 36s ease-in-out infinite alternate;
 }
 
 @keyframes hero-video-drift {
-  from { transform: scale(1.06) translate3d(0, 0, 0); }
-  to   { transform: scale(1.12) translate3d(-1.4%, -0.8%, 0); }
+  from { transform: scale(1.08) translate3d(0, 0, 0); }
+  to   { transform: scale(1.16) translate3d(-1.6%, -1%, 0); }
 }
 
-/* Text rail on the left; keep most of the frame open so the video reads */
+/* Text rail + soft vignette so footage reads as a backdrop, not a photo dump */
 .hero-bg-overlay {
   position: absolute;
   inset: 0;
   z-index: 2;
   background:
+    radial-gradient(
+      ellipse 95% 85% at 50% 45%,
+      transparent 0%,
+      rgba(3, 6, 5, 0.35) 55%,
+      rgba(3, 6, 5, 0.72) 100%
+    ),
     linear-gradient(
-      100deg,
-      rgba(4, 8, 6, 0.88) 0%,
-      rgba(4, 8, 6, 0.55) 28%,
-      rgba(4, 8, 6, 0.12) 52%,
-      rgba(4, 8, 6, 0.08) 100%
+      105deg,
+      rgba(3, 6, 5, 0.9) 0%,
+      rgba(3, 6, 5, 0.55) 30%,
+      rgba(3, 6, 5, 0.18) 58%,
+      rgba(3, 6, 5, 0.35) 100%
     ),
     linear-gradient(
       180deg,
-      rgba(4, 8, 6, 0.35) 0%,
-      transparent 32%,
-      transparent 58%,
-      rgba(4, 8, 6, 0.62) 100%
+      rgba(3, 6, 5, 0.45) 0%,
+      transparent 30%,
+      transparent 55%,
+      rgba(3, 6, 5, 0.7) 100%
     );
 }
 
@@ -1136,7 +1144,7 @@ onMounted(() => {
   position: absolute;
   inset: 0;
   z-index: 3;
-  opacity: 0.022;
+  opacity: 0.04;
   pointer-events: none;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 220px 220px;

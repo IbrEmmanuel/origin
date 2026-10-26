@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => {
     return {
         plugins: [vue()],
         // Allow uppercase image extensions (e.g. .JPG, .JPEG) from device photos
-        assetsInclude: ['**/*.JPG', '**/*.JPEG', '**/*.PNG', '**/*.HEIC'],
+        assetsInclude: ['**/*.JPG', '**/*.JPEG', '**/*.PNG', '**/*.HEIC', '**/*.mp4', '**/*.webm'],
         resolve: {
             alias: {
                 '@': path.resolve(__dirname, './src'),
