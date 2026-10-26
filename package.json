@@ -8,7 +8,10 @@
     "prebuild": "node scripts/generate-sitemap.mjs",
     "build": "vite build",
     "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "test:paystack": "node scripts/test-paystack-stack.mjs",
+    "health": "node scripts/health-check.mjs",
     "sitemap": "node scripts/generate-sitemap.mjs"
   },
   "dependencies": {
@@ -25,6 +28,7 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.0",
     "sharp": "^0.35.4",
-    "vite": "^5.0.0"
+    "vite": "^5.0.0",
+    "vitest": "^3.2.7"
   }
 }

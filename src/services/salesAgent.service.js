@@ -6,10 +6,12 @@
  * (The old /api/agent Vercel proxy still targeted production when Vercel env
  * overrode VITE_SALES_AGENT_URL — that is why Fly only showed /app/health.)
  */
+import { env } from '@/config/env';
+
 const FLY_STAGING = 'https://staging-ai-agent.fly.dev';
-const fromEnv = String(import.meta.env.VITE_SALES_AGENT_URL || '').replace(/\/$/, '');
+const fromEnv = env.salesAgentUrl;
 const BASE = fromEnv.includes('fly.dev') ? fromEnv : FLY_STAGING;
-const AGENT_ID = import.meta.env.VITE_SALES_AGENT_ID || 'sales-agent';
+const AGENT_ID = env.salesAgentId;
 const STORAGE_KEY = 'origin_sales_chat_v1';
 
 export function salesAgentBaseUrl() {

@@ -2,21 +2,10 @@
  * Shared Paystack Inline helper — checkout, orders, consultations.
  * Public key must be set at build time: VITE_PAYSTACK_PUBLIC_KEY=pk_test_… | pk_live_…
  */
-
-const PLACEHOLDER_KEYS = new Set([
-  '',
-  'pk_test_placeholder',
-  'pk_test_your_key_here',
-  'undefined',
-  'null'
-]);
+import { env, isPaystackKeyConfigured } from '@/config/env';
 
 export function getPaystackPublicKey() {
-  const raw = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
-  const key = raw == null ? '' : String(raw).trim();
-  if (!key || PLACEHOLDER_KEYS.has(key)) return null;
-  if (!/^pk_(test|live)_[A-Za-z0-9]+$/.test(key)) return null;
-  return key;
+  return isPaystackKeyConfigured(env.paystackPublicKey) ? env.paystackPublicKey : null;
 }
 
 export function isPaystackConfigured() {

@@ -1,15 +1,13 @@
 import { mediaUrl } from '@/utils/mediaUrl';
+import { env } from '@/config/env';
 
 const SITE = {
   name: 'Origin Electric',
   // Canonical host where this Vue SPA is actually served (not the apex lander redirect).
-  url: 'https://www.originelectricltd.com',
-  defaultImage: 'https://www.originelectricltd.com/logo.png',
+  url: env.siteUrl.replace(/\/$/, ''),
+  defaultImage: `${env.siteUrl.replace(/\/$/, '')}/logo.png`,
   twitter: '@originelectric',
-  sameAs: [
-    'https://www.originelectricltd.com',
-    'https://originelectric.com'
-  ]
+  sameAs: [env.siteUrl.replace(/\/$/, ''), 'https://originelectric.com']
 };
 
 /** Organization + WebSite JSON-LD for homepage / brand SERP signals */

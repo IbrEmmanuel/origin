@@ -23,15 +23,23 @@ dist-ssr/
 *.sln
 *.sw?
 
-# Environment Variables
+# Environment Variables — never commit real secrets
 .env
+.env.*
+!.env.example
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
+# Local dumps / accidental artifacts
+body.json
+prod.js
+health-report.json
+
 # Tests
 /tests/unit/coverage/
+/coverage/
 /tests/e2e/reports/
 /screenshots/
 

@@ -1,13 +1,8 @@
-const API_ORIGIN = 'https://api.originelectricltd.com';
+import { env } from '@/config/env';
 
 /** Media host only — never append /api (uploads live at origin root). */
 function mediaBase() {
-  let base = (import.meta.env.VITE_API_BASE_URL || API_ORIGIN).trim();
-  if (!base || /localhost|127\.0\.0\.1/i.test(base)) base = API_ORIGIN;
-  base = base.replace(/\/$/, '');
-  // Guard against misconfigured .../api base breaking /uploads/*
-  if (/\/api$/i.test(base)) base = base.replace(/\/api$/i, '');
-  return base || API_ORIGIN;
+  return env.apiOrigin;
 }
 
 /** Resolve product/upload paths against the live API host (never localhost). */
