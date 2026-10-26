@@ -3,15 +3,16 @@
  * Image paths are centralized here so assets can be swapped without hunting components.
  *
  * Sources (see docs/SERVICE_IMAGE_SOURCES.md):
- * - solar, cctv, bess, access: Origin project / field photography in-repo
- * - fire: Wikimedia Commons (temporary licensed stand-in until company photo available)
+ * - solar, bess, access: Origin / in-repo field photography
+ * - cctv: in-repo camera wall photography (cctv-pole)
+ * - automation: in-repo gate automation photography (cctv-main)
  * - ev: Unsplash temporary licensed stand-in until company photo available
  */
 import solarImg from '@/assets/pdf-assets/solar-2.jpg';
-import cctvImg from '@/assets/pdf-assets/img-076.jpg';
+import cctvImg from '@/assets/pdf-assets/cctv-pole.jpg';
 import bessImg from '@/assets/pdf-assets/project-ondo.jpg';
 import accessImg from '@/assets/pdf-assets/access-1.jpg';
-import fireImg from '@/assets/services/fire-safety.jpg';
+import automationImg from '@/assets/pdf-assets/cctv-main.jpg';
 import evImg from '@/assets/services/ev-charging.jpg';
 
 /** All service deep-links currently resolve to the Services page (no per-service routes yet). */
@@ -39,8 +40,8 @@ export const homeServices = [
     description:
       'IP camera networks, NVR platforms, and professionally organized monitoring for sites that cannot afford blind spots.',
     image: cctvImg,
-    imageAlt: 'Multi-monitor CCTV surveillance control room',
-    objectPosition: 'center center',
+    imageAlt: 'Multiple professional outdoor CCTV security cameras mounted on a brick wall',
+    objectPosition: 'center 40%',
     icon: 'cctv',
     cta: 'Explore service',
     to: SERVICES_PAGE
@@ -72,18 +73,17 @@ export const homeServices = [
     to: SERVICES_PAGE
   },
   {
-    id: 'fire',
-    category: 'Fire Safety',
-    title: 'Fire Detection & Suppression',
+    id: 'automation',
+    category: 'Smart Automation',
+    title: 'Smart Home & Automation',
     description:
-      'Detection, alarm, and suppression equipment specified and installed to professional safety standards.',
-    image: fireImg,
-    imageAlt: 'Portable fire extinguisher ready for facility fire-safety coverage',
-    objectPosition: 'center center',
-    icon: 'flame',
+      'Gate automation, smart access, lighting controls, and connected building systems designed for reliable daily use.',
+    image: automationImg,
+    imageAlt: 'Automated driveway gates opening with remote control and visible gate-motor hardware',
+    objectPosition: 'center 45%',
+    icon: 'home',
     cta: 'Explore service',
-    to: SERVICES_PAGE,
-    temporaryImage: true
+    to: SERVICES_PAGE
   },
   {
     id: 'ev',

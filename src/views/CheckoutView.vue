@@ -120,6 +120,10 @@
                     : 'Pay with Paystack'
             }}
           </button>
+          <p class="pay-channels-note mt-2">
+            Paystack checkout may offer card, bank transfer, and other channels enabled on Origin’s merchant account.
+            Bank transfers stay <strong>pending</strong> until Paystack and our server verify the payment — a transfer alone is not a confirmed order.
+          </p>
           <p v-if="!paystackReady" class="error-msg mt-2">
             Set VITE_PAYSTACK_PUBLIC_KEY on the host and redeploy to enable payments.
           </p>
@@ -624,6 +628,13 @@ onMounted(() => {
 .primary-btn.full-width { width: 100%; }
 .primary-btn:hover:not(:disabled) { background: var(--color-blue-dark); transform: translateY(-1px); box-shadow: var(--shadow-md); }
 .primary-btn:disabled { background: var(--text-secondary); opacity: 0.5; cursor: not-allowed; }
+
+.pay-channels-note {
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  margin: 0;
+}
 
 .error-msg {
   color: var(--color-orange-primary);

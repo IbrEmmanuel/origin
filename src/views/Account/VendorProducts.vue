@@ -44,10 +44,25 @@
             </div>
 
             <div class="form-group">
-              <label>Price (₦)</label>
+              <label>Your base price (₦)</label>
               <div class="price-input-wrapper">
                 <span class="currency-symbol">₦</span>
                 <input type="text" :value="displayPrice" @input="handlePriceInput" required placeholder="0.00" />
+              </div>
+              <p class="price-hint">Enter the amount you want to receive. Origin adds a {{ commissionPreview.ratePercent }}% marketplace commission on top.</p>
+              <div v-if="form.price > 0" class="commission-breakdown" aria-live="polite">
+                <div class="commission-row">
+                  <span>Your base</span>
+                  <strong>₦{{ formatNaira(commissionPreview.baseNaira) }}</strong>
+                </div>
+                <div class="commission-row">
+                  <span>Origin commission ({{ commissionPreview.ratePercent }}%)</span>
+                  <strong>₦{{ formatNaira(commissionPreview.commissionNaira) }}</strong>
+                </div>
+                <div class="commission-row commission-row--total">
+                  <span>Customer-facing price</span>
+                  <strong>₦{{ formatNaira(commissionPreview.customerNaira) }}</strong>
+                </div>
               </div>
             </div>
 
@@ -170,6 +185,11 @@ import imageCompression from 'browser-image-compression';
 import vendorService from '@/services/vendor.service';
 import marketplaceService from '@/services/marketplace.service';
 import { mediaUrl, parseProductImages } from '@/utils/mediaUrl';
+import {
+  calculateMarketplacePricing,
+  formatNaira,
+  baseFromCustomerNaira
+} from '@/lib/commission';
 
 const products = ref([]);
 const productCategories = ref([]);
@@ -188,6 +208,8 @@ const form = ref({
 });
 
 const displayPrice = ref('');
+
+const commissionPreview = computed(() => calculateMarketplacePricing(form.value.price));
 
 const handlePriceInput = (e) => {
   let val = e.target.value.replace(/[^\d.]/g, '');
@@ -289,8 +311,12 @@ const removeImage = (index) => {
 
 const editProduct = (product) => {
   editingProductData.value = product;
-  form.value = { ...product };
-  displayPrice.value = product.price ? Number(product.price).toLocaleString('en-US') : '';
+  const base =
+    product.base_price != null
+      ? Number(product.base_price)
+      : baseFromCustomerNaira(product.price);
+  form.value = { ...product, price: base };
+  displayPrice.value = base ? Number(base).toLocaleString('en-US') : '';
   // Load existing images into previews
   const existingImages = parseImages(product.images);
   imagePreviews.value = existingImages.map(path => ({
@@ -325,8 +351,14 @@ const saveProduct = async () => {
       existingPaths = [...existingPaths, ...uploadRes.urls];
     }
 
+    const pricing = calculateMarketplacePricing(form.value.price);
     const productData = {
       ...form.value,
+      // Vendor enters base; customer-facing `price` includes Origin's 12% until API owns markup.
+      base_price: pricing.baseNaira,
+      commission_rate_bps: pricing.rateBps,
+      commission_amount: pricing.commissionNaira,
+      price: pricing.customerNaira,
       images: existingPaths.slice(0, 5)
     };
 
@@ -473,6 +505,45 @@ onMounted(fetchProducts);
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
+}
+
+.price-hint {
+  margin: 0.45rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+
+.commission-breakdown {
+  margin-top: 0.75rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm, 8px);
+  background: var(--bg-primary, #fff);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.commission-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.commission-row strong {
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.commission-row--total {
+  margin-top: 0.2rem;
+  padding-top: 0.45rem;
+  border-top: 1px solid var(--border-color);
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 .price-input-wrapper {

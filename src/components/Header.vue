@@ -36,6 +36,7 @@
           <li><router-link to="/marketplace">Marketplace</router-link></li>
           <li><router-link to="/blog">Blog</router-link></li>
           <li><router-link to="/contact">Contact</router-link></li>
+          <li><router-link to="/vendor-apply" class="nav-supplier">Are You a Supplier?</router-link></li>
         </ul>
       </nav>
 
@@ -76,6 +77,7 @@
             <li><router-link to="/marketplace" @click="isMenuOpen = false"><ShoppingBagIcon class="icon-sm" /> Marketplace</router-link></li>
             <li><router-link to="/blog" @click="isMenuOpen = false"><BookOpenIcon class="icon-sm" /> Blog</router-link></li>
             <li><router-link to="/contact" @click="isMenuOpen = false"><MailIcon class="icon-sm" /> Contact</router-link></li>
+            <li><router-link to="/vendor-apply" @click="isMenuOpen = false"><StoreIcon class="icon-sm" /> Are You a Supplier?</router-link></li>
             <li><router-link :to="accountPath" @click="isMenuOpen = false"><UserIcon class="icon-sm" /> Account</router-link></li>
           </ul>
         </div>
@@ -101,7 +103,8 @@ import {
   Mail as MailIcon,
   Phone as PhoneIcon,
   ShoppingCart as ShoppingCartIcon,
-  BookOpen as BookOpenIcon
+  BookOpen as BookOpenIcon,
+  Store as StoreIcon
 } from 'lucide-vue-next';
 
 const route = useRoute();
@@ -336,6 +339,11 @@ onUnmounted(() => {
   color: var(--color-primary);
   background: rgba(255,118,0,0.08);
   font-weight: 600;
+}
+
+.nav-links a.nav-supplier {
+  color: var(--color-primary);
+  font-weight: 700;
 }
 
 .nav-links a.router-link-active::after {

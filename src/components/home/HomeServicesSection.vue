@@ -63,7 +63,7 @@ import {
   Cctv,
   Battery,
   Fingerprint,
-  Flame,
+  Home,
   Zap
 } from 'lucide-vue-next';
 import { homeServices } from '@/data/homeServices';
@@ -75,7 +75,7 @@ const iconMap = {
   cctv: Cctv,
   battery: Battery,
   fingerprint: Fingerprint,
-  flame: Flame,
+  home: Home,
   zap: Zap
 };
 </script>

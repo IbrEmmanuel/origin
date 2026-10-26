@@ -644,6 +644,8 @@
       </div>
     </section>
 
+    <SupplierCTA class="section-clipped" />
+
     <!-- CTA -->
     <section class="cta-section section-clipped section-divider" id="contact" :style="{ backgroundImage: `url(${ctaSolarDuskBg})` }">
       <div class="cta-overlay" aria-hidden="true"></div>
@@ -703,6 +705,7 @@ import marketplaceService from '@/services/marketplace.service';
 import blogService from '@/services/blog.service';
 import { mediaUrl, firstMediaUrl } from '@/utils/mediaUrl';
 import HomeServicesSection from '@/components/home/HomeServicesSection.vue';
+import SupplierCTA from '@/components/SupplierCTA.vue';
 
 // PDF Assets
 import projectOndoImg from '../assets/pdf-assets/project-ondo.jpg';
