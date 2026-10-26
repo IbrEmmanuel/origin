@@ -127,13 +127,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { ArrowLeft, ArrowRight, Share2 } from 'lucide-vue-next';
 import blogService from '@/services/blog.service';
 import { mediaUrl } from '@/utils/mediaUrl';
 import { marked } from 'marked';
-import { applySeo, articleJsonLd } from '@/composables/useSeo';
+import { applySeo, articleJsonLd, breadcrumbJsonLd, setJsonLd, clearDynamicSeo } from '@/composables/useSeo';
 
 const route = useRoute();
 const post = ref(null);
@@ -150,32 +150,52 @@ const fetchPost = async () => {
     post.value = await blogService.getPostBySlug(route.params.slug);
     if (post.value) {
       const path = `/blog/${post.value.slug || route.params.slug}`;
-      const desc = (
-        post.value.excerpt ||
+      const seoTitle = post.value.seo_title || post.value.meta_title || post.value.title;
+      const desc =
         post.value.meta_description ||
+        post.value.excerpt ||
         post.value.content ||
-        ''
-      )
-        .replace(/<[^>]+>/g, '')
-        .replace(/\s+/g, ' ')
-        .trim()
-        .slice(0, 160);
+        `${post.value.title} — Origin Electric Blog`;
 
       applySeo({
-        title: post.value.title,
-        description: desc || `${post.value.title} — Origin Electric Blog`,
+        title: seoTitle,
+        description: desc,
         path,
         image: post.value.featured_image ? mediaUrl(post.value.featured_image) : undefined,
+        imageAlt: post.value.title,
         type: 'article',
         jsonLdId: 'article',
         jsonLd: articleJsonLd(post.value, path)
       });
+      setJsonLd(
+        'breadcrumb',
+        breadcrumbJsonLd([
+          { name: 'Home', path: '/' },
+          { name: 'Blog', path: '/blog' },
+          { name: post.value.title, path }
+        ])
+      );
 
       related.value = await blogService.getRelatedPosts(post.value, 3);
+    } else {
+      clearDynamicSeo();
+      applySeo({
+        title: 'Article not found',
+        description: 'This blog article is unavailable.',
+        path: `/blog/${route.params.slug}`,
+        noindex: true
+      });
     }
   } catch (err) {
     console.error('Error fetching blog post:', err);
     post.value = null;
+    clearDynamicSeo();
+    applySeo({
+      title: 'Article not found',
+      description: 'This blog article is unavailable.',
+      path: `/blog/${route.params.slug}`,
+      noindex: true
+    });
     error.value = err.response?.data?.message || 'Failed to load this article from the API.';
   } finally {
     loading.value = false;
@@ -233,6 +253,9 @@ const copyLink = async () => {
 
 onMounted(fetchPost);
 watch(() => route.params.slug, fetchPost);
+onUnmounted(() => {
+  clearDynamicSeo();
+});
 </script>
 
 <style scoped>

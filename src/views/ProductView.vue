@@ -152,12 +152,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Package as PackageIcon, Store as StoreIcon, Heart as HeartIcon, Plus as PlusIcon, Minus as MinusIcon, Trash as TrashIcon } from 'lucide-vue-next';
 import marketplaceService from '@/services/marketplace.service';
 import { useCart } from '@/composables/useCart';
-import { applySeo, productJsonLd } from '@/composables/useSeo';
+import { applySeo, productJsonLd, breadcrumbJsonLd, setJsonLd, clearDynamicSeo } from '@/composables/useSeo';
 import { resolveProductImages } from '@/utils/mediaUrl';
 import ImageSlider from '@/components/ImageSlider.vue';
 
@@ -235,26 +235,67 @@ const fetchProduct = async () => {
       const path = `/product/${product.value.id}`;
       const gallery = resolveProductImages(product.value.images);
       const firstImage = gallery[0] || '';
+      const reviewCount = Array.isArray(reviews.value) ? reviews.value.length : 0;
+      const seoTitle =
+        product.value.seo_title ||
+        product.value.meta_title ||
+        product.value.name;
+      const seoDesc =
+        product.value.meta_description ||
+        product.value.description ||
+        `${product.value.name} available on the Origin Electric marketplace in Nigeria.`;
 
       applySeo({
-        title: product.value.name,
-        description: (product.value.description || `${product.value.name} — buy from Origin Electric marketplace.`)
-          .replace(/\s+/g, ' ')
-          .slice(0, 160),
+        title: seoTitle,
+        description: seoDesc,
         path,
         image: firstImage || undefined,
+        imageAlt: product.value.name,
         type: 'product',
         jsonLdId: 'product',
-        jsonLd: productJsonLd(product.value, path)
+        jsonLd: productJsonLd(product.value, path, {
+          avgRating: avgRating.value,
+          reviewCount
+        })
+      });
+      setJsonLd(
+        'breadcrumb',
+        breadcrumbJsonLd([
+          { name: 'Home', path: '/' },
+          { name: 'Marketplace', path: '/marketplace' },
+          {
+            name: product.value.category || 'Product',
+            path: product.value.category
+              ? `/marketplace?category=${encodeURIComponent(product.value.category)}`
+              : '/marketplace'
+          },
+          { name: product.value.name, path }
+        ])
+      );
+    } else {
+      clearDynamicSeo();
+      applySeo({
+        title: 'Product not found',
+        description: 'This marketplace product is unavailable.',
+        path: `/product/${route.params.id}`,
+        noindex: true
       });
     }
-    
+
     if (isLoggedIn.value) {
         const eligibility = await marketplaceService.checkEligibility(route.params.id);
         eligibleToReview.value = eligibility.eligible;
     }
   } catch (err) {
     console.error('Failed to load product details', err);
+    product.value = null;
+    clearDynamicSeo();
+    applySeo({
+      title: 'Product not found',
+      description: 'This marketplace product is unavailable.',
+      path: `/product/${route.params.id}`,
+      noindex: true
+    });
   } finally {
     loading.value = false;
   }
@@ -299,6 +340,10 @@ const resolveImages = (imagesStr) => resolveProductImages(imagesStr);
 
 onMounted(() => {
   fetchProduct();
+});
+
+onUnmounted(() => {
+  clearDynamicSeo();
 });
 </script>
 

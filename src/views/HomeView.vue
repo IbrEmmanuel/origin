@@ -1,8 +1,7 @@
 ﻿<template>
   <div class="home-view">
-    <!-- HERO SECTION -->
+    <!-- HERO — full-bleed video, brand-led -->
     <section class="hero" id="home">
-      <!-- Cinematic video background + poster fallback -->
       <div class="hero-bg" aria-hidden="true">
         <div
           class="hero-poster"
@@ -28,115 +27,99 @@
           <source :src="HERO_VIDEO_SRC" type="video/mp4" />
         </video>
         <div class="hero-bg-overlay"></div>
+        <div class="hero-bg-grain"></div>
       </div>
 
-      <!-- Circuit decoration -->
-      <svg class="circuit-line" viewBox="0 0 600 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <path class="circuit-path" d="M580 0 L580 80 L500 80 L500 160 L420 160 L420 120 L340 120 L340 200 L260 200 L260 140 L180 140 L180 260 L300 260 L300 340 L220 340 L220 420 L380 420 L380 360 L460 360 L460 480 L340 480 L340 560 L500 560 L500 640 L400 640 L400 720 L580 720 L580 800" style="animation-delay:0.3s"/>
-        <path class="circuit-path" d="M480 0 L480 60 L560 60" style="animation-delay:0.6s"/>
-        <path class="circuit-path" d="M220 260 L140 260 L140 360 L220 360" style="animation-delay:0.9s"/>
-        <circle class="circuit-dot" cx="500" cy="80"  r="4" style="animation-delay:0.8s"/>
-        <circle class="circuit-dot" cx="340" cy="200" r="4" style="animation-delay:1.1s"/>
-        <circle class="circuit-dot" cx="380" cy="420" r="4" style="animation-delay:1.4s"/>
-        <circle class="circuit-dot" cx="500" cy="560" r="4" style="animation-delay:1.7s"/>
-      </svg>
-
-      <!-- ── HERO BODY — centered column ── -->
       <div class="hero-body">
-
         <p class="hero-brand reveal" style="--reveal-delay:40ms">Origin Electric</p>
 
-        <!-- H1 — large display heading with typewriter word-swap -->
-        <h1 class="hero-h1 reveal" style="--reveal-delay:80ms">
-          Engineering<br class="hero-br-mobile" />
-          <span class="hero-type-wrap">
-            <span class="hero-type-text" ref="typeTextRef"></span><span class="hero-type-cursor" ref="typeCursorRef">|</span>
-          </span><br />
-          for Nigeria.
+        <h1 class="hero-h1 reveal" style="--reveal-delay:100ms">
+          Power systems engineered<br />for Nigeria.
         </h1>
 
-        <!-- Sub-copy -->
         <p class="hero-sub reveal" style="--reveal-delay:180ms">
-          Solar, BESS, security, and EV charging — engineered for businesses, institutions, and government.
+          Solar, storage, security, and EV charging — designed, installed, and supported for sites that cannot afford downtime.
         </p>
 
-        <!-- ── BUTTON ROW — justified modern-tech CTAs ── -->
-        <div class="hero-btn-row reveal" style="--reveal-delay:280ms">
+        <div class="hero-actions reveal" style="--reveal-delay:260ms">
           <router-link to="/account/consultations" class="hero-btn hero-btn--primary">
-            <CalendarIcon class="hero-btn-icon" />
-            <span>Book Consultation</span>
+            Book Consultation
           </router-link>
-          <router-link to="/load-audit" class="hero-btn hero-btn--glass">
-            <CalculatorIcon class="hero-btn-icon" />
-            <span>Load Audit</span>
+          <router-link to="/marketplace" class="hero-btn hero-btn--secondary">
+            Shop Marketplace
           </router-link>
-          <router-link to="/sales-chat" class="hero-btn hero-btn--ghost">
-            <MessageSquareIcon class="hero-btn-icon" />
-            <span>Talk to Us</span>
-          </router-link>
-          <button type="button" class="hero-btn hero-btn--ghost" @click="openInstallerModal">
-            <WrenchIcon class="hero-btn-icon" />
-            <span>Request Install</span>
-          </button>
         </div>
 
-
-        <!-- ── AUTO-SCROLL TICKER ── -->
-        <div class="hero-ticker-wrap">
-          <div class="hero-ticker-fade hero-ticker-fade--left"></div>
-          <div class="hero-ticker-fade hero-ticker-fade--right"></div>
-          <div class="hero-ticker" ref="tickerRef"
-               @mouseenter="pauseTicker" @mouseleave="resumeTicker">
-            <div class="hero-ticker-track" ref="tickerTrackRef">
-              <!-- Render products twice for seamless infinite loop -->
-              <template v-for="pass in 2" :key="pass">
-                <!-- Skeleton chips while loading -->
-                <template v-if="heroProducts.length === 0">
-                  <div v-for="n in 10" :key="`sk-${pass}-${n}`" class="hero-chip hero-chip--skeleton">
-                    <div class="hero-chip-img-wrap skeleton-box"></div>
-                    <div class="hero-chip-skeleton-text">
-                      <div class="skeleton-box" style="height:9px;width:80px;border-radius:3px"></div>
-                      <div class="skeleton-box" style="height:8px;width:50px;border-radius:3px;margin-top:3px"></div>
-                    </div>
-                  </div>
-                </template>
-                <!-- Live product chips -->
-                <router-link
-                  v-for="product in heroProducts"
-                  :key="`${pass}-${product.id}`"
-                  :to="`/product/${product.id}`"
-                  class="hero-chip"
-                >
-                  <div class="hero-chip-img-wrap">
-                    <img v-if="product.image" :src="product.image" :alt="product.name"
-                         class="hero-chip-img" loading="lazy" />
-                    <div v-else class="hero-chip-img-placeholder">
-                      <ZapIcon style="width:12px;height:12px;opacity:0.4" />
-                    </div>
-                  </div>
-                  <div class="hero-chip-info">
-                    <span class="hero-chip-name">{{ product.name }}</span>
-                    <span class="hero-chip-price">₦{{ product.price }}</span>
-                  </div>
-                </router-link>
-              </template>
-            </div>
-          </div>
-          <div class="hero-ticker-meta">
-            <span class="hero-ticker-dot"></span>
-            <span class="hero-ticker-count">
-              {{ heroProducts.length > 0 ? `${heroProducts.length} products live` : 'Loading products…' }}
-            </span>
-            <router-link to="/marketplace" class="hero-ticker-shoplink">
-              Shop all <ArrowRightIcon style="width:11px;height:11px;display:inline-block;vertical-align:-1px" />
-            </router-link>
-          </div>
+        <div class="hero-links reveal" style="--reveal-delay:320ms">
+          <router-link to="/load-audit">Load Audit</router-link>
+          <span aria-hidden="true">·</span>
+          <router-link to="/sales-chat">Talk to Us</router-link>
+          <span aria-hidden="true">·</span>
+          <button type="button" class="hero-text-btn" @click="openInstallerModal">Request Install</button>
         </div>
-
-      </div><!-- /hero-body -->
+      </div>
     </section>
 
-
+    <!-- Live catalog — below the fold so the video stays the hero -->
+    <section class="catalog-strip" aria-label="Live marketplace products">
+      <div class="hero-ticker-wrap">
+        <div class="hero-ticker-fade hero-ticker-fade--left"></div>
+        <div class="hero-ticker-fade hero-ticker-fade--right"></div>
+        <div
+          class="hero-ticker"
+          ref="tickerRef"
+          @mouseenter="pauseTicker"
+          @mouseleave="resumeTicker"
+        >
+          <div class="hero-ticker-track" ref="tickerTrackRef">
+            <template v-for="pass in 2" :key="pass">
+              <template v-if="heroProducts.length === 0">
+                <div v-for="n in 10" :key="`sk-${pass}-${n}`" class="hero-chip hero-chip--skeleton">
+                  <div class="hero-chip-img-wrap skeleton-box"></div>
+                  <div class="hero-chip-skeleton-text">
+                    <div class="skeleton-box" style="height:9px;width:80px;border-radius:3px"></div>
+                    <div class="skeleton-box" style="height:8px;width:50px;border-radius:3px;margin-top:3px"></div>
+                  </div>
+                </div>
+              </template>
+              <router-link
+                v-for="product in heroProducts"
+                :key="`${pass}-${product.id}`"
+                :to="`/product/${product.id}`"
+                class="hero-chip"
+              >
+                <div class="hero-chip-img-wrap">
+                  <img
+                    v-if="product.image"
+                    :src="product.image"
+                    :alt="product.name"
+                    class="hero-chip-img"
+                    loading="lazy"
+                  />
+                  <div v-else class="hero-chip-img-placeholder">
+                    <ZapIcon style="width:12px;height:12px;opacity:0.4" />
+                  </div>
+                </div>
+                <div class="hero-chip-info">
+                  <span class="hero-chip-name">{{ product.name }}</span>
+                  <span class="hero-chip-price">₦{{ product.price }}</span>
+                </div>
+              </router-link>
+            </template>
+          </div>
+        </div>
+        <div class="hero-ticker-meta">
+          <span class="hero-ticker-dot"></span>
+          <span class="hero-ticker-count">
+            {{ heroProducts.length > 0 ? `${heroProducts.length} products live` : 'Loading products…' }}
+          </span>
+          <router-link to="/marketplace" class="hero-ticker-shoplink">
+            Shop all
+            <ArrowRightIcon style="width:11px;height:11px;display:inline-block;vertical-align:-1px" />
+          </router-link>
+        </div>
+      </div>
+    </section>
 
     <!-- SERVICES — premium engineering grid -->
     <HomeServicesSection class="section-clipped section-divider" />
@@ -683,10 +666,7 @@
 <script setup>
 import { ref, nextTick, onMounted, onUnmounted } from 'vue';
 import { 
-  Calculator as CalculatorIcon, 
-  Calendar as CalendarIcon, 
-  Sparkles as SparklesIcon, 
-  MessageSquare as MessageSquareIcon,
+  Calculator as CalculatorIcon,
   Sun as SunIcon, 
   Zap as ZapIcon, 
   Cctv as CctvIcon,
@@ -913,70 +893,6 @@ const fetchFeaturedBlog = async () => {
   }
 };
 
-// ----------------- HERO H1 TYPEWRITER -----------------
-const swapPhrases = [
-  ' Energy Independence',
-  ' Solar Power Systems',
-  ' BESS & Storage',
-  ' EV Charging Networks',
-  ' Security Solutions',
-  ' Engineering Excellence',
-];
-
-const typeTextRef   = ref(null);
-const typeCursorRef = ref(null);
-// keep swapTrackRef defined so nothing else breaks
-const swapTrackRef  = ref(null);
-
-let typeIndex    = 0;   // current phrase index
-let typeTimer    = null;
-let typeRunning  = false;
-
-const sleep = ms => new Promise(r => setTimeout(r, ms));
-
-const typeWriter = async () => {
-  typeRunning = true;
-  while (typeRunning) {
-    const phrase = swapPhrases[typeIndex % swapPhrases.length];
-    const el     = typeTextRef.value;
-    const cursor = typeCursorRef.value;
-    if (!el || !cursor) break;
-
-    // — Type in —
-    cursor.style.opacity = '1';
-    for (let i = 0; i <= phrase.length; i++) {
-      if (!typeRunning) return;
-      el.textContent = phrase.slice(0, i);
-      await sleep(55 + Math.random() * 35);   // natural typing rhythm
-    }
-
-    // — Pause at full phrase —
-    await sleep(1800);
-
-    // — Delete —
-    cursor.style.opacity = '1';
-    for (let i = phrase.length; i >= 0; i--) {
-      if (!typeRunning) return;
-      el.textContent = phrase.slice(0, i);
-      await sleep(28 + Math.random() * 20);   // delete faster
-    }
-
-    await sleep(300);
-    typeIndex++;
-  }
-};
-
-const startSwap = () => {
-  typeRunning = false;
-  clearTimeout(typeTimer);
-  // small delay so DOM is ready
-  typeTimer = setTimeout(typeWriter, 600);
-};
-const stopSwap = () => {
-  typeRunning = false;
-  clearTimeout(typeTimer);
-};
-
 // ----------------- HERO PRODUCT TICKER (rAF horizontal scroll) -----------------
 const heroProducts    = ref([]);
 const tickerRef       = ref(null);
@@ -1048,7 +964,6 @@ const stopHeroScroll  = () => {};
 
 onUnmounted(() => {
   if (tickerRaf) cancelAnimationFrame(tickerRaf);
-  stopSwap();
   const el = heroVideoRef.value;
   if (el) {
     el.pause();
@@ -1064,9 +979,6 @@ function openInstallerModal() {
 
 // ----------------- LIFECYCLE -----------------
 onMounted(() => {
-  // Start H1 word swap
-  startSwap();
-
   // Cinematic hero video (poster-only when reduced-motion / save-data / slow network)
   heroVideoEnabled.value = shouldEnableHeroVideo();
   if (heroVideoEnabled.value) {
@@ -1075,7 +987,7 @@ onMounted(() => {
     });
   }
 
-  // Start ticker immediately (skeleton chips give it content to scroll)
+  // Catalog strip ticker
   startTicker();
 
   // Live API: hero ticker + marketplace preview + blog + EV pricing
@@ -1128,25 +1040,21 @@ onMounted(() => {
 .mt-md  { margin-top: 1.5rem; }
 
 /* ══════════════════════════════════════════
-   HERO — full-screen centered column
-   Matches reference: min-h-screen, flex-col,
-   items-center, text-center, dark bg photo
+   HERO — full-bleed video, brand first
    ══════════════════════════════════════════ */
 .hero {
   position: relative;
   min-height: 100svh;
+  min-height: 100dvh;
   padding-top: calc(5.5rem + env(safe-area-inset-top, 0px));
-  padding-bottom: 0;              /* ticker bleeds to edge */
-  overflow-x: clip;
+  padding-bottom: calc(clamp(3.25rem, 9vh, 6rem) + env(safe-area-inset-bottom, 0px));
+  overflow: hidden;
   display: flex;
   align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  background-color: #000;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  justify-content: flex-start;
+  background-color: #050806;
 }
 
-/* Hero background — poster + cinematic video */
 .hero-bg {
   position: absolute;
   inset: 0;
@@ -1164,7 +1072,7 @@ onMounted(() => {
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;
-  transform: scale(1.02);
+  transform: scale(1.04);
 }
 
 .hero-video {
@@ -1173,457 +1081,283 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center center;
+  object-position: 62% 40%;
   opacity: 0;
-  transition: opacity 0.9s ease;
-  /* Avoid iOS/Android fullscreen chrome stealing the layout */
+  transform: scale(1.06);
+  filter: contrast(1.08) saturate(1.12);
+  transition: opacity 1.15s ease;
   max-width: 100%;
   pointer-events: none;
 }
 
 .hero-video.is-ready {
   opacity: 1;
+  animation: hero-video-drift 32s ease-in-out infinite alternate;
 }
 
-/* Cinematic brand overlay — stronger behind centered copy */
+@keyframes hero-video-drift {
+  from { transform: scale(1.06) translate3d(0, 0, 0); }
+  to   { transform: scale(1.12) translate3d(-1.4%, -0.8%, 0); }
+}
+
+/* Text rail on the left; keep most of the frame open so the video reads */
 .hero-bg-overlay {
   position: absolute;
   inset: 0;
-  z-index: 3;
+  z-index: 2;
   background:
-    radial-gradient(
-      ellipse 85% 70% at 50% 42%,
-      rgba(5, 8, 6, 0.28) 0%,
-      rgba(5, 8, 6, 0.62) 55%,
-      rgba(5, 8, 6, 0.82) 100%
+    linear-gradient(
+      100deg,
+      rgba(4, 8, 6, 0.88) 0%,
+      rgba(4, 8, 6, 0.55) 28%,
+      rgba(4, 8, 6, 0.12) 52%,
+      rgba(4, 8, 6, 0.08) 100%
     ),
     linear-gradient(
       180deg,
-      rgba(11, 31, 23, 0.55) 0%,
-      rgba(0, 0, 0, 0.25) 38%,
-      rgba(0, 0, 0, 0.55) 72%,
-      rgba(0, 0, 0, 0.78) 100%
+      rgba(4, 8, 6, 0.35) 0%,
+      transparent 32%,
+      transparent 58%,
+      rgba(4, 8, 6, 0.62) 100%
     );
 }
 
-/* Circuit SVG decoration */
-.circuit-line {
+.hero-bg-grain {
   position: absolute;
-  right: 0; top: 0;
-  width: 55%; height: 100%;
-  opacity: 0.04;
-  z-index: 4;
+  inset: 0;
+  z-index: 3;
+  opacity: 0.022;
   pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 220px 220px;
+  mix-blend-mode: soft-light;
 }
-.circuit-path {
-  stroke: var(--orange);
-  stroke-width: 1.5;
-  fill: none;
-  stroke-dasharray: 2000;
-  stroke-dashoffset: 2000;
-  animation: draw-circuit 3s ease forwards 0.5s;
-}
-.circuit-dot {
-  fill: var(--orange);
-  opacity: 0;
-  animation: dot-appear 0.4s ease forwards;
-}
-@keyframes draw-circuit { to { stroke-dashoffset: 0; } }
-@keyframes dot-appear    { to { opacity: 1; } }
 
-/* ── Hero body — centered column ── */
 .hero-body {
   position: relative;
   z-index: 5;
-  width: 100%;
-  max-width: 920px;
-  margin: 0 auto;
-  padding: 0 1.5rem 3.5rem;
+  width: min(100% - 3rem, 640px);
+  margin: 0;
+  margin-left: max(1.5rem, env(safe-area-inset-left, 0px), 5vw);
+  padding: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 0;
+  align-items: flex-start;
+  text-align: left;
 }
 
-/* Brand — hero-level signal */
 .hero-brand {
   font-family: var(--font-display);
-  font-size: clamp(1.35rem, 2.4vw, 1.85rem);
+  font-size: clamp(1.7rem, 3.4vw, 2.45rem);
   font-weight: 600;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
   color: #fff;
-  margin: 0 0 1rem;
+  margin: 0 0 1.2rem;
   line-height: 1;
-  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.45);
 }
+
 .hero-brand::after {
   content: '';
   display: block;
-  width: 36px;
+  width: 2.75rem;
   height: 2px;
-  margin: 12px auto 0;
+  margin-top: 0.9rem;
   background: var(--orange);
-  border-radius: 1px;
 }
 
-/* Eyebrow badge */
-.hero-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(255,118,0,0.1);
-  border: 1px solid rgba(255,118,0,0.28);
-  border-radius: var(--radius-xs);
-  padding: 5px 14px;
-  font-family: var(--font-main);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  color: var(--color-primary);
-  text-transform: uppercase;
-  margin-bottom: 1.4rem;
-}
-.hero-eyebrow-dot {
-  width: 6px; height: 6px;
-  background: var(--color-primary);
-  border-radius: 50%;
-  flex-shrink: 0;
-  box-shadow: 0 0 6px var(--color-primary);
-  animation: pulse-dot 2s infinite;
-}
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1;   transform: scale(1);   }
-  50%       { opacity: 0.4; transform: scale(0.6); }
-}
-
-/* ── H1 — large display type ── */
 .hero-h1 {
   font-family: var(--font-display);
-  /* matches reference text-4xl → text-7xl clamp */
-  font-size: clamp(2.45rem, 6.5vw, 5rem);
-  font-weight: 700;
-  line-height: 1.08;
-  letter-spacing: -0.03em;
+  font-size: clamp(2.25rem, 5.8vw, 4rem);
+  font-weight: 550;
+  line-height: 1.06;
+  letter-spacing: -0.035em;
   color: #fff;
-  margin-bottom: 1.25rem;
-  max-width: 820px;
-  text-shadow: 0 2px 28px rgba(0, 0, 0, 0.5);
-}
-.hero-h1 .highlight {
-  background: linear-gradient(135deg, var(--orange), var(--orange2));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  display: inline;
-}
-/* hide the mobile-only <br> on desktop */
-.hero-br-mobile { display: none; }
-@media (max-width: 520px) { .hero-br-mobile { display: block; } }
-
-/* ── H1 typewriter ── */
-.hero-type-wrap {
-  display: inline;
-  position: relative;
-}
-.hero-type-text {
-  background: linear-gradient(135deg, var(--orange) 0%, var(--orange2) 50%, #ffb347 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-size: 200% auto;
-  animation: type-gradient-shift 4s linear infinite;
-}
-@keyframes type-gradient-shift {
-  0%   { background-position: 0% center; }
-  100% { background-position: 200% center; }
-}
-.hero-type-cursor {
-  display: inline-block;
-  width: 3px;
-  background: var(--orange);
-  -webkit-text-fill-color: var(--orange);
-  color: var(--orange);
-  margin-left: 2px;
-  font-weight: 300;
-  animation: cursor-blink 0.75s step-end infinite;
-  vertical-align: baseline;
-}
-@keyframes cursor-blink {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0; }
+  margin: 0 0 1.15rem;
+  max-width: 13ch;
 }
 
-/* Sub-copy */
 .hero-sub {
-  font-size: clamp(0.98rem, 2.2vw, 1.08rem);
-  color: rgba(255, 255, 255, 0.82);
-  max-width: 520px;
-  line-height: 1.65;
-  margin-bottom: 2rem;
+  font-family: var(--font-main);
+  font-size: clamp(1rem, 2vw, 1.125rem);
+  color: rgba(255, 255, 255, 0.78);
+  max-width: 34rem;
+  line-height: 1.55;
+  margin: 0 0 1.75rem;
   font-weight: 400;
-  text-shadow: 0 1px 16px rgba(0, 0, 0, 0.45);
 }
 
-/* ══════════════════════════════════════
-   BUTTON ROW — justified modern-tech
-   ══════════════════════════════════════ */
-.hero-btn-row {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  align-items: stretch;
-  justify-content: center;
-  gap: 10px;
-  width: 100%;
-  max-width: 720px;
-  margin-bottom: 1.75rem;
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.15rem;
 }
 
-/* Base hero button — sharp, equal, justified */
 .hero-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  width: 100%;
-  height: 44px;
-  padding: 0 14px;
-  border-radius: var(--radius-sm);
+  min-height: 48px;
+  padding: 0 1.4rem;
+  border-radius: 2px;
   font-family: var(--font-main);
-  font-size: 0.8125rem;
+  font-size: 0.9rem;
   font-weight: 600;
   letter-spacing: 0.01em;
-  line-height: 1;
-  white-space: nowrap;
   text-decoration: none;
   cursor: pointer;
   border: 1px solid transparent;
-  position: relative;
-  overflow: hidden;
   -webkit-tap-highlight-color: transparent;
-  transition:
-    background  0.18s ease,
-    border-color 0.18s ease,
-    box-shadow  0.2s ease,
-    transform   0.2s var(--transition-bounce),
-    color 0.18s ease;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
-.hero-btn span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.hero-btn::after {
-  content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.1) 50%, transparent 65%);
-  background-size: 200% 100%;
-  background-position: -100% 0;
-  transition: background-position 0.5s ease;
-  pointer-events: none;
-  border-radius: inherit;
-}
-.hero-btn:hover::after { background-position: 200% 0; }
-.hero-btn:hover        { transform: translateY(-1px); }
-.hero-btn:active       { transform: scale(0.97); opacity: 0.9; }
 
-.hero-btn-icon { width: 15px; height: 15px; flex-shrink: 0; stroke-width: 2; }
-
-/* Solid orange — primary CTA */
 .hero-btn--primary {
   background: var(--orange);
   color: #fff;
   border-color: var(--orange);
-  box-shadow: 0 2px 16px -4px rgba(255,118,0,0.55);
-}
-.hero-btn--primary:hover {
-  background: var(--orange2);
-  border-color: var(--orange2);
-  box-shadow: 0 6px 22px -4px rgba(255,118,0,0.6);
 }
 
-/* Glass — secondary actions */
-.hero-btn--glass {
-  background: rgba(255,255,255,0.09);
-  color: rgba(255,255,255,0.95);
-  border-color: rgba(255,255,255,0.22);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+@media (hover: hover) and (pointer: fine) {
+  .hero-btn--primary:hover {
+    background: var(--orange2);
+    border-color: var(--orange2);
+  }
 }
-.hero-btn--glass:hover {
-  background: rgba(255,255,255,0.16);
-  border-color: rgba(255,255,255,0.35);
+
+.hero-btn--secondary {
+  background: transparent;
   color: #fff;
+  border-color: rgba(255, 255, 255, 0.42);
 }
 
-/* Ghost — tertiary actions */
-.hero-btn--ghost {
-  background: rgba(255,255,255,0.03);
-  color: rgba(255,255,255,0.78);
-  border-color: rgba(255,255,255,0.16);
-}
-.hero-btn--ghost:hover {
-  background: rgba(255,255,255,0.08);
-  color: #fff;
-  border-color: rgba(255,255,255,0.3);
+@media (hover: hover) and (pointer: fine) {
+  .hero-btn--secondary:hover {
+    border-color: #fff;
+    background: rgba(255, 255, 255, 0.06);
+  }
 }
 
-/* ══════════════════════════════════════
-   CTA QUICK-ACTION TILES (4 tiles row)
-   ══════════════════════════════════════ */
-.hero-cta-tiles {
+.hero-links {
   display: flex;
-  align-items: stretch;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  max-width: 680px;
-  margin-bottom: 2.5rem;
   flex-wrap: wrap;
-}
-
-.hero-tile {
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 4px;
-  flex: 1 1 120px;
-  min-width: 110px;
-  padding: 14px 12px;
-  border-radius: var(--radius-md);
-  border: 1px solid rgba(255,255,255,0.12);
+  gap: 0.55rem 0.65rem;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.hero-links a,
+.hero-text-btn {
+  color: rgba(255, 255, 255, 0.72);
   text-decoration: none;
+  font: inherit;
+  font-weight: 500;
+  background: none;
+  border: none;
+  padding: 0;
   cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  transition:
-    background  0.2s ease,
-    border-color 0.2s ease,
-    transform   0.22s var(--transition-bounce);
-  -webkit-tap-highlight-color: transparent;
-}
-.hero-tile:hover { transform: translateY(-3px); }
-
-.hero-tile--ai {
-  background: linear-gradient(135deg, rgba(255,118,0,0.18), rgba(30,30,30,0.5));
-  border-color: rgba(255,118,0,0.28);
-}
-.hero-tile--ai:hover { background: linear-gradient(135deg, rgba(255,118,0,0.28), rgba(30,30,30,0.62)); border-color: rgba(255,118,0,0.45); }
-
-.hero-tile--muted {
-  background: rgba(255,255,255,0.06);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-.hero-tile--muted:hover { background: rgba(255,255,255,0.11); border-color: rgba(255,255,255,0.26); }
-
-.hero-tile-icon {
-  width: 20px; height: 20px;
-  color: rgba(255,255,255,0.8);
-  stroke-width: 1.8;
-  margin-bottom: 2px;
-}
-.hero-tile--ai .hero-tile-icon { color: var(--orange); }
-
-.hero-tile-label {
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.45);
-  line-height: 1;
-}
-.hero-tile-title {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: #fff;
-  line-height: 1.2;
 }
 
-/* ══════════════════════════════════════
-   HORIZONTAL AUTO-SCROLL TICKER
-   Pure CSS @keyframes marquee — no JS.
-   ══════════════════════════════════════ */
+@media (hover: hover) and (pointer: fine) {
+  .hero-links a:hover,
+  .hero-text-btn:hover {
+    color: #fff;
+  }
+}
+
+/* Catalog strip — below fold */
+.catalog-strip {
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
+  padding: 1rem 0 1.15rem;
+  overflow-x: clip;
+}
+
 .hero-ticker-wrap {
-  /* Bleed past hero-body padding without 100vw scrollbar bugs */
-  align-self: stretch;
-  width: calc(100% + 3rem);
-  max-width: none;
-  margin-left: -1.5rem;
-  margin-right: -1.5rem;
   position: relative;
-  padding-bottom: 2.75rem;
+  width: 100%;
   overflow: hidden;
 }
 
-/* Fade edges */
 .hero-ticker-fade {
   position: absolute;
-  top: 0; bottom: 20px;
-  width: 80px;
+  top: 0;
+  bottom: 0;
+  width: 56px;
   z-index: 3;
   pointer-events: none;
 }
-.hero-ticker-fade--left  {
+
+.hero-ticker-fade--left {
   left: 0;
-  background: linear-gradient(to right, rgba(0,0,0,0.88) 0%, transparent 100%);
-}
-.hero-ticker-fade--right {
-  right: 0;
-  background: linear-gradient(to left, rgba(0,0,0,0.88) 0%, transparent 100%);
+  background: linear-gradient(to right, var(--bg-primary) 0%, transparent 100%);
 }
 
-/* Scrolling container — overflow hidden */
+.hero-ticker-fade--right {
+  right: 0;
+  background: linear-gradient(to left, var(--bg-primary) 0%, transparent 100%);
+}
+
 .hero-ticker {
   overflow: hidden;
   width: 100%;
   cursor: default;
 }
 
-/* The moving track — rendered twice for seamless loop */
 .hero-ticker-track {
   display: flex;
   align-items: center;
   gap: 10px;
   width: max-content;
   will-change: transform;
+  padding: 0 0.75rem;
 }
 
-/* Product chip */
 .hero-chip {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   padding: 7px 12px 7px 7px;
-  border-radius: var(--radius-md);
-  background: rgba(255,255,255,0.07);
-  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 2px;
+  background: var(--bg-secondary, var(--bg-primary));
+  border: 1px solid var(--border-color);
   text-decoration: none;
   white-space: nowrap;
   flex-shrink: 0;
-  transition: background 0.18s ease, border-color 0.18s ease;
+  transition: border-color 0.18s ease;
 }
-.hero-chip:hover {
-  background: rgba(255,255,255,0.13);
-  border-color: rgba(255,118,0,0.4);
+
+@media (hover: hover) and (pointer: fine) {
+  .hero-chip:hover {
+    border-color: var(--orange);
+  }
 }
 
 .hero-chip-img-wrap {
-  width: 32px; height: 32px;
-  border-radius: var(--radius-sm);
+  width: 32px;
+  height: 32px;
+  border-radius: 2px;
   overflow: hidden;
   flex-shrink: 0;
-  background: rgba(255,255,255,0.06);
-  display: flex; align-items: center; justify-content: center;
+  background: var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
 .hero-chip-img {
-  width: 100%; height: 100%;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
 }
+
 .hero-chip-img-placeholder {
-  width: 100%; height: 100%;
-  display: flex; align-items: center; justify-content: center;
-  color: rgba(255,255,255,0.4);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary, rgba(0, 0, 0, 0.4));
 }
 
 .hero-chip-info {
@@ -1631,16 +1365,18 @@ onMounted(() => {
   flex-direction: column;
   gap: 2px;
 }
+
 .hero-chip-name {
   font-family: var(--font-main);
   font-size: 0.76rem;
   font-weight: 600;
-  color: rgba(255,255,255,0.9);
+  color: var(--text-primary);
   max-width: 130px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
 .hero-chip-price {
   font-family: var(--font-main);
   font-size: 0.68rem;
@@ -1648,111 +1384,135 @@ onMounted(() => {
   color: var(--orange);
 }
 
-/* Skeleton chip */
 .hero-chip--skeleton {
   pointer-events: none;
-  opacity: 0.6;
-}
-.hero-chip-skeleton-text {
-  display: flex; flex-direction: column; gap: 3px;
+  opacity: 0.55;
 }
 
-/* Ticker metadata bar */
+.hero-chip-skeleton-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
 .hero-ticker-meta {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  margin-top: 8px;
+  margin-top: 0.65rem;
   font-family: var(--font-main);
   font-size: 0.72rem;
-  color: rgba(255,255,255,0.45);
+  color: var(--text-secondary, rgba(0, 0, 0, 0.5));
 }
+
 .hero-ticker-dot {
-  width: 6px; height: 6px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: var(--color-success);
-  box-shadow: 0 0 6px var(--color-success);
-  animation: pulse-dot 2s infinite;
+  background: var(--color-success, #2d8a4e);
   flex-shrink: 0;
 }
-.hero-ticker-count { color: rgba(255,255,255,0.45); }
+
+.hero-ticker-count {
+  color: inherit;
+}
+
 .hero-ticker-shoplink {
   color: var(--orange);
   font-weight: 600;
   text-decoration: none;
-  transition: color 0.15s;
-}
-.hero-ticker-shoplink:hover { color: var(--orange2); }
-
-/* Respect reduced-motion — poster only; quiet decorative motion */
-@media (prefers-reduced-motion: reduce) {
-  .hero-ticker-track { transition: none; }
-  .hero-video { display: none !important; }
-  .hero-type-text { animation: none; }
-  .hero-type-cursor { animation: none; opacity: 1; }
-  .circuit-path,
-  .circuit-dot { animation: none; }
-  .circuit-path { stroke-dashoffset: 0; opacity: 0.7; }
-  .circuit-dot { opacity: 0.7; }
 }
 
-/* ══════════════════════════════════════
-   RESPONSIVE
-   ══════════════════════════════════════ */
-@media (max-width: 768px) {
-  .hero-h1 { font-size: clamp(2.2rem, 8vw, 3.2rem); }
-  .hero-sub { font-size: 0.95rem; }
-  .hero-btn-row {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-    max-width: 420px;
+@media (hover: hover) and (pointer: fine) {
+  .hero-ticker-shoplink:hover {
+    color: var(--orange2);
   }
-  .hero-btn { height: 42px; padding: 0 12px; font-size: 0.78rem; }
-  .hero-btn-icon { width: 14px; height: 14px; }
-  .hero-cta-tiles { gap: 6px; }
-  .hero-tile { min-width: 90px; padding: 12px 8px; }
-  .hero-tile-title { font-size: 0.72rem; }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-ticker-track {
+    transition: none;
+  }
+  .hero-video {
+    display: none !important;
+    animation: none !important;
+  }
+  .hero-poster {
+    transform: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    /* Clear fixed mobile bottom nav + safe area */
+    padding-bottom: calc(5.75rem + env(safe-area-inset-bottom, 0px));
+    align-items: flex-end;
+  }
+  /* Bottom grade keeps footage visible above the copy */
+  .hero-bg-overlay {
+    background:
+      linear-gradient(
+        180deg,
+        rgba(4, 8, 6, 0.28) 0%,
+        rgba(4, 8, 6, 0.18) 32%,
+        rgba(4, 8, 6, 0.55) 62%,
+        rgba(4, 8, 6, 0.88) 100%
+      );
+  }
+  .hero-h1 {
+    font-size: clamp(2.05rem, 9vw, 2.9rem);
+    max-width: 12ch;
+  }
+  .hero-sub {
+    font-size: 0.95rem;
+    margin-bottom: 1.25rem;
+  }
+  .hero-video {
+    object-position: center 35%;
+  }
+}
+
 @media (max-width: 520px) {
-  .hero-body { padding: 0 1rem 2.5rem; }
-  .hero-btn-row {
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    max-width: 100%;
+  .hero-body {
+    width: min(100% - 1.5rem, 640px);
+    margin-left: max(0.85rem, env(safe-area-inset-left, 0px));
+  }
+  .hero-brand {
+    font-size: clamp(1.35rem, 5.5vw, 1.65rem);
+    margin-bottom: 0.85rem;
+  }
+  .hero-brand::after {
+    margin-top: 0.65rem;
+  }
+  .hero-h1 {
+    margin-bottom: 0.85rem;
+  }
+  .hero-actions {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
   }
   .hero-btn {
-    height: auto;
+    flex: 1 1 auto;
+    min-width: calc(50% - 0.4rem);
     min-height: 44px;
-    padding: 10px 8px;
-    font-size: 0.72rem;
-    white-space: normal;
-    text-align: center;
-    line-height: 1.2;
+    padding: 0 1rem;
+    font-size: 0.84rem;
   }
-  .hero-btn span { white-space: normal; }
-  .hero-cta-tiles { display: grid; grid-template-columns: 1fr 1fr; }
-  .hero-tile { flex: unset; }
-  .hero-ticker-wrap {
-    width: calc(100% + 2rem);
-    margin-left: -1rem;
-    margin-right: -1rem;
+  .hero-links {
+    font-size: 0.8rem;
   }
-  .hero-ticker-fade { width: 48px; }
+  .hero-ticker-fade {
+    width: 40px;
+  }
 }
 
-/* ─────────────────────────────────────
-   HERO CTA CARDS (kept for reference —
-   no longer used in template)
-/* ── ai-icon pulse (used by hero-tile--ai) ── */
-.ai-icon { color: var(--orange); animation: aiPulse 2s ease-in-out infinite; }
-@keyframes aiPulse {
-  0%, 100% { transform: scale(1) rotate(0); opacity: 1; }
-  50%       { transform: scale(1.15) rotate(12deg); opacity: 0.8; }
+.btn-icon {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
 }
-
-/* Legacy btn-icon alias */
-.btn-icon { width: 15px; height: 15px; flex-shrink: 0; }
 
 /* ══════════════════════════════════════════
    STATS BAR

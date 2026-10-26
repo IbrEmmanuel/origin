@@ -65,7 +65,7 @@ const routes = [
         path: '/cart',
         name: 'Cart',
         component: () => import('../views/CartView.vue'),
-        meta: { title: 'Shopping Cart' }
+        meta: { title: 'Shopping Cart', noindex: true }
     },
     {
         path: '/load-audit',
@@ -119,13 +119,13 @@ const routes = [
         path: '/checkout',
         name: 'Checkout',
         component: () => import('../views/CheckoutView.vue'),
-        meta: { requiresAuth: true, title: 'Checkout' }
+        meta: { requiresAuth: true, title: 'Checkout', noindex: true }
     },
     {
         path: '/order-success',
         name: 'OrderSuccess',
         component: () => import('../views/OrderSuccessView.vue'),
-        meta: { requiresAuth: true, title: 'Order Placed Successfully' }
+        meta: { requiresAuth: true, title: 'Order Placed Successfully', noindex: true }
     },
     {
         path: '/account',
@@ -218,7 +218,7 @@ const routes = [
         path: '/sales-chat',
         name: 'SalesChat',
         component: () => import('../views/SalesChatView.vue'),
-        meta: { title: 'Origin Customer Care Agent' }
+        meta: { title: 'Origin Customer Care Agent', noindex: true }
     },
     {
         path: '/sales',
@@ -298,14 +298,22 @@ router.beforeEach(async (to, from, next) => {
 });
 
 router.afterEach((to) => {
-    // Dynamic pages (product / blog post) set richer SEO themselves after data loads.
-    if (to.name === 'Product' || to.name === 'BlogPost') return;
+    import('@/composables/useSeo').then(({ applySeo, organizationJsonLd, clearDynamicSeo }) => {
+        // Product / blog / marketplace set richer SEO after data loads.
+        if (to.name === 'Product' || to.name === 'BlogPost' || to.name === 'Marketplace') {
+            if (to.name !== 'Product' && to.name !== 'BlogPost') clearDynamicSeo();
+            return;
+        }
 
-    const isPrivate = to.matched.some(
-        (r) => r.meta?.requiresAuth || r.path.startsWith('/account')
-    );
+        clearDynamicSeo();
 
-    import('@/composables/useSeo').then(({ applySeo, organizationJsonLd }) => {
+        const isPrivate = to.matched.some(
+            (r) =>
+                r.meta?.requiresAuth ||
+                r.meta?.noindex ||
+                r.path.startsWith('/account')
+        );
+
         const title =
             to.meta?.title === 'Home' || !to.meta?.title
                 ? null
@@ -315,7 +323,7 @@ router.afterEach((to) => {
             description: to.meta?.description || undefined,
             path: to.path,
             type: 'website',
-            noindex: isPrivate,
+            noindex: isPrivate || Boolean(to.meta?.noindex),
             jsonLd: to.name === 'Home' && !isPrivate ? organizationJsonLd() : undefined,
             jsonLdId: 'page'
         });

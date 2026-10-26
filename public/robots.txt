@@ -10,6 +10,12 @@ Allow: /about
 Allow: /projects
 Allow: /contact
 Allow: /load-audit
+Allow: /assets/
+Allow: /logo.png
+Allow: /favicon.png
+Allow: /manifest.webmanifest
+
+# Private / transactional — do not rely on robots.txt alone; pages also use noindex
 Disallow: /account/
 Disallow: /checkout
 Disallow: /cart
@@ -19,6 +25,10 @@ Disallow: /forgot-password
 Disallow: /verify-email
 Disallow: /vendor-apply
 Disallow: /order-success
+Disallow: /sales-chat
+Disallow: /sales
+Disallow: /chat
+Disallow: /origin-talk
 
 User-agent: GPTBot
 Allow: /

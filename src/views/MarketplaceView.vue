@@ -129,14 +129,16 @@
 
 <script setup>
 import { ref, watch, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { Package as PackageIcon, Store as StoreIcon, Search as SearchIcon, Heart as HeartIcon, Eye as EyeIcon, Plus as PlusIcon, Minus as MinusIcon, Trash as TrashIcon } from 'lucide-vue-next';
 import marketplaceService from '@/services/marketplace.service';
 import { useCart } from '@/composables/useCart';
 import { resolveProductImages } from '@/utils/mediaUrl';
 import ImageSlider from '@/components/ImageSlider.vue';
+import { applySeo } from '@/composables/useSeo';
 
 const router = useRouter();
+const route = useRoute();
 const { cartItems, addToCart, updateQuantity, buyNow } = useCart();
 
 const products = ref([]);
@@ -270,7 +272,53 @@ const resetFilters = () => {
     selectedCategory.value = '';
 };
 
+const syncMarketplaceSeo = () => {
+  const cat = selectedCategory.value;
+  const q = String(searchQuery.value || '').trim();
+  const catMeta = productCategories.value.find(
+    (c) => c.slug === cat || c.id === cat || c.name === cat
+  );
+  const catLabel = catMeta?.name || cat;
+
+  // Search / sort URLs are low-value duplicates — noindex + canonical to marketplace
+  if (q || sortBy.value) {
+    applySeo({
+      title: q ? `Search: ${q}` : 'Marketplace',
+      description:
+        'Browse solar, inverter, CCTV, and energy products on the Origin Electric marketplace.',
+      path: '/marketplace',
+      noindex: true
+    });
+    return;
+  }
+
+  if (cat) {
+    applySeo({
+      title: `${catLabel} | Marketplace`,
+      description: `Shop ${catLabel} products from verified suppliers on the Origin Electric marketplace in Nigeria.`,
+      path: `/marketplace?category=${encodeURIComponent(cat)}`
+    });
+    return;
+  }
+
+  applySeo({
+    title: 'Marketplace',
+    description:
+      'Buy solar batteries, inverters, CCTV, and energy products online from Origin Electric marketplace — Nigeria delivery.',
+    path: '/marketplace'
+  });
+};
+
+watch([selectedCategory, searchQuery, sortBy, productCategories], syncMarketplaceSeo);
+
 onMounted(() => {
+  if (route.query.category) {
+    selectedCategory.value = String(route.query.category);
+  }
+  if (route.query.q) {
+    searchQuery.value = String(route.query.q);
+  }
+  syncMarketplaceSeo();
   fetchProducts(true);
 });
 </script>

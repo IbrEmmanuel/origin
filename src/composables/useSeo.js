@@ -7,8 +7,25 @@ const SITE = {
   url: env.siteUrl.replace(/\/$/, ''),
   defaultImage: `${env.siteUrl.replace(/\/$/, '')}/logo.png`,
   twitter: '@originelectric',
+  locale: 'en_NG',
   sameAs: [env.siteUrl.replace(/\/$/, ''), 'https://originelectric.com']
 };
+
+/** Strip HTML / collapse whitespace for meta descriptions */
+export function plainText(value, max = 160) {
+  const text = String(value || '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!max || text.length <= max) return text;
+  return `${text.slice(0, max - 1).trim()}…`;
+}
+
+export function buildMetaDescription(primary, fallback) {
+  const fromPrimary = plainText(primary, 160);
+  if (fromPrimary) return fromPrimary;
+  return plainText(fallback, 160) || SITE.name;
+}
 
 /** Organization + WebSite JSON-LD for homepage / brand SERP signals */
 export function organizationJsonLd() {
@@ -34,6 +51,7 @@ export function organizationJsonLd() {
         '@id': `${SITE.url}/#website`,
         url: SITE.url,
         name: SITE.name,
+        inLanguage: 'en-NG',
         publisher: { '@id': `${SITE.url}/#organization` },
         potentialAction: {
           '@type': 'SearchAction',
@@ -46,18 +64,6 @@ export function organizationJsonLd() {
       }
     ]
   };
-}
-
-function ensureMeta(selector, attrs) {
-  let el = document.querySelector(selector);
-  if (!el) {
-    el = document.createElement(attrs.property || attrs.name?.startsWith('og:') ? 'meta' : 'meta');
-    if (attrs.name) el.setAttribute('name', attrs.name);
-    if (attrs.property) el.setAttribute('property', attrs.property);
-    document.head.appendChild(el);
-  }
-  if (attrs.content != null) el.setAttribute('content', attrs.content);
-  return el;
 }
 
 function setOrCreate(attr, key, content) {
@@ -107,13 +113,14 @@ function absoluteUrl(pathOrUrl) {
 
 /**
  * Apply page SEO for Google indexing + social previews.
- * @param {object} opts
+ * Client-side SPA: updates document head after route/data load.
  */
 export function applySeo({
   title,
   description,
   path,
   image,
+  imageAlt,
   type = 'website',
   noindex = false,
   jsonLd,
@@ -125,29 +132,37 @@ export function applySeo({
       : `${title} | ${SITE.name}`
     : `${SITE.name} | Smart Energy & Security Solutions`;
 
-  const desc =
-    description ||
-    'Origin Electric — solar, inverters, CCTV, and engineering for homes and industry in Nigeria.';
+  const desc = buildMetaDescription(
+    description,
+    'Origin Electric — solar, inverters, CCTV, and engineering for homes and industry in Nigeria.'
+  );
 
-  const url = absoluteUrl(path || window.location.pathname);
+  const url = absoluteUrl(path || (typeof window !== 'undefined' ? window.location.pathname : '/'));
   const img = absoluteUrl(image || SITE.defaultImage);
+  const alt = plainText(imageAlt || title || SITE.name, 120);
 
   document.title = fullTitle;
 
-  setOrCreate('name', 'description', desc.slice(0, 160));
-  setOrCreate('name', 'robots', noindex ? 'noindex, nofollow' : 'index, follow');
-  setOrCreate('name', 'googlebot', noindex ? 'noindex, nofollow' : 'index, follow');
+  const robots = noindex
+    ? 'noindex, nofollow'
+    : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
+
+  setOrCreate('name', 'description', desc);
+  setOrCreate('name', 'robots', robots);
+  setOrCreate('name', 'googlebot', robots);
 
   setOrCreate('property', 'og:type', type);
+  setOrCreate('property', 'og:locale', SITE.locale);
   setOrCreate('property', 'og:site_name', SITE.name);
   setOrCreate('property', 'og:title', fullTitle);
-  setOrCreate('property', 'og:description', desc.slice(0, 200));
+  setOrCreate('property', 'og:description', plainText(desc, 200));
   setOrCreate('property', 'og:url', url);
   setOrCreate('property', 'og:image', img);
+  setOrCreate('property', 'og:image:alt', alt);
 
   setOrCreate('name', 'twitter:card', 'summary_large_image');
   setOrCreate('name', 'twitter:title', fullTitle);
-  setOrCreate('name', 'twitter:description', desc.slice(0, 200));
+  setOrCreate('name', 'twitter:description', plainText(desc, 200));
   setOrCreate('name', 'twitter:image', img);
   setOrCreate('name', 'twitter:url', url);
 
@@ -155,7 +170,29 @@ export function applySeo({
   setJsonLd(jsonLdId, jsonLd);
 }
 
-export function productJsonLd(product, path) {
+export function breadcrumbJsonLd(items = []) {
+  const list = (items || [])
+    .filter((i) => i?.name && i?.path)
+    .map((i, idx) => ({
+      '@type': 'ListItem',
+      position: idx + 1,
+      name: i.name,
+      item: absoluteUrl(i.path)
+    }));
+  if (!list.length) return null;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: list
+  };
+}
+
+/**
+ * @param {object} product
+ * @param {string} path
+ * @param {{ avgRating?: number, reviewCount?: number }} [rating]
+ */
+export function productJsonLd(product, path, rating = {}) {
   if (!product) return null;
   let images = [];
   try {
@@ -165,42 +202,70 @@ export function productJsonLd(product, path) {
   } catch {
     images = [];
   }
-  return {
+
+  const inStock = Number(product.stock) > 0;
+  const price = Number(product.price);
+  const data = {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.name,
-    description: (product.description || '').slice(0, 500),
+    description: plainText(product.description || product.name, 500),
     sku: product.sku || String(product.id),
     image: images.length ? images : [SITE.defaultImage],
-    brand: { '@type': 'Brand', name: product.store_name || SITE.name },
+    brand: {
+      '@type': 'Brand',
+      name: product.brand || product.store_name || SITE.name
+    },
+    category: product.category || undefined,
     offers: {
       '@type': 'Offer',
       url: absoluteUrl(path),
       priceCurrency: 'NGN',
-      price: String(Number(product.price) || 0),
-      availability:
-        Number(product.stock) > 0
-          ? 'https://schema.org/InStock'
-          : 'https://schema.org/OutOfStock',
-      seller: { '@type': 'Organization', name: product.store_name || SITE.name }
+      price: Number.isFinite(price) ? String(price) : '0',
+      availability: inStock
+        ? 'https://schema.org/InStock'
+        : 'https://schema.org/OutOfStock',
+      itemCondition: 'https://schema.org/NewCondition',
+      seller: {
+        '@type': 'Organization',
+        name: product.store_name || SITE.name
+      }
     }
   };
+
+  const avg = Number(rating.avgRating);
+  const count = Number(rating.reviewCount);
+  if (Number.isFinite(avg) && avg > 0 && Number.isFinite(count) && count > 0) {
+    data.aggregateRating = {
+      '@type': 'AggregateRating',
+      ratingValue: String(Math.round(avg * 10) / 10),
+      reviewCount: String(Math.floor(count)),
+      bestRating: '5',
+      worstRating: '1'
+    };
+  }
+
+  return data;
 }
 
 export function articleJsonLd(post, path) {
   if (!post) return null;
+  const headline = post.seo_title || post.title;
   return {
     '@context': 'https://schema.org',
-    '@type': 'Article',
-    headline: post.title,
-    description: (post.excerpt || post.meta_description || post.content || '')
-      .replace(/<[^>]+>/g, '')
-      .slice(0, 200),
-    image: absoluteUrl(post.featured_image || SITE.defaultImage),
-    datePublished: post.created_at || post.published_at,
-    dateModified: post.updated_at || post.created_at,
+    '@type': 'BlogPosting',
+    headline,
+    description: buildMetaDescription(
+      post.meta_description || post.excerpt || post.content,
+      headline
+    ),
+    image: absoluteUrl(
+      post.featured_image ? mediaUrl(post.featured_image) : SITE.defaultImage
+    ),
+    datePublished: post.published_at || post.created_at,
+    dateModified: post.updated_at || post.published_at || post.created_at,
     author: {
-      '@type': 'Organization',
+      '@type': post.author_name ? 'Person' : 'Organization',
       name: post.author_name || SITE.name
     },
     publisher: {
@@ -208,12 +273,26 @@ export function articleJsonLd(post, path) {
       name: SITE.name,
       logo: { '@type': 'ImageObject', url: SITE.defaultImage }
     },
-    mainEntityOfPage: absoluteUrl(path)
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': absoluteUrl(path)
+    }
   };
+}
+
+/** Clear dynamic JSON-LD blocks when leaving product/article routes */
+export function clearDynamicSeo() {
+  setJsonLd('product', null);
+  setJsonLd('article', null);
+  setJsonLd('breadcrumb', null);
 }
 
 export function clearSeoJsonLd(id = 'page') {
   setJsonLd(id, null);
 }
 
-export { SITE, absoluteUrl, ensureMeta };
+export function ensureMeta() {
+  /* retained for callers */
+}
+
+export { SITE, absoluteUrl, setJsonLd };
