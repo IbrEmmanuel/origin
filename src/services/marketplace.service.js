@@ -1,5 +1,39 @@
 import api from './api';
 
+/** Normalize products list responses from the Origin marketplace API. */
+export function normalizeProductsResponse(res) {
+  if (!res) return { products: [], total: 0, totalPages: 1, page: 1, limit: 0 };
+  const products = Array.isArray(res.products)
+    ? res.products
+    : Array.isArray(res)
+      ? res
+      : [];
+  return {
+    products,
+    total: Number(res.total ?? products.length) || products.length,
+    totalPages: Number(res.totalPages) || 1,
+    page: Number(res.page) || 1,
+    limit: Number(res.limit) || products.length
+  };
+}
+
+/** Normalize categories — API may return [], { value: [] }, or slug→name map. */
+export function normalizeCategories(res) {
+  if (!res) return [];
+  if (Array.isArray(res)) return res;
+  if (Array.isArray(res.value)) return res.value;
+  if (typeof res === 'object') {
+    return Object.entries(res)
+      .filter(([key]) => !['Count', 'count', 'total', 'value'].includes(key))
+      .map(([slug, name]) => ({
+        id: slug,
+        slug,
+        name: typeof name === 'string' ? name : slug
+      }));
+  }
+  return [];
+}
+
 const marketplaceService = {
   async getProducts(params = {}) {
     try {

@@ -36,6 +36,8 @@ dist-ssr/
 body.json
 prod.js
 health-report.json
+vite.config.js.timestamp-*.mjs
+gitignore
 
 # Tests
 /tests/unit/coverage/

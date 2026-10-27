@@ -33,7 +33,7 @@
         <ul>
           <li><router-link to="/marketplace">Marketplace</router-link></li>
           <li><router-link to="/load-audit">Load Audit</router-link></li>
-          <li><router-link to="/origin-talk">Origin Talk AI</router-link></li>
+          <li><router-link to="/sales-chat">Talk to Us</router-link></li>
           <li><router-link to="/contact">Contact</router-link></li>
           <li><router-link to="/vendor-apply">Become a Supplier</router-link></li>
         </ul>

@@ -126,6 +126,16 @@ const userService = {
     return data;
   },
 
+  async calculateShipping(payload) {
+    const { data } = await api.post('/user/calculate-shipping', payload);
+    return data;
+  },
+
+  async checkout(payload) {
+    const { data } = await api.post('/user/checkout', payload);
+    return data;
+  },
+
   async getReferrals() {
     try {
       const { data } = await api.get('/user/referrals');

@@ -115,7 +115,10 @@ import {
   Minus as MinusIcon,
   Trash2 as TrashIcon
 } from 'lucide-vue-next';
-import marketplaceService from '@/services/marketplace.service';
+import marketplaceService, {
+  normalizeProductsResponse,
+  normalizeCategories
+} from '@/services/marketplace.service';
 import { useCart } from '@/composables/useCart';
 import { firstMediaUrl } from '@/utils/mediaUrl';
 
@@ -165,11 +168,15 @@ const fetchProducts = async (reset = false) => {
       marketplaceService.getCategories()
     ]);
 
-    if (reset) products.value = productsRes.products || [];
-    else products.value.push(...(productsRes.products || []));
+    const normalized = normalizeProductsResponse(productsRes);
+    if (reset) products.value = normalized.products;
+    else products.value.push(...normalized.products);
 
-    productCategories.value = [{ id: 'all', name: 'All', slug: '' }, ...(categoriesRes || [])];
-    totalPages.value = productsRes.totalPages || 1;
+    productCategories.value = [
+      { id: 'all', name: 'All', slug: '' },
+      ...normalizeCategories(categoriesRes)
+    ];
+    totalPages.value = normalized.totalPages || 1;
   } catch (err) {
     console.error('Market sync failed', err);
     if (reset) products.value = [];

@@ -274,26 +274,10 @@
             <h2 class="section-title text-left">Field Work</h2>
             <p class="section-sub text-left">Every installation is a commitment. Here's what our team looks like in action — on rooftops, in server rooms, and across Nigeria.</p>
           </div>
-          <div class="fw-header-stats reveal-right">
-            <div class="fw-stat">
-              <span class="fw-stat-val">{{ liveStats.products || '—' }}</span>
-              <span class="fw-stat-lbl">Live Products</span>
-            </div>
-            <div class="fw-stat">
-              <span class="fw-stat-val">{{ liveStats.categories || '—' }}</span>
-              <span class="fw-stat-lbl">Categories</span>
-            </div>
-            <div class="fw-stat">
-              <span class="fw-stat-val">{{ liveStats.posts || '—' }}</span>
-              <span class="fw-stat-lbl">Articles</span>
-            </div>
-          </div>
         </div>
 
-        <!-- Editorial photo grid — all oooooo images + project shots -->
+        <!-- Crew / site photos only — portfolio projects live in Success Stories above -->
         <div class="fw-grid reveal-stagger">
-
-          <!-- SLOT 1: Hero wide — IMG_0020 -->
           <div class="fw-photo fw-photo--wide">
             <img src="../assets/oooooo/web/IMG_0020.jpg" alt="Team on site" class="fw-img" />
             <div class="fw-photo-overlay"></div>
@@ -303,7 +287,6 @@
             </div>
           </div>
 
-          <!-- SLOT 2: tall right — IMG_0036 -->
           <div class="fw-photo fw-photo--tall-right">
             <img src="../assets/oooooo/web/IMG_0036.jpg" alt="Field engineers at work" class="fw-img" />
             <div class="fw-photo-overlay"></div>
@@ -313,7 +296,6 @@
             </div>
           </div>
 
-          <!-- SLOT 3: tall right — IMG_3321 -->
           <div class="fw-photo fw-photo--tall-right">
             <img src="../assets/oooooo/web/IMG_3321.jpg" alt="Site work in progress" class="fw-img" />
             <div class="fw-photo-overlay"></div>
@@ -323,7 +305,6 @@
             </div>
           </div>
 
-          <!-- SLOT 4: IMG_0058 -->
           <div class="fw-photo">
             <img src="../assets/oooooo/web/IMG_0058.jpg" alt="Site survey and audit" class="fw-img" />
             <div class="fw-photo-overlay"></div>
@@ -333,27 +314,6 @@
             </div>
           </div>
 
-          <!-- SLOT 5: project-ondo -->
-          <div class="fw-photo fw-photo--accent">
-            <img src="../assets/pdf-assets/project-ondo.jpg" alt="Ondo 85kWh system" class="fw-img" />
-            <div class="fw-photo-overlay"></div>
-            <div class="fw-photo-label fw-photo-label--top-right">
-              <ZapIcon class="fw-label-icon" />
-              <span>85 kWh — Ondo State</span>
-            </div>
-          </div>
-
-          <!-- SLOT 6: project-gofamint -->
-          <div class="fw-photo">
-            <img src="../assets/pdf-assets/project-gofamint.jpg" alt="CCTV Ibadan" class="fw-img" />
-            <div class="fw-photo-overlay"></div>
-            <div class="fw-photo-label">
-              <CctvIcon class="fw-label-icon" />
-              <span>40 Cameras — Ibadan</span>
-            </div>
-          </div>
-
-          <!-- SLOT 7: IMG_3335 portrait -->
           <div class="fw-photo fw-photo--portrait">
             <img src="../assets/oooooo/web/IMG_3335.jpg" alt="Origin field team" class="fw-img fw-img--top" />
             <div class="fw-photo-overlay"></div>
@@ -363,45 +323,14 @@
             </div>
           </div>
 
-          <!-- SLOT 8: solar-main -->
           <div class="fw-photo">
-            <img src="../assets/pdf-assets/solar-main.jpg" alt="Solar commissioning Ondo" class="fw-img" />
+            <img src="../assets/pdf-assets/solar-main.jpg" alt="Solar commissioning" class="fw-img" />
             <div class="fw-photo-overlay"></div>
             <div class="fw-photo-label">
               <SunIcon class="fw-label-icon" />
-              <span>Solar Commissioning — Ondo</span>
+              <span>Solar Commissioning</span>
             </div>
           </div>
-
-          <!-- SLOT 9: project-fcda -->
-          <div class="fw-photo">
-            <img src="../assets/pdf-assets/project-fcda.jpg" alt="FCDA Abuja" class="fw-img" />
-            <div class="fw-photo-overlay"></div>
-            <div class="fw-photo-label">
-              <ShieldCheckIcon class="fw-label-icon" />
-              <span>Government Install — Abuja</span>
-            </div>
-          </div>
-
-          <!-- SLOT 10: project-ife + project-judge side by side -->
-          <div class="fw-photo">
-            <img src="../assets/pdf-assets/project-ife.jpg" alt="Ife residential" class="fw-img" />
-            <div class="fw-photo-overlay"></div>
-            <div class="fw-photo-label">
-              <HomeIcon class="fw-label-icon" />
-              <span>5 kW Residential — Ife</span>
-            </div>
-          </div>
-
-          <div class="fw-photo">
-            <img src="../assets/pdf-assets/project-judge.jpg" alt="Ibadan hybrid solar" class="fw-img" />
-            <div class="fw-photo-overlay"></div>
-            <div class="fw-photo-label">
-              <BatteryIcon class="fw-label-icon" />
-              <span>Hybrid Solar — Ibadan</span>
-            </div>
-          </div>
-
         </div>
 
         <!-- CTA strip -->
@@ -653,7 +582,7 @@
     <SupplierCTA class="section-clipped" />
 
     <!-- CTA -->
-    <section class="cta-section section-clipped section-divider" id="contact" :style="{ backgroundImage: `url(${ctaSolarDuskBg})` }">
+    <section class="cta-section section-clipped section-divider" id="cta" :style="{ backgroundImage: `url(${ctaSolarDuskBg})` }">
       <div class="cta-overlay" aria-hidden="true"></div>
       <div class="container cta-inner">
         <span class="cta-eyebrow">Ready to Start?</span>
@@ -680,31 +609,22 @@ import {
   Calculator as CalculatorIcon,
   Sun as SunIcon, 
   Zap as ZapIcon, 
-  Cctv as CctvIcon,
-  Wind as WindIcon,
-  PenTool as PenToolIcon,
   ArrowRight as ArrowRightIcon,
   Phone as PhoneIcon,
   Check as CheckIcon,
-  Landmark as LandmarkIcon,
-  Factory as FactoryIcon,
-  GraduationCap as GraduationCapIcon,
-  HeartPulse as HeartPulseIcon,
   Building2 as BuildingIcon,
   Home as HomeIcon,
   Rocket as RocketIcon,
   HelpingHand as HandshakeIcon,
-  MapPin as MapPinIcon,
-  ShieldCheck as ShieldCheckIcon,
-  Battery as BatteryIcon,
-  Clock as ClockIcon,
-  Award as AwardIcon,
   Users as UsersIcon,
   Activity as ActivityIcon,
   Wrench as WrenchIcon
 } from 'lucide-vue-next';
 
-import marketplaceService from '@/services/marketplace.service';
+import marketplaceService, {
+  normalizeProductsResponse,
+  normalizeCategories
+} from '@/services/marketplace.service';
 import blogService from '@/services/blog.service';
 import { mediaUrl, firstMediaUrl } from '@/utils/mediaUrl';
 import HomeServicesSection from '@/components/home/HomeServicesSection.vue';
@@ -838,20 +758,15 @@ const fetchLiveCatalog = async () => {
   marketLoading.value = true;
   try {
     const [productsRes, categoriesRes] = await Promise.all([
-      marketplaceService.getProducts({ page: 1, limit: 48 }),
+      marketplaceService.getProducts({ page: 1, limit: 60 }),
       marketplaceService.getCategories().catch(() => [])
     ]);
-    const raw = productsRes.products || productsRes || [];
-    const list = Array.isArray(raw) ? raw : [];
-    liveStats.value.products = productsRes.total || list.length || 0;
+    const { products: list, total } = normalizeProductsResponse(productsRes);
+    liveStats.value.products = total;
+    liveStats.value.categories = normalizeCategories(categoriesRes).length;
 
-    let cats = categoriesRes;
-    if (!Array.isArray(cats) && cats?.value) cats = cats.value;
-    if (!Array.isArray(cats) && cats && typeof cats === 'object') {
-      cats = Object.keys(cats);
-    }
-    liveStats.value.categories = Array.isArray(cats) ? cats.length : 0;
-
+    // One API load feeds ticker, marketplace grid, and EV pricing
+    heroProducts.value = list.map(mapProductCard);
     marketProducts.value = list.slice(0, 8).map(mapProductCard);
 
     const ev = list.filter(isEvRelated).slice(0, 3);
@@ -863,8 +778,11 @@ const fetchLiveCatalog = async () => {
       meta: p.category || 'Marketplace',
       gauge: `${Math.max(12, Math.round((Number(p.price) / maxPrice) * 100))}%`
     }));
+
+    setTimeout(startTicker, 100);
   } catch (e) {
     console.error('Live catalog fetch error:', e);
+    heroProducts.value = [];
     marketProducts.value = [];
     evProducts.value = [];
   } finally {
@@ -966,22 +884,6 @@ const startTicker = () => {
 const pauseTicker  = () => { tickerPaused = true; };
 const resumeTicker = () => { tickerPaused = false; };
 
-const fetchHeroProducts = async () => {
-  try {
-    const res = await marketplaceService.getProducts({ page: 1, limit: 60 });
-    const raw = res.products || res || [];
-    heroProducts.value = raw.map((p) => ({
-      ...mapProductCard(p),
-      imageBroken: false
-    }));
-  } catch (e) {
-    console.error('Hero products fetch error:', e);
-  }
-};
-
-const startHeroScroll = () => {};   /* no-op — replaced by rAF ticker */
-const stopHeroScroll  = () => {};
-
 onUnmounted(() => {
   if (tickerRaf) cancelAnimationFrame(tickerRaf);
   const el = heroVideoRef.value;
@@ -1007,18 +909,12 @@ onMounted(() => {
     });
   }
 
-  // Catalog strip ticker
+  // Catalog strip ticker (re-measured after single catalog fetch)
   startTicker();
 
-  // Live API: hero ticker + marketplace preview + blog + EV pricing
+  // Live API: one catalog load → ticker + marketplace + EV; plus blog
   fetchLiveCatalog();
   fetchFeaturedBlog();
-
-  // Fetch products, then restart ticker so it re-measures the real item width
-  fetchHeroProducts().then(() => {
-    // nextTick lets Vue render the real chips before we re-measure
-    setTimeout(startTicker, 100);
-  });
 
   // Scroll Reveal Observer
   const revealObserver = new IntersectionObserver((entries) => {
@@ -3010,296 +2906,6 @@ onMounted(() => {
 .trust-logo:hover {
   opacity: 1;
   color: var(--orange);
-}
-
-/* ----------------- MARKETPLACE SECTION ----------------- */
-.marketplace {
-  background: var(--bg-secondary);
-}
-
-.marketplace-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 48px;
-  flex-wrap: wrap;
-  gap: 24px;
-}
-
-.marketplace-tabs {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 36px;
-  flex-wrap: wrap;
-}
-
-.mkt-tab {
-  height: 32px;
-  padding: 0 14px;
-  border-radius: 6px;
-  font-family: var(--font-main);
-  font-weight: 500;
-  font-size: 0.83rem;
-  cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
-  border: 1px solid var(--border-color);
-  background: transparent;
-  color: var(--text-secondary);
-  -webkit-tap-highlight-color: transparent;
-}
-.mkt-tab.active {
-  background: var(--color-dark);
-  color: var(--color-light);
-  border-color: var(--color-dark);
-}
-.mkt-tab:hover:not(.active) {
-  background: var(--bg-secondary);
-  color: var(--text-primary);
-  border-color: var(--border-color-strong);
-}
-
-.products-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  align-items: stretch;
-}
-
-@media (max-width: 900px) {
-  .products-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-  }
-}
-
-@media (max-width: 560px) {
-  .products-grid {
-    grid-template-columns: 1fr;
-    gap: 14px;
-  }
-}
-
-.product-card {
-  background: var(--bg-primary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  transition: all 0.3s var(--transition-bounce);
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-}
-
-.product-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-md);
-  border-color: var(--orange);
-}
-
-.product-img {
-  height: 180px;
-  background: var(--bg-secondary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-}
-
-.p-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.p-placeholder {
-  font-size: 3rem;
-}
-
-.product-badge {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: #ef4444;
-  color: white;
-  border-radius: 100px;
-  padding: 3px 10px;
-  font-size: 0.65rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  box-shadow: var(--shadow-sm);
-}
-
-.product-badge.out-of-stock {
-  background: var(--text-secondary);
-}
-
-.product-body {
-  padding: 20px;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.product-category {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--orange2);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 6px;
-}
-
-.product-name {
-  font-family: var(--font-main);
-  font-size: 1.05rem;
-  font-weight: 800;
-  color: var(--text-primary);
-  margin-bottom: 8px;
-  line-height: 1.35;
-}
-
-.product-desc {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  line-height: 1.55;
-  margin-bottom: 20px;
-  flex: 1;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.product-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-top: 14px;
-  border-top: 1px solid var(--border-color);
-  margin-top: auto;
-}
-
-.product-price {
-  font-family: var(--font-main);
-  font-size: 1.15rem;
-  font-weight: 800;
-  color: var(--text-primary);
-}
-
-.product-btn {
-  background: var(--text-primary);
-  color: var(--bg-primary);
-  padding: 7px 14px;
-  border-radius: 999px;
-  font-family: var(--font-main);
-  font-weight: 600;
-  font-size: 0.75rem;
-  letter-spacing: 0.01em;
-  border: none;
-  cursor: pointer;
-  transition:
-    background 0.18s ease,
-    color 0.18s ease,
-    transform 0.2s var(--transition-bounce);
-  -webkit-tap-highlight-color: transparent;
-}
-.product-card:hover .product-btn {
-  background: var(--orange);
-  color: #fff;
-  transform: translateY(-1px);
-}
-
-.empty-state-container {
-  background: var(--bg-primary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  padding: 48px;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.empty-icon {
-  width: 48px;
-  height: 48px;
-  color: var(--text-secondary);
-  margin-bottom: 16px;
-}
-
-.empty-state-container h3 {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 8px;
-}
-
-.empty-state-container p {
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-}
-
-.marketplace-cta {
-  margin-top: 56px;
-  background: var(--bg-primary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  padding: 48px 32px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-}
-
-.cta-icon-box {
-  width: 60px;
-  height: 60px;
-  background: rgba(255, 118, 0, 0.1);
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.cta-cart-icon {
-  width: 28px;
-  height: 28px;
-  color: var(--orange);
-  stroke-width: 1.8;
-}
-
-.tab-icon {
-  width: 14px;
-  height: 14px;
-  display: inline-block;
-  vertical-align: middle;
-  margin-right: 4px;
-}
-
-.placeholder-icon {
-  width: 40px;
-  height: 40px;
-  color: var(--text-secondary);
-  opacity: 0.4;
-}
-
-.marketplace-cta h3 {
-  font-size: 1.45rem;
-  font-weight: 800;
-  color: var(--text-primary);
-}
-
-.marketplace-cta p {
-  font-size: 0.92rem;
-  color: var(--text-secondary);
-  max-width: 480px;
-  text-align: center;
-  line-height: 1.6;
-}
-
-.btn-icon-right {
-  width: 16px;
-  height: 16px;
 }
 
 /* ----------------- FINANCING SECTION ----------------- */

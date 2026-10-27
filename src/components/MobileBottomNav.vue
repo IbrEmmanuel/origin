@@ -29,7 +29,7 @@ const route = useRoute();
 
 const navItems = [
   { label: 'Home',      path: '/',            icon: HomeIcon         },
-  { label: 'Shop',      path: '/marketplace', icon: ShoppingBagIcon  },
+  { label: 'Market',    path: '/marketplace', icon: ShoppingBagIcon  },
   { label: 'Audit',     path: '/load-audit',  icon: CalculatorIcon   },
   { label: 'AI Chat',   path: '/sales-chat',  icon: MessageSquareIcon },
   { label: 'Account',   path: '/account',     icon: UserIcon         },

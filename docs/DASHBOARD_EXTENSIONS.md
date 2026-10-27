@@ -23,12 +23,12 @@ This Vue SPA was extended **in place**. There is **no database in this repo** â€
 
 ## Files added
 
-- `src/services/ads.service.js`
 - `src/utils/productImport.js`
 - `src/views/Account/VendorBulkUpload.vue`
 - `src/views/Account/VendorBatchDashboard.vue`
-- `src/views/Account/VendorAds.vue`
 - `docs/DASHBOARD_EXTENSIONS.md` (this file)
+
+Note: vendor ads UI/service was removed as unused; reintroduce when Ads tab ships.
 
 ## Database migrations
 

@@ -1,16 +1,14 @@
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_BASE_URL ?? '';
+import api from './api';
 
 class ContactService {
-    async sendMessage(contactData) {
-        try {
-            const response = await axios.post(`${API_URL}/api/contact`, contactData);
-            return response.data;
-        } catch (error) {
-            throw error.response ? error.response.data : new Error('Network error or server is down');
-        }
+  async sendMessage(contactData) {
+    try {
+      const response = await api.post('/contact', contactData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || new Error('Network error or server is down');
     }
+  }
 }
 
 export default new ContactService();

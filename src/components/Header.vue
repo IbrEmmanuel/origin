@@ -34,6 +34,8 @@
         <ul class="nav-links">
           <li><router-link to="/">Home</router-link></li>
           <li><router-link to="/marketplace">Marketplace</router-link></li>
+          <li><router-link to="/services">Services</router-link></li>
+          <li><router-link to="/projects">Projects</router-link></li>
           <li><router-link to="/blog">Blog</router-link></li>
           <li><router-link to="/contact">Contact</router-link></li>
           <li><router-link to="/vendor-apply" class="nav-supplier">Are You a Supplier?</router-link></li>
@@ -89,6 +91,8 @@
           <ul class="mobile-links">
             <li><router-link to="/" @click="closeMenu"><HomeIcon class="icon-sm" /> Home</router-link></li>
             <li><router-link to="/marketplace" @click="closeMenu"><ShoppingBagIcon class="icon-sm" /> Marketplace</router-link></li>
+            <li><router-link to="/services" @click="closeMenu"><WrenchIcon class="icon-sm" /> Services</router-link></li>
+            <li><router-link to="/projects" @click="closeMenu"><FolderKanbanIcon class="icon-sm" /> Projects</router-link></li>
             <li><router-link to="/cart" @click="closeMenu"><ShoppingCartIcon class="icon-sm" /> Cart ({{ cartCount }})</router-link></li>
             <li><router-link to="/blog" @click="closeMenu"><BookOpenIcon class="icon-sm" /> Blog</router-link></li>
             <li><router-link to="/contact" @click="closeMenu"><MailIcon class="icon-sm" /> Contact</router-link></li>
@@ -119,7 +123,9 @@ import {
   Phone as PhoneIcon,
   ShoppingCart as ShoppingCartIcon,
   BookOpen as BookOpenIcon,
-  Store as StoreIcon
+  Store as StoreIcon,
+  Wrench as WrenchIcon,
+  FolderKanban as FolderKanbanIcon
 } from 'lucide-vue-next';
 
 const route = useRoute();

@@ -59,11 +59,10 @@ Private routes set `noindex` via `useSeo`.
 | `salesAgent.service.js` | AgentOS SSE chat |
 | `ai.service.js` | Origin Talk |
 | `contact.service.js` | Contact form |
-| `ads.service.js`, `appliance.service.js`, `settings.service.js` | Supporting |
+| `appliance.service.js`, `settings.service.js` | Load audit support |
 
-## Unused / legacy candidates (do not delete until confirmed)
+## Cleanup notes
 
-- `src/views/HomeView.backup.vue`
-- `src/views/HomeView.backup-2026-07-18.vue`
-- `src/views/Home.vue` (verify unused vs `HomeView.vue`)
-- Untracked `prod.js`, `body.json` (local clutter — keep out of git)
+- Home backups / stub `Home.vue`, unused `SalesChatFAB`, and unused `ads.service.js` removed.
+- Catalog listing normalized via `normalizeProductsResponse` / `normalizeCategories` in `marketplace.service.js`.
+- Contact + checkout go through shared `api.js` (same `/api` proxy as marketplace).

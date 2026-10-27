@@ -131,7 +131,10 @@
 import { ref, watch, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Package as PackageIcon, Store as StoreIcon, Search as SearchIcon, Heart as HeartIcon, Eye as EyeIcon, Plus as PlusIcon, Minus as MinusIcon, Trash as TrashIcon } from 'lucide-vue-next';
-import marketplaceService from '@/services/marketplace.service';
+import marketplaceService, {
+  normalizeProductsResponse,
+  normalizeCategories
+} from '@/services/marketplace.service';
 import { useCart } from '@/composables/useCart';
 import { resolveProductImages } from '@/utils/mediaUrl';
 import ImageSlider from '@/components/ImageSlider.vue';
@@ -219,30 +222,19 @@ const fetchProducts = async (reset = false) => {
         : Promise.resolve(productCategories.value)
     ]);
     
-    // Handle products array — API returns { products: [], total, page, limit, totalPages }
-    let newProducts = productsRes.products || productsRes || [];
-    newProducts = applyClientSort(newProducts);
+    const normalized = normalizeProductsResponse(productsRes);
+    let newProducts = applyClientSort(normalized.products);
     if (reset) {
        products.value = newProducts;
     } else {
        products.value.push(...newProducts);
     }
 
-    // Handle categories — API returns { value: [], Count: N }
     if (productCategories.value.length === 0) {
-      const cats = categoriesRes;
-      if (Array.isArray(cats)) {
-        productCategories.value = cats;
-      } else if (cats && Array.isArray(cats.value)) {
-        productCategories.value = cats.value;
-      } else if (cats && typeof cats === 'object') {
-        productCategories.value = Object.entries(cats).map(([slug, name]) => ({
-          id: slug, slug, name: typeof name === 'string' ? name : slug
-        }));
-      }
+      productCategories.value = normalizeCategories(categoriesRes);
     }
 
-    totalPages.value = productsRes.totalPages || 1;
+    totalPages.value = normalized.totalPages || 1;
   } catch (err) {
     console.error('Failed to load marketplace products', err);
   } finally {

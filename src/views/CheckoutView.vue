@@ -318,13 +318,6 @@ const paystackReady = isPaystackConfigured();
 const showConfigDiagnostics = Boolean(env.isDev || import.meta.env.DEV);
 const paystackChannelLabels = Object.values(PAYSTACK_CHANNEL_LABELS);
 
-const apiRoot = () => {
-  const base = import.meta.env.VITE_API_BASE_URL;
-  if (base === '' || base == null) return '';
-  return String(base).replace(/\/$/, '');
-};
-const apiUrl = (path) => `${apiRoot()}${path.startsWith('/') ? path : `/${path}`}`;
-
 const loadingProfile = ref(true);
 const savedAddresses = ref([]);
 const selectedAddressId = ref(null);
@@ -505,7 +498,6 @@ const updateDeliveryFeeAndCoords = async (lat, lng, opts = {}) => {
   delete fieldErrors.value.location;
 
   try {
-    const token = localStorage.getItem('token');
     const body = {
       city: form.value.city,
       state: form.value.state,
@@ -516,37 +508,22 @@ const updateDeliveryFeeAndCoords = async (lat, lng, opts = {}) => {
       body.latitude = form.value.latitude;
       body.longitude = form.value.longitude;
     }
-    const res = await fetch(apiUrl('/api/user/calculate-shipping'), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify(body)
-    });
-
-    if (res.ok) {
-      const data = await res.json();
-      if (data.quote_required || data.requires_quote) {
-        setFeeQuote(data.message);
-        return;
-      }
-      const fee = data.delivery_fee ?? data.fee ?? data.amount;
-      setFeeOk(fee, data);
-      if (opts.formatted_address) addressConfirm.value = opts.formatted_address;
+    const data = await userService.calculateShipping(body);
+    if (data.quote_required || data.requires_quote) {
+      setFeeQuote(data.message);
       return;
     }
-
-    if (res.status === 404 || res.status === 501) {
+    const fee = data.delivery_fee ?? data.fee ?? data.amount;
+    setFeeOk(fee, data);
+    if (opts.formatted_address) addressConfirm.value = opts.formatted_address;
+  } catch (err) {
+    const status = err.response?.status;
+    if (status === 404 || status === 501) {
       setFeeQuote('Shipping calculator is not available yet for this location.');
       return;
     }
-
-    const errBody = await res.json().catch(() => ({}));
-    setFeeError(errBody.message || `Shipping request failed (${res.status}).`);
-  } catch (err) {
     console.error('Failed to calculate shipping fee', err);
-    setFeeError('Network error while calculating delivery fee.');
+    setFeeError(err.response?.data?.message || 'Network error while calculating delivery fee.');
   }
 };
 
@@ -705,26 +682,21 @@ const fetchProfile = async () => {
   }
 
   try {
-    const res = await fetch(apiUrl('/api/user/profile'), {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    if (res.ok) {
-      const data = await res.json();
-      savedAddresses.value = data.addresses || [];
-      if (!form.value.phone) form.value.phone = data.user?.phone || '';
+    const data = await userService.getProfile();
+    savedAddresses.value = data.addresses || [];
+    if (!form.value.phone) form.value.phone = data.user?.phone || '';
 
-      const draft = loadCheckoutDraft();
-      if (draft?.form) {
-        form.value = { ...form.value, ...draft.form, country: draft.form.country || 'Nigeria' };
-        if (draft.addressConfirm) addressConfirm.value = draft.addressConfirm;
-        if (draft.feeStatus === 'ok' && draft.deliveryFee != null) {
-          deliveryFee.value = Number(draft.deliveryFee);
-          feeStatus.value = 'ok';
-        }
-      } else {
-        const defaultAddr = savedAddresses.value.find((a) => a.isDefault) || savedAddresses.value[0];
-        if (defaultAddr) selectAddress(defaultAddr);
+    const draft = loadCheckoutDraft();
+    if (draft?.form) {
+      form.value = { ...form.value, ...draft.form, country: draft.form.country || 'Nigeria' };
+      if (draft.addressConfirm) addressConfirm.value = draft.addressConfirm;
+      if (draft.feeStatus === 'ok' && draft.deliveryFee != null) {
+        deliveryFee.value = Number(draft.deliveryFee);
+        feeStatus.value = 'ok';
       }
+    } else {
+      const defaultAddr = savedAddresses.value.find((a) => a.isDefault) || savedAddresses.value[0];
+      if (defaultAddr) selectAddress(defaultAddr);
     }
   } catch (err) {
     console.error('Failed to load profile', err);
@@ -783,19 +755,14 @@ const processCheckout = async () => {
       }
     }
 
-    const token = localStorage.getItem('token');
     const street =
       form.value.street.trim() ||
       (mapSearchInput.value && mapSearchInput.value.value) ||
       '';
 
-    const checkoutRes = await fetch(apiUrl('/api/user/checkout'), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({
+    let orderData;
+    try {
+      orderData = await userService.checkout({
         items: cartItems.value.map((item) => ({ id: item.id, quantity: item.quantity })),
         delivery_street: street,
         delivery_city: form.value.city.trim(),
@@ -806,15 +773,11 @@ const processCheckout = async () => {
         latitude: form.value.latitude,
         longitude: form.value.longitude,
         delivery_fee: deliveryFee.value
-      })
-    });
-
-    if (!checkoutRes.ok) {
-      const errBody = await checkoutRes.json().catch(() => ({}));
-      throw new Error(errBody.message || 'Failed to create order');
+      });
+    } catch (checkoutErr) {
+      throw new Error(checkoutErr.response?.data?.message || checkoutErr.message || 'Failed to create order');
     }
 
-    const orderData = await checkoutRes.json();
     const orderId = orderData.orderId || orderData.order_id || orderData.id;
     const amountNaira =
       orderData.total ?? orderData.total_amount ?? orderData.amount ?? grandTotal.value;
