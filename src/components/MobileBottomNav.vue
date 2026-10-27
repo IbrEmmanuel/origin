@@ -66,6 +66,12 @@ function isActive(item) {
     padding-right: max(6px, env(safe-area-inset-right, 0px));
     z-index: 900;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06);
+    /* Let taps between tab hit-targets reach Buy Now / Add to Cart underneath */
+    pointer-events: none;
+  }
+
+  .mobile-bottom-nav .nav-item {
+    pointer-events: auto;
   }
 }
 

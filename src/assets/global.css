@@ -244,7 +244,12 @@ a,
     padding-top: calc(96px + env(safe-area-inset-top, 0px));
   }
   .main-content.has-bottom-nav {
-    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Keep scroll-into-view / last cards clear of the fixed bottom nav */
+  html {
+    scroll-padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
   }
 }
 

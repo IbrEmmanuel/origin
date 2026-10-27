@@ -40,6 +40,9 @@
           <p class="eyebrow">Account access</p>
           <h1>Sign in</h1>
           <p class="sub">Manage orders, products, and your energy workspace.</p>
+          <p v-if="isCheckoutRedirect" class="sub checkout-note">
+            Sign in to finish your order — we’ll return you to checkout.
+          </p>
         </header>
 
         <div v-if="hasSession" class="session-card">
@@ -190,6 +193,10 @@ const error = ref('');
 const sessionTick = ref(0);
 const isReferralModalOpen = ref(false);
 const googleIdToken = ref(null);
+
+const isCheckoutRedirect = computed(() =>
+  String(route.query.redirect || '').startsWith('/checkout')
+);
 
 const hasSession = computed(() => {
   sessionTick.value;
@@ -483,6 +490,11 @@ const finishAuth = (data) => {
   color: var(--text-secondary);
   font-size: 0.92rem;
   line-height: 1.45;
+}
+
+.checkout-note {
+  color: var(--color-primary, #ff7600);
+  font-weight: 600;
 }
 
 .session-card {

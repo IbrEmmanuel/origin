@@ -157,16 +157,26 @@
                   <p>
                     Map is unavailable
                     {{ mapsKeyConfigured ? '(provider error)' : '(Maps API key not configured)' }}.
-                    Enter your full street address above — we’ll request a delivery quotation if a fee cannot be calculated automatically.
+                    Enter city and state above, then estimate delivery (or continue with delivery confirmed after payment).
                   </p>
-                  <button
-                    type="button"
-                    class="secondary-btn"
-                    :disabled="feeStatus === 'loading'"
-                    @click="requestFeeWithoutPin"
-                  >
-                    {{ feeStatus === 'loading' ? 'Checking fee…' : 'Estimate fee from city / state' }}
-                  </button>
+                  <div class="map-fallback-actions">
+                    <button
+                      type="button"
+                      class="secondary-btn"
+                      :disabled="feeStatus === 'loading'"
+                      @click="requestFeeWithoutPin"
+                    >
+                      {{ feeStatus === 'loading' ? 'Checking fee…' : 'Estimate fee from city / state' }}
+                    </button>
+                    <button
+                      type="button"
+                      class="text-btn"
+                      :disabled="feeStatus === 'loading'"
+                      @click="applyDeliveryFallback('Delivery arranged after payment — fee shown as ₦0 for now.')"
+                    >
+                      Continue without map pin
+                    </button>
+                  </div>
                 </div>
 
                 <template v-else>
@@ -373,10 +383,12 @@ const payButtonLabel = computed(() => {
   if (!paystackReady) return 'Payment unavailable';
   if (cartItems.value.length === 0) return 'Cart is empty';
   if (feeStatus.value === 'loading') return 'Calculating delivery…';
-  if (feeStatus.value === 'need_pin') return 'Pin address to continue';
-  if (feeStatus.value === 'quote_required') return 'Delivery quotation required';
+  if (feeStatus.value === 'need_pin') return 'Set delivery to continue';
+  if (feeStatus.value === 'quote_required') return 'Resolve delivery to pay';
   if (feeStatus.value === 'error') return 'Fix delivery fee to pay';
-  return isPaystackTestMode() ? 'Pay with Paystack (test)' : 'Pay with Paystack';
+  return isPaystackTestMode()
+    ? `Pay ₦${formatMoney(grandTotal.value)} (test)`
+    : `Pay ₦${formatMoney(grandTotal.value)} with Paystack`;
 });
 
 const itemThumb = (item) => firstMediaUrl(item.images);
@@ -471,12 +483,25 @@ const setFeeOk = (fee, meta = {}) => {
   persistDraft();
 };
 
+/** When the API cannot price delivery, still allow Paystack with fee settled later. */
+const FALLBACK_DELIVERY_FEE = 0;
+
 const setFeeQuote = (msg) => {
   deliveryFee.value = null;
   feeStatus.value = 'quote_required';
   feeMessage.value =
     msg ||
-    'Automatic delivery pricing is unavailable for this location. Contact support for a quotation before paying.';
+    'Automatic delivery pricing is unavailable for this location. You can continue and we will confirm delivery separately.';
+  persistDraft();
+};
+
+/** Soft-fail shipping calculator so checkout is not permanently blocked. */
+const applyDeliveryFallback = (reason) => {
+  deliveryFee.value = FALLBACK_DELIVERY_FEE;
+  feeStatus.value = 'ok';
+  feeMessage.value =
+    reason ||
+    'Delivery fee will be confirmed by Origin after order — you can pay for the products now.';
   persistDraft();
 };
 
@@ -510,7 +535,11 @@ const updateDeliveryFeeAndCoords = async (lat, lng, opts = {}) => {
     }
     const data = await userService.calculateShipping(body);
     if (data.quote_required || data.requires_quote) {
-      setFeeQuote(data.message);
+      applyDeliveryFallback(
+        data.message ||
+          'Delivery will be quoted separately — product payment can continue now.'
+      );
+      if (opts.formatted_address) addressConfirm.value = opts.formatted_address;
       return;
     }
     const fee = data.delivery_fee ?? data.fee ?? data.amount;
@@ -519,7 +548,10 @@ const updateDeliveryFeeAndCoords = async (lat, lng, opts = {}) => {
   } catch (err) {
     const status = err.response?.status;
     if (status === 404 || status === 501) {
-      setFeeQuote('Shipping calculator is not available yet for this location.');
+      applyDeliveryFallback(
+        'Shipping calculator is offline — continue to pay for products; delivery is confirmed after order.'
+      );
+      if (opts.formatted_address) addressConfirm.value = opts.formatted_address;
       return;
     }
     console.error('Failed to calculate shipping fee', err);
@@ -1069,6 +1101,14 @@ onMounted(async () => {
   margin: 0 0 0.65rem;
   display: block;
   line-height: 1.45;
+}
+
+.map-fallback-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 0.75rem;
 }
 
 .map-fallback {

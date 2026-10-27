@@ -92,14 +92,14 @@
                   </button>
                </div>
                
-               <button v-else @click="onAddToCart(product)" class="primary-btn" :disabled="product.stock <= 0">
-                 {{ product.stock > 0 ? 'Add to Cart' : 'Sold Out' }}
+               <button v-else @click="onAddToCart(product)" class="primary-btn" :disabled="!isInStock(product)">
+                 {{ isInStock(product) ? 'Add to Cart' : 'Sold Out' }}
                </button>
                <button
-                 v-if="product.stock > 0"
+                 v-if="isInStock(product)"
                  type="button"
                  class="buy-now-btn"
-                 @click="onBuyNow(product)"
+                 @click.stop="onBuyNow(product)"
                >
                  Buy Now
                </button>
@@ -154,15 +154,24 @@ const favorites = ref([]);
 const page = ref(1);
 const totalPages = ref(1);
 
+/** Treat missing stock as available — only block when API says 0. */
+const isInStock = (product) => {
+  if (product == null || product.stock == null || product.stock === '') return true;
+  return Number(product.stock) > 0;
+};
+
 const onAddToCart = (product) => {
   addToCart(product, 1);
   marketplaceService.trackEvent({ type: 'add_to_cart', product_id: product.id });
 };
 
 const onBuyNow = (product) => {
+  if (!isInStock(product)) return;
   const path = buyNow(product, 1);
   marketplaceService.trackEvent({ type: 'buy_now', product_id: product.id });
-  router.push(path);
+  // Guests are sent to login with redirect back to checkout
+  const token = localStorage.getItem('token');
+  router.push(token ? path : { path: '/login', query: { redirect: path } });
 };
 
 const applyClientSort = (list) => {
@@ -489,13 +498,16 @@ onMounted(() => {
 .card-image-wrapper {
   position: relative;
   width: 100%;
-  aspect-ratio: 1;
+  aspect-ratio: 4 / 3;
   background:
     linear-gradient(160deg, var(--bg-secondary) 0%, var(--bg-primary) 50%, var(--bg-secondary) 100%);
   border-radius: var(--radius-sm);
   overflow: hidden;
   margin-bottom: 0.65rem;
   border: 1px solid var(--border-color);
+}
+@media (min-width: 900px) {
+  .card-image-wrapper { aspect-ratio: 1; }
 }
 .tag-vendor {
   position: absolute;
@@ -579,9 +591,10 @@ onMounted(() => {
   grid-template-columns: 1fr 1fr;
   gap: 8px;
   margin-top: auto;
+  /* Sit above the fixed mobile bottom nav hit-area when cards are near the fold */
+  position: relative;
+  z-index: 2;
 }
-.card-actions .primary-btn,
-.card-actions .buy-now-btn,
 .card-actions .cart-stepper {
   grid-column: 1 / -1;
 }
@@ -749,8 +762,12 @@ onMounted(() => {
 }
 
 @media (max-width: 479px) {
-  .card-actions {
-    grid-template-columns: 1fr;
+  .card-actions .primary-btn,
+  .card-actions .buy-now-btn {
+    font-size: 0.75rem;
+    min-height: 42px;
+    height: 42px;
+    padding: 0 6px;
   }
 }
 </style>

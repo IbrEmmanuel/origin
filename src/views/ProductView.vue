@@ -52,14 +52,14 @@
               </button>
             </div>
             
-            <button v-else @click="onAddToCart" class="primary-btn large-btn" :disabled="product.stock <= 0">
-              {{ product.stock > 0 ? 'Add to Cart' : 'Sold Out' }}
+            <button v-else @click="onAddToCart" class="primary-btn large-btn" :disabled="!inStock">
+              {{ inStock ? 'Add to Cart' : 'Sold Out' }}
             </button>
             <button
-              v-if="product.stock > 0"
+              v-if="inStock"
               type="button"
               class="buy-now-btn large-btn"
-              @click="onBuyNow"
+              @click.stop="onBuyNow"
             >
               Buy Now
             </button>
@@ -152,7 +152,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Package as PackageIcon, Store as StoreIcon, Heart as HeartIcon, Plus as PlusIcon, Minus as MinusIcon, Trash as TrashIcon } from 'lucide-vue-next';
 import marketplaceService from '@/services/marketplace.service';
@@ -165,17 +165,25 @@ const route = useRoute();
 const router = useRouter();
 const { cartItems, addToCart, updateQuantity, buyNow } = useCart();
 
+const inStock = computed(() => {
+  const p = product.value;
+  if (!p) return false;
+  if (p.stock == null || p.stock === '') return true;
+  return Number(p.stock) > 0;
+});
+
 const onAddToCart = () => {
-  if (!product.value) return;
+  if (!product.value || !inStock.value) return;
   addToCart(product.value, 1);
   marketplaceService.trackEvent({ type: 'add_to_cart', product_id: product.value.id });
 };
 
 const onBuyNow = () => {
-  if (!product.value) return;
+  if (!product.value || !inStock.value) return;
   const path = buyNow(product.value, 1);
   marketplaceService.trackEvent({ type: 'buy_now', product_id: product.value.id });
-  router.push(path);
+  const token = localStorage.getItem('token');
+  router.push(token ? path : { path: '/login', query: { redirect: path } });
 };
 
 const product = ref(null);
@@ -486,10 +494,13 @@ onUnmounted(() => {
 
 @media (max-width: 560px) {
   .product-actions {
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
   }
-  .product-actions > * {
-    width: 100%;
+  .product-actions .cart-stepper-large,
+  .product-actions .icon-primary-btn {
+    grid-column: 1 / -1;
   }
 }
 
