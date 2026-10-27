@@ -429,15 +429,17 @@
           </router-link>
         </div>
 
-        <div v-if="marketLoading" class="home-market-grid">
-          <div v-for="n in 4" :key="n" class="home-mkt-card home-mkt-card--skel">
+        <div v-if="marketLoading" class="home-market-grid" aria-busy="true">
+          <div v-for="n in 8" :key="n" class="home-mkt-card home-mkt-card--skel">
             <div class="skel media"></div>
             <div class="skel line w-40"></div>
             <div class="skel line w-80"></div>
+            <div class="skel line w-55"></div>
           </div>
         </div>
 
-        <div v-else-if="marketProducts.length" class="home-market-grid reveal-stagger">
+        <!-- No reveal-stagger here: grid mounts after API load, so IO never sees it -->
+        <div v-else-if="marketProducts.length" class="home-market-grid home-market-grid--live">
           <router-link
             v-for="product in marketProducts"
             :key="product.id"
@@ -552,7 +554,7 @@
           <router-link to="/blog" class="lp-btn lp-btn--outline">View all articles</router-link>
         </div>
 
-        <div v-if="postsLoading" class="home-blog-grid">
+        <div v-if="postsLoading" class="home-blog-grid" aria-busy="true">
           <div v-for="n in 3" :key="n" class="home-blog-card home-blog-card--skel">
             <div class="skel media"></div>
             <div class="skel line w-50"></div>
@@ -560,7 +562,7 @@
           </div>
         </div>
 
-        <div v-else class="home-blog-grid reveal-stagger">
+        <div v-else class="home-blog-grid home-blog-grid--live">
           <router-link
             v-for="post in featuredPosts"
             :key="post.id"
@@ -2757,16 +2759,25 @@ onMounted(() => {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
+  min-height: 12rem;
+}
+.home-market-grid--live {
+  animation: homeMarketIn 0.45s ease both;
+}
+@keyframes homeMarketIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 .home-mkt-card {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-color-strong, var(--border-color));
   border-radius: var(--radius-md);
   overflow: hidden;
-  background: var(--bg-primary);
+  background: var(--bg-secondary, var(--bg-primary));
   text-decoration: none;
-  color: inherit;
+  color: var(--text-primary);
+  opacity: 1;
   transition: transform 0.3s var(--transition-bounce), border-color 0.2s, box-shadow 0.3s;
 }
 .home-mkt-card:hover {
@@ -2777,7 +2788,7 @@ onMounted(() => {
 .home-mkt-media {
   position: relative;
   aspect-ratio: 1;
-  background: var(--bg-secondary);
+  background: var(--bg-primary);
   overflow: hidden;
 }
 .home-mkt-media img {
@@ -2822,6 +2833,7 @@ onMounted(() => {
   font-weight: 550;
   letter-spacing: -0.02em;
   line-height: 1.25;
+  color: var(--text-primary);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -2884,11 +2896,15 @@ onMounted(() => {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
 }
+.home-blog-grid--live {
+  animation: homeMarketIn 0.45s ease both;
+}
 .home-blog-card {
   display: flex;
   flex-direction: column;
-  background: var(--bg-primary);
-  border: 1px solid var(--border-color);
+  background: var(--bg-secondary, var(--bg-primary));
+  border: 1px solid var(--border-color-strong, var(--border-color));
+  opacity: 1;
   border-radius: var(--radius-md);
   overflow: hidden;
   text-decoration: none;
