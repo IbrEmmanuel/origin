@@ -41,7 +41,10 @@
         </p>
 
         <div class="hero-actions reveal" style="--reveal-delay:260ms">
-          <router-link to="/account/consultations" class="hero-btn hero-btn--primary">
+          <router-link
+            :to="{ path: '/account/consultations', query: { from: 'home' } }"
+            class="hero-btn hero-btn--primary"
+          >
             Book Consultation
           </router-link>
           <router-link to="/marketplace" class="hero-btn hero-btn--secondary">
@@ -89,11 +92,12 @@
               >
                 <div class="hero-chip-img-wrap">
                   <img
-                    v-if="product.image"
+                    v-if="product.image && !product.imageBroken"
                     :src="product.image"
                     :alt="product.name"
                     class="hero-chip-img"
                     loading="lazy"
+                    @error="product.imageBroken = true"
                   />
                   <div v-else class="hero-chip-img-placeholder">
                     <ZapIcon style="width:12px;height:12px;opacity:0.4" />
@@ -441,7 +445,13 @@
             class="home-mkt-card"
           >
             <div class="home-mkt-media">
-              <img v-if="product.image" :src="product.image" :alt="product.name" loading="lazy" />
+              <img
+                v-if="product.image && !product.imageBroken"
+                :src="product.image"
+                :alt="product.name"
+                loading="lazy"
+                @error="product.imageBroken = true"
+              />
               <div v-else class="home-mkt-fallback"><ZapIcon /></div>
               <span v-if="product.category" class="home-mkt-badge">{{ product.category }}</span>
             </div>
@@ -813,7 +823,8 @@ const mapProductCard = (p) => ({
   name: p.name,
   price: Number(p.price).toLocaleString('en-NG'),
   category: p.category || p.category_name || '',
-  image: firstMediaUrl(p.images) || mediaUrl(p.featured_image) || ''
+  image: firstMediaUrl(p.images) || mediaUrl(p.featured_image) || '',
+  imageBroken: false
 });
 
 const isEvRelated = (p) => {
@@ -859,41 +870,55 @@ const fetchLiveCatalog = async () => {
   }
 };
 
+const mapBlogCard = (p) => {
+  const plain = String(p.excerpt || p.content || '')
+    .replace(/[#*`_~]/g, '')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return {
+    id: p.id,
+    slug: p.slug,
+    title: p.title,
+    category: p.category_name || 'Insights',
+    image: p.featured_image ? mediaUrl(p.featured_image) : '',
+    date: p.created_at
+      ? new Date(p.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      : '—',
+    minutes: blogService.readingMinutes(p.content),
+    excerpt: plain.length > 120 ? `${plain.slice(0, 120)}…` : plain,
+    initials: String(p.title || 'OE')
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((w) => w[0] || '')
+      .join('')
+      .toUpperCase()
+  };
+};
+
 const fetchFeaturedBlog = async () => {
   postsLoading.value = true;
   try {
-    const posts = await blogService.getFeaturedPosts();
-    liveStats.value.posts = posts.length;
-    featuredPosts.value = posts.slice(0, 3).map((p) => {
-      const plain = String(p.excerpt || p.content || '')
-        .replace(/[#*`_~]/g, '')
-        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-        .replace(/\s+/g, ' ')
-        .trim();
-      return {
-        id: p.id,
-        slug: p.slug,
-        title: p.title,
-        category: p.category_name || 'Insights',
-        image: p.featured_image ? mediaUrl(p.featured_image) : '',
-        date: p.created_at
-          ? new Date(p.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-          : '—',
-        minutes: blogService.readingMinutes(p.content),
-        excerpt: plain.length > 120 ? `${plain.slice(0, 120)}…` : plain,
-        initials: String(p.title || 'OE')
-          .split(/\s+/)
-          .slice(0, 2)
-          .map((w) => w[0] || '')
-          .join('')
-          .toUpperCase()
-      };
-    });
-    // Prefer total article count when possible
+    let posts = await blogService.getFeaturedPosts();
+    // Prefer total article count + fill grid to 3 when API marks only one as featured
     try {
       const all = await blogService.getAllPosts();
       if (all.length) liveStats.value.posts = all.length;
-    } catch { /* keep featured length */ }
+      if (posts.length < 3 && all.length) {
+        const seen = new Set(posts.map((p) => p.id || p.slug));
+        for (const p of all) {
+          if (posts.length >= 3) break;
+          const key = p.id || p.slug;
+          if (key && seen.has(key)) continue;
+          if (key) seen.add(key);
+          posts.push(p);
+        }
+      }
+    } catch {
+      liveStats.value.posts = posts.length;
+    }
+    if (!liveStats.value.posts) liveStats.value.posts = posts.length;
+    featuredPosts.value = posts.slice(0, 3).map(mapBlogCard);
   } catch (e) {
     console.error('Featured blog fetch error:', e);
     featuredPosts.value = [];
@@ -939,29 +964,13 @@ const startTicker = () => {
 const pauseTicker  = () => { tickerPaused = true; };
 const resumeTicker = () => { tickerPaused = false; };
 
-const getHeroImageUrl = (path) => {
-  if (!path) return '';
-  if (path.startsWith('http')) return path;
-  return `https://api.originelectricltd.com${path}`;
-};
-
-const parseHeroImages = (images) => {
-  try {
-    const arr = typeof images === 'string' ? JSON.parse(images || '[]') : (images || []);
-    return arr.length ? arr : [];
-  } catch { return []; }
-};
-
 const fetchHeroProducts = async () => {
   try {
     const res = await marketplaceService.getProducts({ page: 1, limit: 60 });
     const raw = res.products || res || [];
-    heroProducts.value = raw.map(p => ({
-      id: p.id,
-      name: p.name,
-      price: Number(p.price).toLocaleString('en-NG'),
-      category: p.category || '',
-      image: getHeroImageUrl(parseHeroImages(p.images)[0] || '')
+    heroProducts.value = raw.map((p) => ({
+      ...mapProductCard(p),
+      imageBroken: false
     }));
   } catch (e) {
     console.error('Hero products fetch error:', e);

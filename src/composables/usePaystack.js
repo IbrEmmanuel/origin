@@ -1,8 +1,28 @@
 /**
  * Shared Paystack Inline helper — checkout, orders, consultations.
  * Public key must be set at build time: VITE_PAYSTACK_PUBLIC_KEY=pk_test_… | pk_live_…
+ *
+ * Channels: Paystack shows methods enabled on the merchant account AND listed here.
+ * Funds settle to Origin Electric’s Paystack balance (designated merchant account).
  */
 import { env, isPaystackKeyConfigured } from '@/config/env';
+
+/** Customer-facing methods we request from Paystack Inline (NG). */
+export const PAYSTACK_CHANNELS = Object.freeze([
+  'card',
+  'bank',
+  'ussd',
+  'bank_transfer',
+  'qr'
+]);
+
+export const PAYSTACK_CHANNEL_LABELS = Object.freeze({
+  card: 'Card',
+  bank: 'Bank',
+  ussd: 'USSD',
+  bank_transfer: 'Bank transfer',
+  qr: 'QR'
+});
 
 export function getPaystackPublicKey() {
   return isPaystackKeyConfigured(env.paystackPublicKey) ? env.paystackPublicKey : null;
@@ -55,6 +75,7 @@ export function loadPaystackScript() {
  * @param {number|string} opts.amountNaira
  * @param {object} [opts.metadata]
  * @param {string} [opts.reference]
+ * @param {string[]} [opts.channels] — defaults to PAYSTACK_CHANNELS
  * @param {(response: { reference: string }) => void} opts.onSuccess
  * @param {() => void} [opts.onClose]
  */
@@ -63,6 +84,7 @@ export async function openPaystackPopup({
   amountNaira,
   metadata = {},
   reference,
+  channels = PAYSTACK_CHANNELS,
   onSuccess,
   onClose
 }) {
@@ -88,14 +110,27 @@ export async function openPaystackPopup({
     throw new Error('Paystack failed to initialize.');
   }
 
+  const channelList = Array.isArray(channels) && channels.length
+    ? channels
+    : [...PAYSTACK_CHANNELS];
+
   const handler = window.PaystackPop.setup({
     key,
     email: customerEmail,
     amount,
     currency: 'NGN',
     ref: reference || undefined,
+    channels: channelList,
     metadata: {
       ...metadata,
+      custom_fields: [
+        ...(metadata.custom_fields || []),
+        {
+          display_name: 'Merchant',
+          variable_name: 'merchant',
+          value: 'Origin Electric'
+        }
+      ],
       test_mode: key.startsWith('pk_test_')
     },
     callback: (response) => {

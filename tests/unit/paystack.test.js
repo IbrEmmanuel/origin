@@ -34,4 +34,15 @@ describe('usePaystack amount helpers', () => {
     expect(isPaystackConfigured()).toBe(true);
     expect(getPaystackPublicKey()).toMatch(/^pk_test_/);
   });
+
+  it('exposes card, bank, ussd, bank_transfer, and qr channels', async () => {
+    const { PAYSTACK_CHANNELS, PAYSTACK_CHANNEL_LABELS } = await import(
+      '@/composables/usePaystack.js'
+    );
+    expect(PAYSTACK_CHANNELS).toEqual(
+      expect.arrayContaining(['card', 'bank', 'ussd', 'bank_transfer', 'qr'])
+    );
+    expect(PAYSTACK_CHANNEL_LABELS.card).toBe('Card');
+    expect(PAYSTACK_CHANNEL_LABELS.bank_transfer).toBe('Bank transfer');
+  });
 });

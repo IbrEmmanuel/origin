@@ -7,8 +7,13 @@ import {
 } from '@/utils/productImport';
 
 const vendorService = {
-    async apply(formData) {
-        const response = await api.post('/vendor/apply', formData);
+    /**
+     * Submit supplier application.
+     * Accepts a plain object or FormData (store photos / verification docs).
+     * Axios sets multipart boundaries automatically when given FormData.
+     */
+    async apply(payload) {
+        const response = await api.post('/vendor/apply', payload);
         return response.data;
     },
 

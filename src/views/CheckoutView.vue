@@ -258,9 +258,17 @@
             {{ payButtonLabel }}
           </button>
 
+          <div class="pay-methods" aria-label="Available payment methods">
+            <span
+              v-for="ch in paystackChannelLabels"
+              :key="ch"
+              class="pay-method-chip"
+            >{{ ch }}</span>
+          </div>
           <p class="pay-channels-note">
-            Paystack may offer card, bank transfer, and other channels enabled on Origin’s merchant account.
-            Bank transfers stay <strong>pending</strong> until verified — a transfer alone is not a confirmed order.
+            Pay securely via Paystack into Origin Electric’s merchant account.
+            Card, bank transfer, bank, USSD, and QR appear when enabled on the Paystack dashboard.
+            Bank transfers stay <strong>pending</strong> until server verification — a transfer alone is not a confirmed order.
           </p>
 
           <div
@@ -291,7 +299,12 @@
 import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCart } from '@/composables/useCart';
-import { openPaystackPopup, isPaystackConfigured, isPaystackTestMode } from '@/composables/usePaystack';
+import {
+  openPaystackPopup,
+  isPaystackConfigured,
+  isPaystackTestMode,
+  PAYSTACK_CHANNEL_LABELS
+} from '@/composables/usePaystack';
 import { env, publicConfigSnapshot } from '@/config/env';
 import userService from '@/services/user.service';
 import { firstMediaUrl } from '@/utils/mediaUrl';
@@ -303,6 +316,7 @@ const router = useRouter();
 const { cartItems, cartTotal, removeFromCart } = useCart();
 const paystackReady = isPaystackConfigured();
 const showConfigDiagnostics = Boolean(env.isDev || import.meta.env.DEV);
+const paystackChannelLabels = Object.values(PAYSTACK_CHANNEL_LABELS);
 
 const apiRoot = () => {
   const base = import.meta.env.VITE_API_BASE_URL;
@@ -1311,6 +1325,26 @@ onMounted(async () => {
   color: var(--color-primary, #ff7600);
   border: 1.5px solid var(--color-primary, #ff7600);
   width: 100%;
+}
+
+.pay-methods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.85rem 0 0.5rem;
+}
+
+.pay-method-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.28rem 0.55rem;
+  border-radius: 2px;
+  border: 1px solid var(--border-color, #e5e2dc);
+  background: var(--bg-secondary, #f3f1ec);
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  color: var(--text-secondary, #5c574f);
 }
 
 .pay-channels-note {

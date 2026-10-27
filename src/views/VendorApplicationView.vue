@@ -102,6 +102,48 @@
             <textarea id="description" v-model="form.description" rows="4" placeholder="Services offered, years in business, current product range, etc."></textarea>
           </div>
 
+          <div class="form-section-label">Store verification</div>
+
+          <div class="form-group">
+            <label for="storePhotos">Store / warehouse photos</label>
+            <input
+              id="storePhotos"
+              type="file"
+              accept="image/*"
+              multiple
+              @change="onStorePhotos"
+            />
+            <p class="field-hint">Upload 1–5 clear photos of your storefront or warehouse (JPG/PNG, max 5&nbsp;MB each).</p>
+            <ul v-if="storePhotoNames.length" class="file-list">
+              <li v-for="(name, i) in storePhotoNames" :key="i">{{ name }}</li>
+            </ul>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="idDoc">ID document (optional)</label>
+              <input id="idDoc" type="file" accept="image/*,.pdf" @change="onIdDoc" />
+              <p class="field-hint">National ID, passport, or driver’s licence.</p>
+            </div>
+            <div class="form-group">
+              <label for="cacDoc">CAC / business proof (optional)</label>
+              <input id="cacDoc" type="file" accept="image/*,.pdf" @change="onCacDoc" />
+              <p class="field-hint">Registration certificate if available.</p>
+            </div>
+          </div>
+
+          <div class="form-section-label">Store location</div>
+          <div class="geo-row">
+            <button type="button" class="btn secondary-btn geo-btn" :disabled="geoLoading" @click="captureLocation">
+              {{ geoLoading ? 'Locating…' : (form.latitude ? 'Update GPS pin' : 'Use my current location') }}
+            </button>
+            <p v-if="form.latitude && form.longitude" class="geo-coords">
+              Pin: {{ Number(form.latitude).toFixed(5) }}, {{ Number(form.longitude).toFixed(5) }}
+            </p>
+            <p v-else class="field-hint">Geolocation helps admins verify your store address. Allow location when prompted.</p>
+            <p v-if="geoError" class="geo-error" role="alert">{{ geoError }}</p>
+          </div>
+
           <button type="submit" class="btn primary-btn submit-btn" :disabled="isSubmitting">
             <span v-if="isSubmitting" class="loader"></span>
             <span v-else>Submit Application</span>
@@ -206,11 +248,102 @@ const form = ref({
   street: '',
   city: '',
   state: '',
-  country: '',
+  country: 'Nigeria',
   phone: '',
   business_type: '',
-  description: ''
+  description: '',
+  latitude: null,
+  longitude: null
 });
+
+const storePhotos = ref([]);
+const storePhotoNames = ref([]);
+const idDoc = ref(null);
+const cacDoc = ref(null);
+const geoLoading = ref(false);
+const geoError = ref('');
+
+const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
+
+const onStorePhotos = (e) => {
+  const files = Array.from(e.target.files || []).slice(0, 5);
+  const accepted = [];
+  for (const f of files) {
+    if (f.size > MAX_PHOTO_BYTES) {
+      alert(`${f.name} is larger than 5 MB and was skipped.`);
+      continue;
+    }
+    accepted.push(f);
+  }
+  storePhotos.value = accepted;
+  storePhotoNames.value = accepted.map((f) => f.name);
+};
+
+const onIdDoc = (e) => {
+  const f = e.target.files?.[0] || null;
+  if (f && f.size > MAX_PHOTO_BYTES) {
+    alert('ID document must be under 5 MB.');
+    e.target.value = '';
+    idDoc.value = null;
+    return;
+  }
+  idDoc.value = f;
+};
+
+const onCacDoc = (e) => {
+  const f = e.target.files?.[0] || null;
+  if (f && f.size > MAX_PHOTO_BYTES) {
+    alert('CAC document must be under 5 MB.');
+    e.target.value = '';
+    cacDoc.value = null;
+    return;
+  }
+  cacDoc.value = f;
+};
+
+const captureLocation = () => {
+  geoError.value = '';
+  if (!navigator.geolocation) {
+    geoError.value = 'Geolocation is not supported in this browser.';
+    return;
+  }
+  geoLoading.value = true;
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      form.value.latitude = pos.coords.latitude;
+      form.value.longitude = pos.coords.longitude;
+      geoLoading.value = false;
+    },
+    (err) => {
+      geoError.value =
+        err.code === 1
+          ? 'Location permission denied. You can still submit — admin will verify your address manually.'
+          : 'Could not read GPS. Check permissions and try again.';
+      geoLoading.value = false;
+    },
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
+  );
+};
+
+const buildApplyPayload = () => {
+  const hasFiles =
+    storePhotos.value.length > 0 || idDoc.value || cacDoc.value;
+  if (!hasFiles) {
+    return { ...form.value };
+  }
+  const fd = new FormData();
+  Object.entries(form.value).forEach(([key, val]) => {
+    if (val == null || val === '') return;
+    fd.append(key, String(val));
+  });
+  storePhotos.value.forEach((file, i) => {
+    fd.append('store_photos[]', file);
+    fd.append(`store_photo_${i}`, file);
+  });
+  if (idDoc.value) fd.append('id_document', idDoc.value);
+  if (cacDoc.value) fd.append('cac_document', cacDoc.value);
+  return fd;
+};
 
 const fetchProfile = async () => {
   try {
@@ -240,9 +373,15 @@ const fetchStatus = async () => {
 };
 
 const handleSubmit = async () => {
+  if (!storePhotos.value.length && !form.value.latitude) {
+    const ok = confirm(
+      'No store photos or GPS pin yet. Admins review photos and location for approval. Submit anyway?'
+    );
+    if (!ok) return;
+  }
   isSubmitting.value = true;
   try {
-    await vendorService.apply(form.value);
+    await vendorService.apply(buildApplyPayload());
     status.value = 'pending';
     showForm.value = false;
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -425,6 +564,51 @@ input:focus, select:focus, textarea:focus {
 }
 
 .submit-btn { margin-top: 1rem; padding: 1.125rem; font-size: 1.1rem; font-weight: 800; }
+
+.form-section-label {
+  margin: 1.75rem 0 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.field-hint {
+  margin: 0.4rem 0 0;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.file-list {
+  margin: 0.5rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
+
+.geo-row {
+  margin-bottom: 1rem;
+}
+
+.geo-btn {
+  width: 100%;
+  max-width: 280px;
+}
+
+.geo-coords {
+  margin: 0.65rem 0 0;
+  font-size: 0.85rem;
+  font-weight: 650;
+  color: var(--color-primary, #ff7600);
+}
+
+.geo-error {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  color: #b42318;
+}
 
 /* Status Cards */
 .status-card {

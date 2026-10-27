@@ -26,9 +26,11 @@ Redeploy after changing any `VITE_*` value (Vite bakes them at build time).
 
 ## SPA flow (implemented)
 
-Cart validate → `POST /api/user/checkout` → Paystack Inline → `POST /user/verify-payment` with reference + order id.
+Cart validate → `POST /api/user/checkout` → Paystack Inline (`channels`: card, bank, ussd, bank_transfer, qr) → `POST /user/verify-payment` with reference + order id.
 
-Bank transfers remain **pending** until server verification succeeds.
+Bank transfers remain **pending** until server verification succeeds. Funds settle to Origin Electric’s Paystack merchant account.
+
+See also `docs/MARKETPLACE_VENDOR_PAYMENTS.md`.
 
 ## Status
 

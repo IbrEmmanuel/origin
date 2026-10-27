@@ -1,12 +1,13 @@
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
+import { calculateMarketplacePricing } from '@/lib/commission';
 
 /** Canonical columns for vendor product bulk import */
 export const IMPORT_COLUMNS = [
   { key: 'sku', label: 'SKU', required: true },
   { key: 'name', label: 'Name', required: true },
   { key: 'description', label: 'Description', required: false },
-  { key: 'price', label: 'Price', required: true },
+  { key: 'price', label: 'Base Price (₦ you receive)', required: true },
   { key: 'stock', label: 'Stock', required: true },
   { key: 'category', label: 'Category', required: false },
   { key: 'image_url', label: 'Image URL', required: false }
@@ -141,18 +142,26 @@ export function validateImportRows(rows, options = {}) {
   });
 }
 
-/** Map a validated import row to the vendor product API payload. */
+/**
+ * Map a validated import row to the vendor product API payload.
+ * CSV `price` is the vendor base; customer-facing price includes Origin’s 12%.
+ */
 export function rowToProductPayload(row) {
   const images = row.image_url ? [String(row.image_url).trim()].filter(Boolean) : [];
   const descParts = [];
   if (row.description) descParts.push(String(row.description));
   if (row.sku) descParts.push(`SKU: ${row.sku}`);
 
+  const pricing = calculateMarketplacePricing(row.price);
+
   return {
     sku: row.sku,
     name: row.name,
     description: descParts.join('\n\n') || row.name,
-    price: Number(row.price),
+    base_price: pricing.baseNaira,
+    commission_rate_bps: pricing.rateBps,
+    commission_amount: pricing.commissionNaira,
+    price: pricing.customerNaira,
     stock: Number(row.stock),
     category: row.category || '',
     images

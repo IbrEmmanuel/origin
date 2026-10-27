@@ -87,27 +87,74 @@
         </div>
 
         <div class="info-column">
+          <div class="glass-card delivery-card mb-6">
+            <h3 class="section-title">Customer delivery details</h3>
+            <dl class="delivery-dl">
+              <div v-if="delivery.name">
+                <dt>Customer</dt>
+                <dd>{{ delivery.name }}</dd>
+              </div>
+              <div v-if="delivery.phone">
+                <dt>Phone</dt>
+                <dd>
+                  <a :href="`tel:${delivery.phone}`">{{ delivery.phone }}</a>
+                </dd>
+              </div>
+              <div v-if="delivery.addressLines.length">
+                <dt>Address</dt>
+                <dd>
+                  <span v-for="(line, i) in delivery.addressLines" :key="i" class="addr-line">{{ line }}</span>
+                </dd>
+              </div>
+              <div v-if="delivery.coords">
+                <dt>Map pin</dt>
+                <dd>
+                  <a
+                    :href="`https://www.google.com/maps?q=${delivery.coords.lat},${delivery.coords.lng}`"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >Open in Maps</a>
+                </dd>
+              </div>
+            </dl>
+            <p v-if="!delivery.hasAny" class="text-secondary small">
+              Delivery details were not returned by the API for this order. Contact Origin support if you need the address to dispatch.
+            </p>
+            <a
+              v-if="whatsappHref"
+              class="whatsapp-btn"
+              :href="whatsappHref"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              WhatsApp customer about this order
+            </a>
+            <p class="payout-note">
+              Customer paid Origin Electric (incl. 12% commission). Your payout is the base item total above — settled manually by Origin until automated payouts are enabled.
+            </p>
+          </div>
+
           <div class="glass-card instructions-card mb-6">
             <h3 class="section-title">Fulfillment Steps</h3>
             <div class="fulfillment-steps">
                 <div class="step" :class="{ active: details.order.status === 'Processing' }">
                     <span class="step-num">1</span>
-                    <p>Order paid. Accept the order to begin preparation.</p>
+                    <p>Order paid into Origin’s account. Accept to begin preparation.</p>
                 </div>
                 <div class="step" :class="{ active: details.order.status === 'Accepted' }">
                     <span class="step-num">2</span>
-                    <p>Package the item carefully and mark as packaged.</p>
+                    <p>Package using the delivery details above, then mark as packaged.</p>
                 </div>
                 <div class="step" :class="{ disabled: !['Packaged', 'Shipped', 'Delivered'].includes(details.order.status) }">
                     <span class="step-num">3</span>
-                    <p>Admin will handle shipping and final delivery.</p>
+                    <p>Admin is notified to arrange shipping / final delivery.</p>
                 </div>
             </div>
           </div>
 
           <div class="glass-card instructions-card">
             <h3 class="section-title">Vendor Notes</h3>
-            <p class="text-secondary small">Please ensure items are packed securely for transit. Once you mark an order as "Packaged", the admin will be notified to handle the shipping and final delivery.</p>
+            <p class="text-secondary small">Pack securely. After “Packaged”, Origin admin handles carrier handoff. You keep the base price; Origin retains the 12% marketplace commission.</p>
           </div>
         </div>
       </div>
@@ -116,7 +163,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { 
   ArrowLeft as ArrowLeftIcon, 
   Package as PackageIcon,
@@ -127,11 +174,75 @@ import vendorService from '@/services/vendor.service';
 import { mediaUrl } from '@/utils/mediaUrl';
 
 const props = defineProps(['orderId']);
-const emit = defineEmits(['back']);
+defineEmits(['back']);
 
 const details = ref(null);
 const loading = ref(true);
 const updating = ref(false);
+
+const pick = (...vals) => vals.find((v) => v != null && String(v).trim() !== '');
+
+const delivery = computed(() => {
+  const d = details.value || {};
+  const order = d.order || {};
+  const ship = d.delivery || d.shipping || order.delivery || order.shipping || {};
+  const customer = d.customer || order.customer || {};
+
+  const name = pick(
+    customer.name,
+    customer.full_name,
+    [customer.first_name, customer.last_name].filter(Boolean).join(' '),
+    order.customer_name,
+    ship.recipient_name
+  );
+  const phone = pick(
+    customer.phone,
+    customer.phone_number,
+    order.contact_phone,
+    order.phone,
+    ship.phone,
+    ship.contact_phone
+  );
+  const street = pick(
+    ship.street,
+    ship.address,
+    order.delivery_street,
+    order.shipping_address,
+    order.address
+  );
+  const city = pick(ship.city, order.delivery_city);
+  const state = pick(ship.state, order.delivery_state);
+  const country = pick(ship.country, order.delivery_country, 'Nigeria');
+  const postal = pick(ship.postal_code, ship.postalCode, order.delivery_postal_code);
+
+  const addressLines = [street, [city, state].filter(Boolean).join(', '), [postal, country].filter(Boolean).join(' ')]
+    .map((l) => (l || '').trim())
+    .filter(Boolean);
+
+  const lat = Number(ship.latitude ?? order.latitude ?? order.delivery_latitude);
+  const lng = Number(ship.longitude ?? order.longitude ?? order.delivery_longitude);
+  const coords =
+    Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null;
+
+  return {
+    name,
+    phone,
+    addressLines,
+    coords,
+    hasAny: Boolean(name || phone || addressLines.length || coords)
+  };
+});
+
+const whatsappHref = computed(() => {
+  const phone = String(delivery.value.phone || '').replace(/\D/g, '');
+  if (phone.length < 10) return '';
+  const normalized = phone.startsWith('0') ? `234${phone.slice(1)}` : phone;
+  const orderId = details.value?.order?.id || props.orderId;
+  const text = encodeURIComponent(
+    `Hello, this is your Origin Electric marketplace supplier regarding order #${orderId}.`
+  );
+  return `https://wa.me/${normalized}?text=${text}`;
+});
 
 const fetchDetails = async () => {
   try {
@@ -150,7 +261,7 @@ const handleStatusUpdate = async (newStatus) => {
   updating.value = true;
   try {
     await vendorService.updateOrderStatus(props.orderId, newStatus);
-    await fetchDetails(); // Refresh data
+    await fetchDetails();
   } catch (err) {
     alert(err.response?.data?.message || 'Failed to update status');
   } finally {
@@ -354,6 +465,60 @@ onMounted(fetchDetails);
 }
 
 .info-group p { font-size: 1rem; color: var(--text-primary); line-height: 1.6; }
+
+.delivery-dl {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 0 0 1.25rem;
+}
+
+.delivery-dl dt {
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 0.2rem;
+}
+
+.delivery-dl dd {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.addr-line {
+  display: block;
+}
+
+.whatsapp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 44px;
+  margin-top: 0.35rem;
+  padding: 0.65rem 1rem;
+  border-radius: 10px;
+  background: #128c7e;
+  color: #fff;
+  font-weight: 750;
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.whatsapp-btn:hover {
+  filter: brightness(1.06);
+}
+
+.payout-note {
+  margin: 1rem 0 0;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
 
 @media (max-width: 992px) {
   .details-grid { grid-template-columns: 1fr; }
