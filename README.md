@@ -1,4 +1,4 @@
-﻿# Origin Electric — Webapp (Vue SPA)
+﻿# Origin Electric — Webapp (Vue SPA). 
 
 Storefront for [Origin Electric](https://www.originelectricltd.com).  
 Business API and database live on **`api.originelectricltd.com`** (not in this repository).
