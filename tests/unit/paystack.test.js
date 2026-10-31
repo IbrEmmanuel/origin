@@ -35,6 +35,17 @@ describe('usePaystack amount helpers', () => {
     expect(getPaystackPublicKey()).toMatch(/^pk_test_/);
   });
 
+  it('accepts formatted pk_live keys', async () => {
+    vi.stubEnv('VITE_PAYSTACK_PUBLIC_KEY', 'pk_live_abcdefghijklmnopqrstuvwxyz123456');
+    vi.resetModules();
+    const { isPaystackConfigured, getPaystackPublicKey, isPaystackTestMode } = await import(
+      '@/composables/usePaystack.js'
+    );
+    expect(isPaystackConfigured()).toBe(true);
+    expect(getPaystackPublicKey()).toMatch(/^pk_live_/);
+    expect(isPaystackTestMode()).toBe(false);
+  });
+
   it('exposes card, bank, ussd, bank_transfer, and qr channels', async () => {
     const { PAYSTACK_CHANNELS, PAYSTACK_CHANNEL_LABELS } = await import(
       '@/composables/usePaystack.js'
