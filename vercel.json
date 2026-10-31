@@ -2,6 +2,12 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
+  "env": {
+    "VITE_PAYSTACK_PUBLIC_KEY": "pk_live_e89b62b19cd2b6257bf4946f715695cdecea4ddc",
+    "VITE_API_URL": "/api",
+    "VITE_API_BASE_URL": "https://api.originelectricltd.com",
+    "VITE_SITE_URL": "https://www.originelectricltd.com"
+  },
   "functions": {
     "api/agent.js": {
       "maxDuration": 30
