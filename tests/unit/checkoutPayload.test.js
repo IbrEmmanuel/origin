@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { sanitizeCheckoutPayload } from '@/services/user.service.js';
+import { sanitizeCheckoutPayload } from '@/lib/checkoutPayload.js';
 
 describe('sanitizeCheckoutPayload', () => {
   it('omits null coords and empty postal, coerces numbers', () => {
