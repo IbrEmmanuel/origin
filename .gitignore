@@ -48,3 +48,5 @@ gitignore
 # System Files
 Thumbs.db
 desktop.ini
+.vercel
+.env*
