@@ -807,7 +807,19 @@ const processCheckout = async () => {
         delivery_fee: deliveryFee.value
       });
     } catch (checkoutErr) {
-      throw new Error(checkoutErr.response?.data?.message || checkoutErr.message || 'Failed to create order');
+      const status = checkoutErr.response?.status;
+      const apiMsg =
+        checkoutErr.response?.data?.message ||
+        checkoutErr.response?.data?.error ||
+        checkoutErr.message;
+      if (status >= 500) {
+        throw new Error(
+          apiMsg && !/^internal server error$/i.test(String(apiMsg).trim())
+            ? apiMsg
+            : 'Order API returned 500 while creating the order. On api.originelectricltd.com set PAYSTACK_SECRET_KEY (live secret) and check checkout logs — the browser key alone cannot finish payment.'
+        );
+      }
+      throw new Error(apiMsg || 'Failed to create order');
     }
 
     const orderId = orderData.orderId || orderData.order_id || orderData.id;
@@ -851,9 +863,16 @@ const verifyPayment = async (response, orderId) => {
     clearCheckoutDraft();
     router.push({ path: '/order-success', query: { ref: response.reference, order: orderId } });
   } catch (err) {
-    error.value =
-      err.response?.data?.message ||
-      `Payment could not be verified yet. Keep this Paystack reference: ${response.reference}. Contact support if your bank was charged.`;
+    const status = err.response?.status;
+    const apiMsg = err.response?.data?.message || err.response?.data?.error;
+    if (status >= 500) {
+      error.value =
+        `Payment may have succeeded on Paystack, but the API could not verify it (500). Keep reference ${response.reference}. Confirm PAYSTACK_SECRET_KEY is set on the API, then retry from Orders.`;
+    } else {
+      error.value =
+        apiMsg ||
+        `Payment could not be verified yet. Keep this Paystack reference: ${response.reference}. Contact support if your bank was charged.`;
+    }
     isProcessing.value = false;
   }
 };

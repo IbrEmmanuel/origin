@@ -21,8 +21,10 @@ Redeploy after changing any `VITE_*` value (Vite bakes them at build time).
 
 | Variable | Purpose |
 |----------|---------|
-| `PAYSTACK_SECRET_KEY` | Verify charges / webhooks |
+| `PAYSTACK_SECRET_KEY` | **Required.** Create payment references on `POST /user/checkout` and verify on `/user/verify-payment`. Missing/mismatched secret → SPA shows **Internal server error** after Pay. Use the **live** secret that matches `pk_live_…`. |
 | Webhook URL | Signed Paystack events → mark orders paid idempotently |
+
+If checkout UI opens but Pay fails with `Internal server error`, the SPA public key is fine — fix the **API** secret / order create logs on `api.originelectricltd.com`.
 
 ## SPA flow (implemented)
 
