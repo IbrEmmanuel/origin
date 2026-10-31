@@ -49,4 +49,3 @@ gitignore
 Thumbs.db
 desktop.ini
 .vercel
-.env*
